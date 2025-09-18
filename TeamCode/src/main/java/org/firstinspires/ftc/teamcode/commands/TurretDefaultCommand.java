@@ -5,17 +5,20 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 
 public class TurretDefaultCommand extends CommandBase {
-    TurretSubsystem turret;
-    public TurretDefaultCommand(TurretSubsystem turret){
+    private final TurretSubsystem turret;
+
+    public TurretDefaultCommand(TurretSubsystem turret) {
         this.turret = turret;
         addRequirements(turret);
     }
+
     @Override
-    public void initialize(){
+    public void initialize() {
         turret.resetEncoder();
     }
+
     @Override
-    public void execute(){
+    public void execute() {
         turret.setPower(turret.pidCalc());
     }
 }
