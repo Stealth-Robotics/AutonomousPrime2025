@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -9,33 +8,44 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import static java.lang.Math.abs;
+
+import java.util.ArrayList;
 
 public class SpindexerSubsystem extends StealthSubsystem {
     private final RevColorSensorV3 colorSensor;
     private final CRServo servo1;
     private final CRServo servo2;
 
-    private int currentIndex = 0;
+    private final double[] DISTANCE_THRESHOLD_INCHES = {0.0, 0.0};
 
-    private final Artifact[] spindexer = {Artifact.PURPLE, Artifact.PURPLE, Artifact.GREEN};
+    private int currentIntakeIndex = 0;
+    private int currentShootIndex = 0;
+
+    private final ArrayList<Artifact> spindexer = new ArrayList<>();
 
     private boolean isMoving = false;
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
-        servo1 = hardwareMap.get(CRServo.class, "spinServo1");
-        servo2 = hardwareMap.get(CRServo.class, "spinServo2");
+        servo1 = hardwareMap.get(CRServo.class, "spindexerServo1");
+        servo2 = hardwareMap.get(CRServo.class, "spindexerServo2");
+
+        //Initial colors
+        spindexer.add(Artifact.EMPTY);
+        spindexer.add(Artifact.EMPTY);
+        spindexer.add(Artifact.EMPTY);
     }
 
-    public void rotateToSlot(int desiredIndex) {
-        boolean shortestIsLeft = ((currentIndex - desiredIndex) % 3 < (currentIndex + desiredIndex) % 3);
-        int rotations = abs(currentIndex - desiredIndex);
+    public void rotateSlotToIntake(int slotNumber) {
+        boolean shortestIsLeft = ((currentIntakeIndex - slotNumber) % 3 < (currentIntakeIndex + slotNumber) % 3);
+        int rotations = abs(currentIntakeIndex - slotNumber);
 
-        currentIndex = desiredIndex;
+        currentIntakeIndex = slotNumber;
 
         if (shortestIsLeft)
             for (int i = rotations; i > 0; i--)
@@ -45,8 +55,14 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 rotateRight();
     }
 
-    private Command rotateLeft() {
-        return new SequentialCommandGroup(
+    public void loadShooter(Artifact color) {
+        if (spindexer.contains(color)) {
+            //rotate closest color to the shooter
+        }
+    }
+
+    private void rotateLeft() {
+        new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         new InstantCommand(() -> servo1.setPower(-1)),
                         new InstantCommand(() -> servo2.setPower(-1))
@@ -55,8 +71,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         );
     }
 
-    private Command rotateRight() {
-        return new SequentialCommandGroup(
+    private void rotateRight() {
+        new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         new InstantCommand(() -> servo1.setPower(1)),
                         new InstantCommand(() -> servo2.setPower(1))
@@ -67,20 +83,27 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     //Use color + distance color sensor measurement to accurately detect when a slot is full
     private boolean detectedGamePiece() {
-        return true;
+        double distance = colorSensor.getDistance(DistanceUnit.INCH);
+        double[] detectedColor = {colorSensor.red(), colorSensor.green(), colorSensor.blue()};
+
+        return (distance > DISTANCE_THRESHOLD_INCHES[0] && distance < DISTANCE_THRESHOLD_INCHES[1]);
     }
 
     public int getCurrentSlot() {
-        return currentIndex;
+        return currentIntakeIndex;
     }
 
-    public void setSlotColor(Artifact artifact) {
-        spindexer[currentIndex] = artifact;
+    private void intakeArtifact(Artifact artifact) {
+        spindexer.set(currentIntakeIndex, artifact);
+    }
+
+    private void shootArtifact() {
+        spindexer.set(currentShootIndex, Artifact.EMPTY);
     }
 
     @Override
     public void periodic() {
-        telemetry.addData("Slot: ", currentIndex);
+        telemetry.addData("IndexSlot: ", currentIntakeIndex);
         telemetry.addData("Moving: ", isMoving);
     }
 }
