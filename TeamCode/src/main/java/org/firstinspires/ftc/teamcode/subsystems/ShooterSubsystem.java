@@ -28,4 +28,10 @@ public class ShooterSubsystem extends StealthSubsystem {
     public void setPusher(double pos){
         pusherServo.setPosition(pos);
     }
+    public void open(){
+        setPusher(PUSHER_OPEN_POSITION);
+    }
+    public void close(){
+        setPusher(PUSHER_CLOSED_POSITION);
+    }
 }
