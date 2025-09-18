@@ -11,6 +11,10 @@ public class TurretDefaultCommand extends CommandBase {
         addRequirements(turret);
     }
     @Override
+    public void initialize(){
+        turret.resetEncoder();
+    }
+    @Override
     public void execute(){
         turret.setPower(turret.pidCalc());
     }
