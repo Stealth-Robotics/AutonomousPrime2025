@@ -18,20 +18,22 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
-        pusherServo = hardwareMap.get(ServoEx.class, "pusherServo");
+//        pusherServo = hardwareMap.get(ServoEx.class, "pusherServo");
+        pusherServo = null;
     }
 
-    private void setPower(double power) {
+    public void setPower(double power) {
         shooterMotor.setPower(power);
     }
 
-    public void setPusher(double pos){
+    private void setPusher(double pos) {
         pusherServo.setPosition(pos);
     }
-    public void open(){
+
+    public void open() {
         setPusher(PUSHER_OPEN_POSITION);
     }
-    public void close(){
+    public void close() {
         setPusher(PUSHER_CLOSED_POSITION);
     }
 }
