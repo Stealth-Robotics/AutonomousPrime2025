@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.commands.ShooterDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
@@ -16,20 +17,23 @@ public class Teleop extends StealthOpMode {
     GamepadEx operatorGamepad;
 
 //    DriveSubsystem drive;
-    ShooterSubsystem shooter;
+    SpindexerSubsystem spindexer;
+//    ShooterSubsystem shooter;
 
     @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
         operatorGamepad = new GamepadEx(gamepad2);
 
-        shooter = new ShooterSubsystem(hardwareMap);
+        spindexer = new SpindexerSubsystem(hardwareMap);
 
-        //Get auto to teleop heading to work
+//        shooter = new ShooterSubsystem(hardwareMap);
 
-        register(shooter);
+        //Get auto to teleop heading to work (so i dont need to reset odometry in the match)
 
-        shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+//        register(shooter);
+        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(spindexer.loadShooter(0));
+//        shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
 //        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
     }

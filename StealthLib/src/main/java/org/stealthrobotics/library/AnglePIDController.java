@@ -1,5 +1,7 @@
 package org.stealthrobotics.library;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class AnglePIDController {
     private final double kP;
     private final double kI;
@@ -59,7 +61,7 @@ public class AnglePIDController {
         this.measuredValue = measuredValue;
 
         double time = (double) System.nanoTime() / 1E9;
-        double error = wrapAngle(reference - measuredValue);
+        double error = getPositionError();
         double derivative = (error - lastError) / (time - lastTime);
 
         integralSum += error * (time - lastTime);
@@ -72,9 +74,7 @@ public class AnglePIDController {
     }
 
     private double wrapAngle(double angle) {
-        while (angle > 180) angle -= 360;
-        while (angle <= -180) angle += 360;
-        return angle;
+        return AngleUnit.normalizeDegrees(angle); // ! Make sure it goes between 0 and 360 then back to 0
     }
 
     // Get time since last update
