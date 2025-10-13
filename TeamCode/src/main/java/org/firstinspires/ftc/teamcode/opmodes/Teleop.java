@@ -4,12 +4,14 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.commands.ShooterDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.stealthrobotics.library.Alliance;
+import org.stealthrobotics.library.AutoToTeleStorage;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class Teleop extends StealthOpMode {
@@ -30,9 +32,11 @@ public class Teleop extends StealthOpMode {
 //        shooter = new ShooterSubsystem(hardwareMap);
 
         //Get auto to teleop heading to work (so i dont need to reset odometry in the match)
+//        AutoToTeleStorage.finalAutoHeading;
 
 //        register(shooter);
-        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(spindexer.loadShooter(0));
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> spindexer.loadSlot(Artifact.GREEN));
 //        shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
 //        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
