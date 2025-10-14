@@ -13,6 +13,7 @@ import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -31,7 +32,8 @@ import java.util.ArrayList;
 public class SpindexerSubsystem extends StealthSubsystem {
     private final CRServo servo1;
     private final CRServo servo2;
-    private final AnalogInput encoder;
+
+    private final DcMotorEx encoder;
 
     //PID constants
     public static double kP = 0.0008;
@@ -45,7 +47,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final double SHOOT_POSITION = 180.0;
     private final double INTAKE_POSITION = 0.0;
 
-    private final double SLOT_ANGLE_CONSTANT = 120.0; //Angle in between all of the slots
+    private final double SLOT_ANGLE_CONSTANT = 120.0;
+    private final double TICKS_PER_REVOLUTION = 8192;
 
     private final double ANGLE_TOLERANCE = 1.0; //TODO: Tune for accuracy
     private final double VELOCITY_TOLERANCE = 5.0; //TODO: Tune for accuracy
@@ -87,19 +90,25 @@ public class SpindexerSubsystem extends StealthSubsystem {
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         servo1 = hardwareMap.get(CRServo.class, "spindexerServo1");
         servo2 = hardwareMap.get(CRServo.class, "spindexerServo2");
-        encoder = hardwareMap.get(AnalogInput.class, "absoluteEncoder");
+        encoder = hardwareMap.get(DcMotorEx.class, "absoluteEncoder"); //TODO: Change to correct motor port
 
         pid = new AnglePIDController(kP, kI, kD);
 
         pid.setPositionTolerance(ANGLE_TOLERANCE);
         pid.setVelocityTolerance(VELOCITY_TOLERANCE);
 
-        pid.setSetPoint(90);
+        pid.setSetPoint(getCurrentPosition()); // Reset pid
     }
 
-    //Position in degrees from [0, 360]
+    //Position in degrees from [0, 360)
     public double getCurrentPosition() {
-        return (encoder.getVoltage() / 3.3 * 360.0);
+        return wrapAngle((encoder.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
+    }
+
+    private double wrapAngle(double theta) {
+        while (theta >= 360) theta -= 360;
+        while (theta < 0) theta += 360;
+        return theta;
     }
 
     //Rotate the nearest empty slot to the intake to be filled
@@ -111,37 +120,28 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }
     }
 
-    //Change the artifact state of the slot at the intake position
-    public void loadSlot(Artifact artifact) {
-        if (slotAtIntake != null) {
-            slotAtIntake.setArtifact(artifact);
-            slotAtIntake = null;
-        }
-    }
-
     //Return the nearest empty slot to the intake position
     private Slot nearestEmpty() {
-//        ArrayList<Slot> emptySlots = new ArrayList<>();
-//        if (slot1.getArtifact() == Artifact.EMPTY)
-//            emptySlots.add(slot1);
-//        if (slot2.getArtifact() == Artifact.EMPTY)
-//            emptySlots.add(slot2);
-//        if (slot3.getArtifact() == Artifact.EMPTY)
-//            emptySlots.add(slot3);
-//
-//        Slot nearestSlot = null;
-//        double minDistance = Double.MAX_VALUE;
-//
-//        for (Slot slot : emptySlots) {
-//            double distance = //Find distance from slot intake position to current position
-//            if (distance < minDistance) {
-//                nearestSlot = slot;
-//                minDistance = distance;
-//            }
-//        }
-//
-//        return nearestSlot;
-        return slot1;
+        ArrayList<Slot> emptySlots = new ArrayList<>();
+        if (slot1.getArtifact() == Artifact.EMPTY)
+            emptySlots.add(slot1);
+        if (slot2.getArtifact() == Artifact.EMPTY)
+            emptySlots.add(slot2);
+        if (slot3.getArtifact() == Artifact.EMPTY)
+            emptySlots.add(slot3);
+
+        Slot nearestSlot = null;
+        double minDistance = Double.MAX_VALUE;
+
+        for (Slot slot : emptySlots) {
+            //Calculate the shortest arc between the slot intake position and the current position
+            double distance = Math.min((slot.getIntakePosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getIntakePosition() + 360) % 360);
+            if (distance < minDistance) {
+                nearestSlot = slot;
+                minDistance = distance;
+            }
+        }
+        return nearestSlot;
     }
 
     //Set the power of both servos in parallel

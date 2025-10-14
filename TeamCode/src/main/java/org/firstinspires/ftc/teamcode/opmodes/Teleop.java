@@ -35,8 +35,7 @@ public class Teleop extends StealthOpMode {
 //        AutoToTeleStorage.finalAutoHeading;
 
 //        register(shooter);
-//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
-//        driveGamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> spindexer.loadSlot(Artifact.GREEN));
+        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
 //        shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
 //        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
