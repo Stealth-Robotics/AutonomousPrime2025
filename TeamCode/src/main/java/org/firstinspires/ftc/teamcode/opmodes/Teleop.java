@@ -8,9 +8,11 @@ import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.GamepadBindings;
 import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.commands.ShooterDefaultCommand;
+import org.firstinspires.ftc.teamcode.commands.TurretDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.AutoToTeleStorage;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
@@ -21,6 +23,7 @@ public class Teleop extends StealthOpMode {
 
     DriveSubsystem drive;
     SpindexerSubsystem spindexer;
+    TurretSubsystem turret;
 
     @Override
     public void initialize() {
@@ -29,14 +32,16 @@ public class Teleop extends StealthOpMode {
 
         drive = new DriveSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
+        turret = new TurretSubsystem(hardwareMap);
 
-        register(drive, spindexer);
+        register(drive, spindexer, turret);
 
         //Transfer heading from auto to teleop
         drive.setHeading(AutoToTeleStorage.finalAutoHeading);
 
         //Setup default commands
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
+        turret.setDefaultCommand(new TurretDefaultCommand(turret));
 
         //Configure gamepad bindings
         configureBindings();
