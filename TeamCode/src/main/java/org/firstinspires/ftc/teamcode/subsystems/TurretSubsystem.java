@@ -38,9 +38,9 @@ public class TurretSubsystem extends StealthSubsystem {
             @Override
             public void initialize() {
                 if (getCurrentWraps() > 0)
-                    pid.setSetPoint(turretMotor.getCurrentPosition() - TICKS_PER_REVOLUTION);
+                    tickPID.setSetPoint(turretMotor.getCurrentPosition() - TICKS_PER_REVOLUTION);
                 else
-                    pid.setSetPoint(turretMotor.getCurrentPosition() + TICKS_PER_REVOLUTION);
+                    tickPID.setSetPoint(turretMotor.getCurrentPosition() + TICKS_PER_REVOLUTION);
             }
 
             @Override
@@ -50,7 +50,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
             @Override
             public boolean isFinished() {
-                return pid.atSetPoint();
+                return tickPID.atSetPoint();
             }
         };
     }
