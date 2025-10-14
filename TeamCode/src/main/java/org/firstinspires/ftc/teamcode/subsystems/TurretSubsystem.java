@@ -55,8 +55,25 @@ public class TurretSubsystem extends StealthSubsystem {
         };
     }
 
-//    public Command unWrapFully() {
-//    }
+    //Unwrap turret fully back to 0
+    public Command unWrapFully() {
+        return new CommandBase() {
+            @Override
+            public void initialize() {
+                tickPID.setSetPoint(0);
+            }
+
+            @Override
+            public void execute() {
+                setPower(tickPID.calculate(turretMotor.getCurrentPosition()));
+            }
+
+            @Override
+            public boolean isFinished() {
+                return tickPID.atSetPoint();
+            }
+        };
+    }
 
     //Turret angle in [0, 360)
     public double getPosition() {
