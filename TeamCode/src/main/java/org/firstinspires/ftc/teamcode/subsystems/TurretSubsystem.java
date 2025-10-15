@@ -7,11 +7,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
+import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 
 public class TurretSubsystem extends StealthSubsystem {
     private final DcMotorEx turretMotor;
-    private final PIDController pid;
+    private final AnglePIDController pid;
     private final PIDController tickPID;
 
     private final double POSITION_TOLERANCE_DEGREES = 1.0; //TODO tune tolerance
@@ -25,10 +26,10 @@ public class TurretSubsystem extends StealthSubsystem {
     public TurretSubsystem(HardwareMap hardwareMap) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
 
-        pid = new PIDController(0.0, 0.0, 0.0);
+        pid = new AnglePIDController(0.0, 0.0, 0.0);
         tickPID = new PIDController(0.0, 0.0, 0.0);
 
-        pid.setTolerance(POSITION_TOLERANCE_DEGREES);
+        pid.setPositionTolerance(POSITION_TOLERANCE_DEGREES);
         tickPID.setTolerance(POSITION_TOLERANCE_TICKS);
     }
 
