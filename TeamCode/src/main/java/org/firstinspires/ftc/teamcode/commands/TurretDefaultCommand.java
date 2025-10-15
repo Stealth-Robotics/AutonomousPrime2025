@@ -13,12 +13,9 @@ public class TurretDefaultCommand extends CommandBase {
     }
 
     @Override
-    public void initialize() {
-        turret.resetEncoder();
-    }
-
-    @Override
     public void execute() {
-        turret.setPower(turret.pidCalc());
+        double targetAngle = 0.0; //Set based off of apriltag
+        turret.setTarget(targetAngle);
+        turret.setPower(turret.pidCalculate());
     }
 }
