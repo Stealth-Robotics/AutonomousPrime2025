@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.AutoToTeleStorage;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
@@ -24,6 +25,11 @@ public class Teleop extends StealthOpMode {
     DriveSubsystem drive;
     SpindexerSubsystem spindexer;
     TurretSubsystem turret;
+    VisionSubsystem vision;
+
+    @Override
+    public void whileWaitingToStart() {
+    }
 
     @Override
     public void initialize() {
@@ -33,6 +39,7 @@ public class Teleop extends StealthOpMode {
         drive = new DriveSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
+        vision = new VisionSubsystem(hardwareMap);
 
         register(drive, spindexer, turret);
 

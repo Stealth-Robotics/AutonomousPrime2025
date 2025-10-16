@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import android.graphics.Canvas;
 import android.util.Size;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,18 +8,12 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
-import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.VisionProcessor;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.opencv.core.Mat;
 import org.stealthrobotics.library.StealthSubsystem;
-
-import java.util.ArrayList;
 
 public class VisionSubsystem extends StealthSubsystem {
     private final AprilTagProcessor aprilTagProcessor;
@@ -29,16 +22,18 @@ public class VisionSubsystem extends StealthSubsystem {
 
     private final int MOTIF_GPP_ID = 21, MOTIF_PGP_ID = 22, MOTIF_PPG_ID = 23,
             GOAL_BLUE_ID = 20, GOAL_RED_ID = 24;
-    private VectorF poseAdjust(VectorF old){
+
+    private VectorF poseAdjust(VectorF old) {
         return new VectorF(72 + old.getData()[1], 72 - old.getData()[0], old.getData()[2]);
     }
-    private Quaternion angleAdjust(Quaternion q){
+
+    private Quaternion angleAdjust(Quaternion q) {
         Quaternion rotation = new Quaternion(0.707f,0,0.707f,0,0);
         q.multiply(rotation,0);
         return(q);
     }
 
-    public VisionSubsystem(HardwareMap hardwareMap){
+    public VisionSubsystem(HardwareMap hardwareMap) {
         //TODO: Add apriltag data
         AprilTagLibrary.Builder libraryBuilder = new AprilTagLibrary.Builder();
         AprilTagMetadata[] decodeLibrary = AprilTagGameDatabase.getDecodeTagLibrary().getAllTags();
@@ -68,6 +63,5 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setAutoStopLiveView(true)
                 .build();
         visionPortal.setProcessorEnabled(aprilTagProcessor,true);
-
     }
 }
