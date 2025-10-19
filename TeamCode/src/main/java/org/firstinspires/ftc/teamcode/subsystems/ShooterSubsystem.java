@@ -20,12 +20,15 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final PIDController velocityPID; //In ticks per second
     private final double VELO_TOLERANCE = 0.0;
 
+    public static double kP = 0.0;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
 
     private void generateInterpolationTables() {
-        //Shooter speed
 //        speedTable.add();
         speedTable.createLUT();
         hoodTable.createLUT();
@@ -35,7 +38,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
         hoodServo = hardwareMap.get(ServoEx.class, "hoodServo");
 
-        velocityPID = new PIDController(0.0, 0.0, 0.0);
+        velocityPID = new PIDController(kP, kI, kD);
         velocityPID.setTolerance(VELO_TOLERANCE);
 
         generateInterpolationTables();
@@ -50,6 +53,7 @@ public class ShooterSubsystem extends StealthSubsystem {
     }
 
     //Spin up the motor to target velocity and then finish
+    // ! native getVelocity method might cause issues because it doesn't update when motor power is 0
     public Command spinUp(double targetVelo) {
         return this.runOnce(() -> velocityPID.setSetPoint(targetVelo))
                 .andThen(run(() -> shooterMotor.setPower(velocityPID.calculate(shooterMotor.getVelocity()))).interruptOn(this::atVelocity));
