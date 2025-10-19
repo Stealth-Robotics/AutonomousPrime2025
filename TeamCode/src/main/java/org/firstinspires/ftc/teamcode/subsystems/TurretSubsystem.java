@@ -15,6 +15,7 @@ import org.stealthrobotics.library.StealthSubsystem;
 @Config
 public class TurretSubsystem extends StealthSubsystem {
     private final DcMotorEx turretMotor;
+
     private final AnglePIDController pid;
     private final PIDController tickPID;
 
@@ -126,7 +127,7 @@ public class TurretSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         if (Math.abs(Math.abs(getCurrentWraps()) - Math.abs(MAX_ROTATION_WRAP)) < WRAP_TOLERANCE) {
-            unWrapFully().schedule();
+            unWrapFully().schedule(); // ! unwrap partially or fully?
         }
 
         telemetry.addLine("----------turret----------");
