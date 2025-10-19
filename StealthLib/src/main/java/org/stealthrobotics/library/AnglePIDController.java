@@ -6,6 +6,7 @@ public class AnglePIDController {
     private final double kP;
     private final double kI;
     private final double kD;
+    private final double kF;
 
     private double reference;
     private double measuredValue;
@@ -19,10 +20,19 @@ public class AnglePIDController {
     private double lastMeasuredValue;
     private double lastTime;
 
+    public AnglePIDController(double kP, double kI, double kD, double kF) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+        this.kF = kF;
+        this.lastTime = (double) System.nanoTime() / 1E9;
+    }
+
     public AnglePIDController(double kP, double kI, double kD) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
+        this.kF = 0.0;
         this.lastTime = (double) System.nanoTime() / 1E9;
     }
 
@@ -66,13 +76,11 @@ public class AnglePIDController {
         lastMeasuredValue = measuredValue;
         lastTime = time;
 
-        return (kP * error) + (kI * integralSum) + (kD * derivative);
+        return (kP * error) + (kI * integralSum) + (kD * derivative) + kF;
     }
 
     private double wrapAngle(double theta) {
-        while (theta >= 360) theta -= 360;
-        while (theta < 0) theta += 360;
-        return theta;
+        return AngleUnit.normalizeDegrees(theta);
     }
 
     private double getTimeSinceLastUpdate() {

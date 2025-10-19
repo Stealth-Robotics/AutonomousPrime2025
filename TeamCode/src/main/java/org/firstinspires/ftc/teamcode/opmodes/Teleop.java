@@ -22,7 +22,7 @@ public class Teleop extends StealthOpMode {
     GamepadEx driveGamepad;
     GamepadEx operatorGamepad;
 
-    DriveSubsystem drive;
+//    DriveSubsystem drive;
 //    SpindexerSubsystem spindexer;
     TurretSubsystem turret;
 //    VisionSubsystem vision;
@@ -36,19 +36,19 @@ public class Teleop extends StealthOpMode {
         driveGamepad = new GamepadEx(gamepad1);
         operatorGamepad = new GamepadEx(gamepad2);
 
-        drive = new DriveSubsystem(hardwareMap);
+//        drive = new DriveSubsystem(hardwareMap);
 //        spindexer = new SpindexerSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
 //        vision = new VisionSubsystem(hardwareMap);
 
-        register(drive, spindexer, turret);
+        register(turret);
 
         //Transfer heading from auto to teleop
-        drive.setHeading(AutoToTeleStorage.finalAutoHeading);
+//        drive.setHeading(AutoToTeleStorage.finalAutoHeading);
 
         //Setup default commands
-        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
-        turret.setDefaultCommand(new TurretDefaultCommand(turret));
+//        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
+        turret.setDefaultCommand(new TurretDefaultCommand(turret, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER), () -> driveGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
 
         //Configure gamepad bindings
         configureBindings();
@@ -56,7 +56,7 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
-        driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+//        driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
     }
 
     @SuppressWarnings("unused")

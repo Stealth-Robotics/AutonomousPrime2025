@@ -14,7 +14,6 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import java.util.ArrayList;
 
-@Config
 public class SpindexerSubsystem extends StealthSubsystem {
     private final CRServo servo1;
     private final CRServo servo2;
