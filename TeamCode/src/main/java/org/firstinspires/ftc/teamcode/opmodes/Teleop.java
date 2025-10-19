@@ -23,9 +23,9 @@ public class Teleop extends StealthOpMode {
     GamepadEx operatorGamepad;
 
     DriveSubsystem drive;
-    SpindexerSubsystem spindexer;
+//    SpindexerSubsystem spindexer;
     TurretSubsystem turret;
-    VisionSubsystem vision;
+//    VisionSubsystem vision;
 
     @Override
     public void whileWaitingToStart() {
@@ -37,9 +37,9 @@ public class Teleop extends StealthOpMode {
         operatorGamepad = new GamepadEx(gamepad2);
 
         drive = new DriveSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap);
+//        spindexer = new SpindexerSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
-        vision = new VisionSubsystem(hardwareMap);
+//        vision = new VisionSubsystem(hardwareMap);
 
         register(drive, spindexer, turret);
 
@@ -55,7 +55,7 @@ public class Teleop extends StealthOpMode {
     }
 
     private void configureBindings() {
-        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
         driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
     }
 

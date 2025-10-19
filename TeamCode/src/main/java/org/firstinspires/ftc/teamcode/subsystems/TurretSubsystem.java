@@ -112,5 +112,6 @@ public class TurretSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----------turret----------");
         telemetry.addData("angle: ", getPosition());
+        telemetry.addData("wraps: ", getCurrentWraps());
     }
 }
