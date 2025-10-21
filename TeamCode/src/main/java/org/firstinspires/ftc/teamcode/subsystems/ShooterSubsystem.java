@@ -77,6 +77,6 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        telemetry.addLine("-----shooter-----");
+//        telemetry.addLine("-----shooter-----");
     }
 }

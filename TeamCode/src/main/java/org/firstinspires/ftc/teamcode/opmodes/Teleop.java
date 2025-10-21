@@ -25,8 +25,8 @@ public class Teleop extends StealthOpMode {
 //    DriveSubsystem drive;
 //    SpindexerSubsystem spindexer;
 //    TurretSubsystem turret;
-    ShooterSubsystem shooter;
-//    VisionSubsystem vision;
+//    ShooterSubsystem shooter;
+    VisionSubsystem vision;
 
     @Override
     public void whileWaitingToStart() {
@@ -40,10 +40,10 @@ public class Teleop extends StealthOpMode {
 //        drive = new DriveSubsystem(hardwareMap);
 //        spindexer = new SpindexerSubsystem(hardwareMap);
 //        turret = new TurretSubsystem(hardwareMap);
-//        vision = new VisionSubsystem(hardwareMap);
-        shooter = new ShooterSubsystem(hardwareMap);
+        vision = new VisionSubsystem(hardwareMap);
+//        shooter = new ShooterSubsystem(hardwareMap);
 
-        register(shooter);
+//        register(shooter);
 
         //Transfer heading from auto to teleop
 //        drive.setHeading(AutoToTeleStorage.finalAutoHeading);

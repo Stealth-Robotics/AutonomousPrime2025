@@ -9,11 +9,15 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import org.stealthrobotics.library.StealthSubsystem;
+
+import java.util.List;
 
 public class VisionSubsystem extends StealthSubsystem {
     private final AprilTagProcessor aprilTagProcessor;
@@ -34,20 +38,18 @@ public class VisionSubsystem extends StealthSubsystem {
     }
 
     public VisionSubsystem(HardwareMap hardwareMap) {
-        //TODO: Add apriltag data
         AprilTagLibrary.Builder libraryBuilder = new AprilTagLibrary.Builder();
         AprilTagMetadata[] decodeLibrary = AprilTagGameDatabase.getDecodeTagLibrary().getAllTags();
-        for(AprilTagMetadata data : decodeLibrary){
-            if(data.fieldOrientation != null && data.fieldPosition != null) {
+        for (AprilTagMetadata data : decodeLibrary) {
+            if (data.fieldOrientation != null && data.fieldPosition != null) {
                 libraryBuilder.addTag(data.id, data.name, data.tagsize, poseAdjust(data.fieldPosition), data.distanceUnit, angleAdjust(data.fieldOrientation));
-            } else {
+            }
+            else {
                 libraryBuilder.addTag(data);
             }
         }
-        tagLibrary = new AprilTagLibrary.Builder()
-                .addTags(AprilTagGameDatabase.getDecodeTagLibrary())
-                .addTag(1,"Awesome",6.5, DistanceUnit.INCH)
-                .build();
+
+        tagLibrary = libraryBuilder.build();
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setTagLibrary(tagLibrary)
                 .setDrawTagID(true)
@@ -62,6 +64,7 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .setAutoStopLiveView(true)
                 .build();
-        visionPortal.setProcessorEnabled(aprilTagProcessor,true);
+
+        visionPortal.resumeStreaming();
     }
 }
