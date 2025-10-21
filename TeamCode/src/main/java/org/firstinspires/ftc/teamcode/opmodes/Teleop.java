@@ -24,7 +24,8 @@ public class Teleop extends StealthOpMode {
 
 //    DriveSubsystem drive;
 //    SpindexerSubsystem spindexer;
-    TurretSubsystem turret;
+//    TurretSubsystem turret;
+    ShooterSubsystem shooter;
 //    VisionSubsystem vision;
 
     @Override
@@ -38,17 +39,18 @@ public class Teleop extends StealthOpMode {
 
 //        drive = new DriveSubsystem(hardwareMap);
 //        spindexer = new SpindexerSubsystem(hardwareMap);
-        turret = new TurretSubsystem(hardwareMap);
+//        turret = new TurretSubsystem(hardwareMap);
 //        vision = new VisionSubsystem(hardwareMap);
+        shooter = new ShooterSubsystem(hardwareMap);
 
-        register(turret);
+        register(shooter);
 
         //Transfer heading from auto to teleop
 //        drive.setHeading(AutoToTeleStorage.finalAutoHeading);
 
         //Setup default commands
 //        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
-        turret.setDefaultCommand(new TurretDefaultCommand(turret, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER), () -> driveGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
+//        turret.setDefaultCommand(new TurretDefaultCommand(turret, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER), () -> driveGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
 
         //Configure gamepad bindings
         configureBindings();
