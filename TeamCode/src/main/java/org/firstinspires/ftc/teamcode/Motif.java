@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 public class Motif {
-    private static MotifType motif;
+    private static MotifType motif = MotifType.NULL;
 
     public static MotifType getMotif() {
         return motif;
@@ -14,6 +14,7 @@ public class Motif {
     public enum MotifType {
         PPG,
         PGP,
-        GPP
+        GPP,
+        NULL
     }
 }

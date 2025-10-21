@@ -1,15 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.Pose;
 
 public class PoseTracker {
     private static Pose pose;
 
+    // ? Takes in FTCCoordinates and saves it in PedroCoordinates
     public static void updateEstimatedPose(Pose newPose) {
-        pose = newPose;
+        pose = FTCCoordinates.INSTANCE.convertToPedro(newPose);
     }
 
-    //Pedro's coordinate system is at 0, 0 in the bottom left hand corner
     public static Pose getEstimatedPose() {
         return pose;
     }
