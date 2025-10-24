@@ -79,7 +79,7 @@ public class VisionSubsystem extends StealthSubsystem {
     }
 
     private Quaternion angleAdjust(Quaternion q) {
-        Quaternion rotation = new Quaternion(0.707f,0,0.707f,0,0);
+        Quaternion rotation = new Quaternion(0.707f,0,0,-0.707f,0);
         q.multiply(rotation,0);
         return(q);
     }
