@@ -147,7 +147,7 @@ public class VisionSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        TelemetryPacket packet = new TelemetryPacket();
+//        TelemetryPacket packet = new TelemetryPacket();
 
         ArrayList<AprilTagDetection> latestDetections = aprilTagProcessor.getDetections();
         if (!latestDetections.isEmpty()) {
@@ -170,9 +170,9 @@ public class VisionSubsystem extends StealthSubsystem {
 
 //        packet.put("x (pedro)", estimatedPose.getX());
 //        packet.put("y (pedro) ", estimatedPose.getY());
-        packet.put("heading (degrees) (pedro)", (PoseTracker.getEstimatedPose().getHeading() * 180.0) / Math.PI);
+//        packet.put("heading (degrees) (pedro)", (PoseTracker.getEstimatedPose().getHeading() * 180.0) / Math.PI);
 //
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        dashboard.sendTelemetryPacket(packet);
+//        FtcDashboard dashboard = FtcDashboard.getInstance();
+//        dashboard.sendTelemetryPacket(packet);
     }
 }

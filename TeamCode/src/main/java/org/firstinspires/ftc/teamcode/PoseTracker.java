@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.Pose;
 
 public class PoseTracker {
