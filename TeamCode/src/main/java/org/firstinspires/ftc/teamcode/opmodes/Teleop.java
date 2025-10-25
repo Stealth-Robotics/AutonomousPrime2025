@@ -29,10 +29,6 @@ public class Teleop extends StealthOpMode {
     VisionSubsystem vision;
 
     @Override
-    public void whileWaitingToStart() {
-    }
-
-    @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
         operatorGamepad = new GamepadEx(gamepad2);
@@ -59,6 +55,7 @@ public class Teleop extends StealthOpMode {
     private void configureBindings() {
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
 //        driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinUp(1.0));
     }
 
     @SuppressWarnings("unused")

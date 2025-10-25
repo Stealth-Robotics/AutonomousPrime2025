@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -12,7 +13,7 @@ public class IntakeSubsystem extends StealthSubsystem {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
     }
 
-    public void setPower(double power) {
-        intakeMotor.setPower(power);
+    public Command setPower(double power) {
+        return runOnce(() -> intakeMotor.setPower(power));
     }
 }

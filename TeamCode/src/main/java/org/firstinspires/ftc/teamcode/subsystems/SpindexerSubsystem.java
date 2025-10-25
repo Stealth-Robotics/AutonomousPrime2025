@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -36,7 +35,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final double TICKS_PER_REVOLUTION = 8192;
 
     private final double ANGLE_TOLERANCE = 1.0; //TODO: Tune for accuracy
-    private final double VELOCITY_TOLERANCE = 5.0; //TODO: Tune for accuracy
 
     private final AnglePIDController pid;
 
@@ -78,9 +76,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         encoder = hardwareMap.get(DcMotorEx.class, "absoluteEncoder"); //TODO: Change to correct motor port
 
         pid = new AnglePIDController(kP, kI, kD);
-
         pid.setPositionTolerance(ANGLE_TOLERANCE);
-        pid.setVelocityTolerance(VELOCITY_TOLERANCE);
 
         pid.setSetPoint(getCurrentPosition()); // Reset pid
     }
