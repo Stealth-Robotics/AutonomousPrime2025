@@ -2,73 +2,63 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.stealthrobotics.library.StealthSubsystem;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 @Config
 public class DriveSubsystem extends StealthSubsystem {
-    private final DcMotorEx frontLeft;
-    private final DcMotorEx frontRight;
-    private final DcMotorEx backLeft;
-    private final DcMotorEx backRight;
+    private final DcMotorEx leftFront;
+    private final DcMotorEx leftBack;
+    private final DcMotorEx rightFront;
+    private final DcMotorEx rightBack;
 
-    private final IMU imu;
-    private double headingOffset = 0.0;
+    private final GoBildaPinpointDriver pp;
 
     public DriveSubsystem(HardwareMap hardwareMap) {
-        frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
-        frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
-        backLeft = hardwareMap.get(DcMotorEx.class, "leftRear");
-        backRight = hardwareMap.get(DcMotorEx.class, "rightRear");
+        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
 
-        frontRight.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.REVERSE);
+        rightBack.setDirection(DcMotorEx.Direction.REVERSE);
+        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
 
-        frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        imu = hardwareMap.get(IMU.class, "imu");
-
-        IMU.Parameters imuParameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                )
-        );
-
-        imu.initialize(imuParameters);
-    }
-
-    public void setHeading(double headingOffset) {
-        this.headingOffset = headingOffset;
+        pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pp.setOffsets(3, -5, DistanceUnit.INCH);
+        pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pp.resetPosAndIMU();
     }
 
     public double getHeading() {
-        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) - headingOffset;
+        return pp.getHeading(AngleUnit.RADIANS);
     }
 
     public void resetHeading() {
-        headingOffset = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        pp.resetPosAndIMU();
     }
 
     public void stop() {
-        frontLeft.setPower(0.0);
-        frontRight.setPower(0.0);
-        backLeft.setPower(0.0);
-        backRight.setPower(0.0);
+        leftFront.setPower(0.0);
+        rightFront.setPower(0.0);
+        leftBack.setPower(0.0);
+        rightBack.setPower(0.0);
     }
 
     public void drive(double x, double y, double rot) {
@@ -79,23 +69,34 @@ public class DriveSubsystem extends StealthSubsystem {
         dx *= 1.1; // Counteract imperfect strafing
 
         double denominator = Math.max(Math.abs(dy) + Math.abs(dx) + Math.abs(rot), 1);
-        double frontLeftPower = (dy + dx + rot) / denominator;
-        double backLeftPower = (dy - dx + rot) / denominator;
-        double frontRightPower = (dy - dx - rot) / denominator;
-        double backRightPower = (dy + dx - rot) / denominator;
+        double leftFrontPower = (dy + dx + rot) / denominator;
+        double leftBackPower = (dy - dx + rot) / denominator;
+        double rightFrontPower = (dy - dx - rot) / denominator;
+        double rightBackPower = (dy + dx - rot) / denominator;
 
-        frontLeft.setPower(frontLeftPower);
-        backLeft.setPower(backLeftPower);
-        frontRight.setPower(frontRightPower);
-        backRight.setPower(backRightPower);
+        leftFront.setPower(leftFrontPower);
+        leftBack.setPower(leftBackPower);
+        rightFront.setPower(rightFrontPower);
+        rightBack.setPower(rightBackPower);
+
+        telemetry.addData("leftFrontPower", leftFrontPower);
+        telemetry.addData("leftBackPower", leftBackPower);
+        telemetry.addData("rightFrontPower", rightFrontPower);
+        telemetry.addData("rightBackPower", rightBackPower);
+
     }
 
     public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
-        return this.run(() -> drive(x.getAsDouble(), y.getAsDouble(), -rot.getAsDouble()));
+        return this.run(() -> drive(x.getAsDouble(), y.getAsDouble(), rot.getAsDouble()));
     }
 
     @Override
     public void periodic() {
-        telemetry.addData("Heading", AngleUnit.RADIANS.toDegrees(getHeading()));
+        pp.update(); //Update the odometry once per loop
+
+        Pose2D pose = pp.getPosition();
+        telemetry.addData("x", pose.getX(DistanceUnit.INCH));
+        telemetry.addData("y", pose.getY(DistanceUnit.INCH));
+        telemetry.addData("heading", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }

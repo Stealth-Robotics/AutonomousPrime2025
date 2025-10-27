@@ -22,30 +22,30 @@ public class Teleop extends StealthOpMode {
     GamepadEx driveGamepad;
     GamepadEx operatorGamepad;
 
-//    DriveSubsystem drive;
+    DriveSubsystem drive;
 //    SpindexerSubsystem spindexer;
 //    TurretSubsystem turret;
 //    ShooterSubsystem shooter;
-    VisionSubsystem vision;
+//    VisionSubsystem vision;
 
     @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
         operatorGamepad = new GamepadEx(gamepad2);
 
-//        drive = new DriveSubsystem(hardwareMap);
+        drive = new DriveSubsystem(hardwareMap);
 //        spindexer = new SpindexerSubsystem(hardwareMap);
 //        turret = new TurretSubsystem(hardwareMap);
-        vision = new VisionSubsystem(hardwareMap);
+//        vision = new VisionSubsystem(hardwareMap);
 //        shooter = new ShooterSubsystem(hardwareMap);
 
-//        register(shooter);
+        register(drive);
 
         //Transfer heading from auto to teleop
 //        drive.setHeading(AutoToTeleStorage.finalAutoHeading);
 
         //Setup default commands
-//        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
+        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 //        turret.setDefaultCommand(new TurretDefaultCommand(turret, () -> driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER), () -> driveGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)));
 
         //Configure gamepad bindings
@@ -54,7 +54,7 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
-//        driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+        driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinUp(1.0));
     }
 

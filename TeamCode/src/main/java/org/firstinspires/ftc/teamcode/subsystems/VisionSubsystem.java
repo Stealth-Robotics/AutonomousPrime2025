@@ -77,56 +77,12 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setAutoStopLiveView(true)
                 .build();
 
-        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
+        if (FtcDashboard.getInstance().isEnabled())
+            FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
     }
 
     private Pose poseAdjust(Pose old) {
         return new Pose(72 + old.getY(), 72 - old.getX(), old.getHeading() - (Math.PI / 2));
-    }
-
-    public static double[] quaternionToEuler(Quaternion q) {
-        double w = q.w;
-        double x = q.x;
-        double y = q.y;
-        double z = q.z;
-        // Normalize the quaternion
-        double norm = Math.sqrt(w*w + x*x + y*y + z*z);
-        w /= norm;
-        x /= norm;
-        y /= norm;
-        z /= norm;
-
-        // Calculate Euler angles
-        double roll = Math.atan2(2.0 * (w*x + y*z), 1.0 - 2.0 * (x*x + y*y));
-
-        double sinPitch = 2.0 * (w*y - z*x);
-        // Clamp to handle numerical inaccuracies
-        sinPitch = Math.max(-1.0, Math.min(1.0, sinPitch));
-        double pitch = Math.asin(sinPitch);
-
-        double yaw = Math.atan2(2.0 * (w*z + x*y), 1.0 - 2.0 * (y*y + z*z));
-
-        return new double[] { roll * 180.0 / Math.PI, pitch * 180.0 / Math.PI, yaw * 180.0 / Math.PI}; // in radians
-    }
-
-    private Quaternion eulerToQuaternion(float rollDeg, float pitchDeg, float yawDeg) {
-        float roll  = (float) Math.toRadians(rollDeg);
-        float pitch = (float) Math.toRadians(pitchDeg);
-        float yaw   = (float) Math.toRadians(yawDeg);
-
-        float cy = (float) Math.cos(yaw * 0.5);
-        float sy = (float) Math.sin(yaw * 0.5);
-        float cp = (float) Math.cos(pitch * 0.5);
-        float sp = (float) Math.sin(pitch * 0.5);
-        float cr = (float) Math.cos(roll * 0.5);
-        float sr = (float) Math.sin(roll * 0.5);
-
-        float w = cr * cp * cy + sr * sp * sy;
-        float x = sr * cp * cy - cr * sp * sy;
-        float y = cr * sp * cy + sr * cp * sy;
-        float z = cr * cp * sy - sr * sp * cy;
-
-        return new Quaternion(w, x, y, z, System.nanoTime());
     }
 
     // ? Returns a new motif if the camera detects a new one
@@ -168,11 +124,11 @@ public class VisionSubsystem extends StealthSubsystem {
             }
         }
 
-//        packet.put("x (pedro)", estimatedPose.getX());
-//        packet.put("y (pedro) ", estimatedPose.getY());
+//        packet.put("x (pedro)", PoseTracker.getEstimatedPose().getX());
+//        packet.put("y (pedro) ", PoseTracker.getEstimatedPose().getY());
 //        packet.put("heading (degrees) (pedro)", (PoseTracker.getEstimatedPose().getHeading() * 180.0) / Math.PI);
 //
-//        FtcDashboard dashboard = FtcDashboard.getInstance();
+//        FtcDashboard dashboard = FtcDashboard.getInstance();s
 //        dashboard.sendTelemetryPacket(packet);
     }
 }
