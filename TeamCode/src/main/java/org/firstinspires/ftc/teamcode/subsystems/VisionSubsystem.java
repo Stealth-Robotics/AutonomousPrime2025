@@ -8,6 +8,7 @@ import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -130,5 +131,6 @@ public class VisionSubsystem extends StealthSubsystem {
 //
 //        FtcDashboard dashboard = FtcDashboard.getInstance();s
 //        dashboard.sendTelemetryPacket(packet);
+        telemetry.addData("Motif", Motif.getMotif());
     }
 }
