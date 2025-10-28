@@ -114,7 +114,7 @@ public class VisionSubsystem extends StealthSubsystem {
                             detection.robotPose.getPosition().x,
                             detection.robotPose.getPosition().y,
                             detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
-                    )));
+                    )), false);
 //                    packet.fieldOverlay()
 //                            .drawImage("/dash/decode_field.png", 0, 0, 144, 144);
 //

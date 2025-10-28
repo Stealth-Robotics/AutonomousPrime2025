@@ -112,15 +112,15 @@ public class TurretSubsystem extends StealthSubsystem {
         return theta;
     }
 
-    public double pidCalculate() {
+    public double calculatePIDPower() {
         return pid.calculate(getPosition());
     }
 
-    public void setTarget(double target) {
-        pid.setSetPoint(target);
+    public void setTargetAngle(double angle) {
+        pid.setSetPoint(angle);
     }
 
-    public void setPower(double power) {
+    private void setPower(double power) {
         turretMotor.setPower(power);
     }
 

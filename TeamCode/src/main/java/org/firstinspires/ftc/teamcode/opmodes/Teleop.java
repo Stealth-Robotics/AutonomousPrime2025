@@ -4,18 +4,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.GamepadBindings;
-import org.firstinspires.ftc.teamcode.Motif;
-import org.firstinspires.ftc.teamcode.commands.ShooterDefaultCommand;
-import org.firstinspires.ftc.teamcode.commands.TurretDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
-import org.stealthrobotics.library.Alliance;
-import org.stealthrobotics.library.AutoToTeleStorage;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class Teleop extends StealthOpMode {
@@ -25,7 +16,7 @@ public class Teleop extends StealthOpMode {
     DriveSubsystem drive;
 //    SpindexerSubsystem spindexer;
 //    TurretSubsystem turret;
-//    ShooterSubsystem shooter;
+    ShooterSubsystem shooter;
 //    VisionSubsystem vision;
 
     @Override
@@ -37,7 +28,7 @@ public class Teleop extends StealthOpMode {
 //        spindexer = new SpindexerSubsystem(hardwareMap);
 //        turret = new TurretSubsystem(hardwareMap);
 //        vision = new VisionSubsystem(hardwareMap);
-//        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystem(hardwareMap);
 
         register(drive);
 
@@ -55,6 +46,7 @@ public class Teleop extends StealthOpMode {
     private void configureBindings() {
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> spindexer.rotateEmptyToIntake());
         driveGamepad.getGamepadButton(GamepadBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity(0.01));
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinUp(1.0));
     }
 

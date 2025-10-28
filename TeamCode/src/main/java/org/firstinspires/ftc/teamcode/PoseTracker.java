@@ -5,8 +5,11 @@ import com.pedropathing.geometry.Pose;
 public class PoseTracker {
     private static Pose pose = new Pose();
 
-    public static void updateEstimatedPose(Pose newPose) {
-        pose = newPose;
+    public static void updateEstimatedPose(Pose newPose, boolean updateHeading) {
+        if (updateHeading)
+            pose = newPose;
+        else
+            pose = new Pose(newPose.getX(), newPose.getY(), pose.getHeading());
     }
 
     /**

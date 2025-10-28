@@ -13,24 +13,25 @@ import java.util.function.DoubleSupplier;
 public class TurretDefaultCommand extends CommandBase {
     private final TurretSubsystem turret;
     private final Pose goalPose;
-    private double targetAngle = 0;
-    private final Pose BlueGoalPose = new Pose(-58.3727,-55.6425);
-    private final Pose RedGoalPose = new Pose(-58.3727, 55.6425);
+
+    //In pedro coordinates
+    private final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
+    private final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
+
 
     public TurretDefaultCommand(TurretSubsystem turret, Alliance alliance) {
         this.turret = turret;
-        if (alliance.equals(Alliance.BLUE)) {
-            goalPose = BlueGoalPose;
-        } else {
-            goalPose = RedGoalPose;
-        }
+
+        if (alliance.equals(Alliance.BLUE)) goalPose = BLUE_GOAL_POSE;
+        else goalPose = RED_GOAL_POSE;
+
         addRequirements(turret);
     }
 
     @Override
     public void execute() {
         Pose currentPose = PoseTracker.getEstimatedPose();
-        targetAngle = Math.atan2(goalPose.getY() - currentPose.getY(), goalPose.getX() - currentPose.getX());
-        turret.setTarget(targetAngle-currentPose.getHeading());
+        double targetAngle = Math.atan2(goalPose.getY() - currentPose.getY(), goalPose.getX() - currentPose.getX());
+        turret.setTargetAngle(targetAngle - currentPose.getHeading());
     }
 }

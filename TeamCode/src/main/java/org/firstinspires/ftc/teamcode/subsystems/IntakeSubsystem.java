@@ -7,13 +7,22 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.stealthrobotics.library.StealthSubsystem;
 
 public class IntakeSubsystem extends StealthSubsystem {
-    private final DcMotorEx intakeMotor;
+    private final DcMotorEx transferMotor;
+    private final double transferSpeed = 1.0;
 
     public IntakeSubsystem(HardwareMap hardwareMap) {
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
+        transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
     }
 
-    public Command setPower(double power) {
-        return runOnce(() -> intakeMotor.setPower(power));
+    public Command start() {
+        return this.runOnce(() -> setPower(transferSpeed));
+    }
+
+    public Command stop() {
+        return this.runOnce(() -> setPower(0));
+    }
+
+    private void setPower(double power) {
+        transferMotor.setPower(power);
     }
 }

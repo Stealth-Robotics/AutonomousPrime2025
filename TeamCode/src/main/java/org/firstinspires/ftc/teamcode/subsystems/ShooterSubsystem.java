@@ -27,6 +27,8 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final int MAX_VELOCITY = 2800;
 
+    public static double hoodPercentage = 0.0;
+
     public static double MAX_HOOD_ANGLE = 0.85;
     public static double MIN_HOOD_ANGLE = 0.07;
 
@@ -36,6 +38,9 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
+
+    private double lastTime;
+    private int lastTicks;
 
     private void generateInterpolationTables() {
         //Shooter speed
@@ -51,9 +56,10 @@ public class ShooterSubsystem extends StealthSubsystem {
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         velocityPID = new PIDController(kP, kI, kD);
-        velocityPID.setTolerance(VELO_TOLERANCE);
+        lastTime = (double) System.nanoTime() / 1E9;
 
         generateInterpolationTables();
+//        setHoodPercentage(1);
     }
 
     //[0.0, 1.0]
@@ -66,23 +72,28 @@ public class ShooterSubsystem extends StealthSubsystem {
     }
 
     public boolean atVelocity() {
-        return velocityPID.atSetPoint();
+        return Math.abs(getVelocity() - velocityPID.getSetPoint()) < VELO_TOLERANCE;
     }
 
     //Spin up the motor to target velocity and then finish
-    public Command spinUp(double velocityPercentage) {
+    public Command spinToVelocity(double velocityPercentage) {
         return this.runOnce(() -> velocityPID.setSetPoint(velocityPercentage * MAX_VELOCITY))
                 .andThen(run(() -> shooterMotor.setPower(velocityPID.calculate(getVelocity()))).interruptOn(this::atVelocity));
     }
 
     //Stop the motor
     public Command stop() {
-        return this.runOnce(() -> spinUp(0.0));
+        return this.runOnce(() -> spinToVelocity(0.0));
     }
 
     //Returns the shooter velocity in ticks per second
     private double getVelocity() {
-        return shooterMotor.getVelocity();
+        double time = (double) System.nanoTime() / 1E9;
+        int ticks = shooterMotor.getCurrentPosition();
+        double velo = (ticks - lastTicks) / (time - lastTime);
+        lastTime = time;
+        lastTicks = ticks;
+        return velo;
     }
 
     @Override
@@ -91,5 +102,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("velo", getVelocity());
         telemetry.addData("atVelo", atVelocity());
         telemetry.addData("targetVelo", velocityPID.getSetPoint());
+
+        setPower(1.0);
     }
 }
