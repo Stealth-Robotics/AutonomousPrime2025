@@ -27,13 +27,11 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final int MAX_VELOCITY = 2800;
 
-    public static double hoodPercentage = 0.0;
-
     public static double MAX_HOOD_ANGLE = 0.85;
     public static double MIN_HOOD_ANGLE = 0.07;
 
     private final PIDController velocityPID;
-    public static double VELO_TOLERANCE = 5.0;
+    public static double VELOCITY_TOLERANCE = 5.0;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -59,7 +57,6 @@ public class ShooterSubsystem extends StealthSubsystem {
         lastTime = (double) System.nanoTime() / 1E9;
 
         generateInterpolationTables();
-//        setHoodPercentage(1);
     }
 
     //[0.0, 1.0]
@@ -72,7 +69,7 @@ public class ShooterSubsystem extends StealthSubsystem {
     }
 
     public boolean atVelocity() {
-        return Math.abs(getVelocity() - velocityPID.getSetPoint()) < VELO_TOLERANCE;
+        return Math.abs(getVelocity() - velocityPID.getSetPoint()) < VELOCITY_TOLERANCE;
     }
 
     //Spin up the motor to target velocity and then finish
@@ -102,7 +99,5 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("velo", getVelocity());
         telemetry.addData("atVelo", atVelocity());
         telemetry.addData("targetVelo", velocityPID.getSetPoint());
-
-        setPower(1.0);
     }
 }

@@ -30,9 +30,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private Slot intakeSlot = null;
     private Slot shooterSlot = null;
 
-    private final double SHOOT_POSITION = 180.0;
-    private final double INTAKE_POSITION = 0.0;
-
     private final double SLOT_ANGLE_CONSTANT = 120.0;
     private final double TICKS_PER_REVOLUTION = 8192;
 

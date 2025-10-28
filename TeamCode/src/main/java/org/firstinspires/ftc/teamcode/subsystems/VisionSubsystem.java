@@ -131,6 +131,7 @@ public class VisionSubsystem extends StealthSubsystem {
 //
 //        FtcDashboard dashboard = FtcDashboard.getInstance();s
 //        dashboard.sendTelemetryPacket(packet);
-        telemetry.addData("Motif", Motif.getMotif());
+        telemetry.addLine("----vision----");
+        telemetry.addData("Detected Motif", Motif.getMotif());
     }
 }
