@@ -34,7 +34,8 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity(0.01));
+        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity(1.0));
+        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(shooter.stop());
     }
 
     @SuppressWarnings("unused")

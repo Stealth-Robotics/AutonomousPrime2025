@@ -27,8 +27,6 @@ import java.util.ArrayList;
 
 public class VisionSubsystem extends StealthSubsystem {
     private final AprilTagProcessor aprilTagProcessor;
-    private final AprilTagLibrary tagLibrary;
-    private final VisionPortal visionPortal;
 
     //TODO: VERY IMPORTANT TO SET THIS ACCURATELY
     private final Position cameraPosition = new Position(DistanceUnit.INCH, 0, 0, 0, 0);
@@ -50,7 +48,7 @@ public class VisionSubsystem extends StealthSubsystem {
             else libraryBuilder.addTag(data);
         }
 
-        tagLibrary = libraryBuilder.build();
+        AprilTagLibrary tagLibrary = libraryBuilder.build();
 
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
@@ -61,10 +59,10 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setDrawCubeProjection(true)
                 .build();
 
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class,"aprilTagCamera"))
+        VisionPortal visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "aprilTagCamera"))
                 .addProcessor(aprilTagProcessor)
-                .setCameraResolution(new Size(640,480))
+                .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .setAutoStopLiveView(true)
                 .build();

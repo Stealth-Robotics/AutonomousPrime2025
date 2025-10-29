@@ -153,6 +153,21 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
+    public Command updateSlotState(Artifact artifact, boolean intake, boolean outtake) {
+        return this.runOnce(() -> {
+            if (intake)
+                intakeSlot.setArtifact(artifact);
+            else if (outtake)
+                shooterSlot.setArtifact(artifact);
+        });
+    }
+
+    public boolean hasEmptySlot() {
+        if (slot1.getArtifact() == Artifact.EMPTY) return true;
+        if (slot2.getArtifact() == Artifact.EMPTY) return true;
+        return slot3.getArtifact() == Artifact.EMPTY;
+    }
+
     //Set the power of both servos in parallel
     private void setPower(double power) {
         servo1.setPower(power);
