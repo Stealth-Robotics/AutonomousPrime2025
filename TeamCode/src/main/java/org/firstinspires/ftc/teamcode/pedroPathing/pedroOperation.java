@@ -30,4 +30,7 @@ public class pedroOperation {
     public Pose Pose(double x, double y, double heading) {
         return AlliancePose(this.a, x, y, heading);
     }
+    public Pose Pose(double x, double y){
+        return AlliancePose(this.a, new Pose(x, y));
+    }
 }
