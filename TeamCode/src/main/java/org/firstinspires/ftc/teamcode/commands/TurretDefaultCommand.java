@@ -26,6 +26,6 @@ public class TurretDefaultCommand extends CommandBase {
     public void execute() {
         Pose currentPose = PoseTracker.getEstimatedPose();
         double targetAngle = Math.atan2(goalPose.getY() - currentPose.getY(), goalPose.getX() - currentPose.getX());
-        turret.setTargetAngle(targetAngle - currentPose.getHeading());
+        turret.setTargetAngle(currentPose.getHeading() - targetAngle);
     }
 }
