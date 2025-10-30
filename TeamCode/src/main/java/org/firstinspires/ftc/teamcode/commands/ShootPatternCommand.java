@@ -9,7 +9,7 @@ public class ShootPatternCommand extends SequentialCommandGroup {
 
     public ShootPatternCommand(ShooterSubsystem shooter, SpindexerSubsystem spindexer) {
 
-        if (spindexer.hasMotifColors) {
+        if (spindexer.hasMotifColors()) {
 
         }
 

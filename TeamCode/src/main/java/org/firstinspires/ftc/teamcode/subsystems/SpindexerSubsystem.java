@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -12,6 +16,8 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("FieldCanBeLocal")
+@Config
 public class SpindexerSubsystem extends StealthSubsystem {
     private final CRServo servo1;
     private final CRServo servo2;
@@ -19,25 +25,26 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx encoder;
 
     //PID constants
-    public static double kP = 0.0008;
+    public static double kP = 0.002;
     public static double kI = 0.0;
     public static double kD = 0.0;
+
+    public static double testPosition = 20;
 
     //Variables to keep track of the state of the slots
     private Slot intakeSlot = null;
     private Slot shooterSlot = null;
 
-    private final double SLOT_ANGLE_CONSTANT = 120.0;
     private final double TICKS_PER_REVOLUTION = 8192;
 
-    private final double ANGLE_TOLERANCE = 0.5; //TODO: Tune for accuracy
+    private final double ANGLE_TOLERANCE = 1; //TODO: Tune for accuracy
 
     private final AnglePIDController pid;
 
     //TODO: Starting Configuration
-    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 0.0);
-    private final Slot slot2 = new Slot(Artifact.EMPTY, 120, 0.0);
-    private final Slot slot3 = new Slot(Artifact.EMPTY, -120, 0.0);
+    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180);
+    private final Slot slot2 = new Slot(Artifact.EMPTY, 120, 60);
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 240, 300);
 
     private static class Slot {
         private Artifact artifact;
@@ -73,6 +80,12 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         pid = new AnglePIDController(kP, kI, kD);
         pid.setPositionTolerance(ANGLE_TOLERANCE);
+
+        resetEncoder();
+    }
+
+    private void resetEncoder() {
+        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     //Position in degrees from [0, 360)
@@ -227,17 +240,23 @@ public class SpindexerSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         telemetry.addData("position: ", getCurrentPosition());
-        telemetry.addData("slot 1: ", slot1.getArtifact());
-        telemetry.addData("slot 2: ", slot2.getArtifact());
-        telemetry.addData("slot 3: ", slot3.getArtifact());
+//        telemetry.addData("slot 1: ", slot1.getArtifact());
+//        telemetry.addData("slot 2: ", slot2.getArtifact());
+//        telemetry.addData("slot 3: ", slot3.getArtifact());
+        telemetry.addData("setpoint: ", pid.getSetPoint());
+        telemetry.addData("kP", kP);
+        telemetry.addData("error: ", pid.getError());
         telemetry.addData("atSetpoint: ", pid.atSetPoint());
 
+        pid.setSetPoint(testPosition);
+        setPower(pid.calculate(getCurrentPosition()));
+
         // ! For graphing
-//        FtcDashboard dashboard = FtcDashboard.getInstance();
-//        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-//
-//        dashboardTelemetry.addData("target", pid.getSetPoint());
-//        dashboardTelemetry.addData("current", getCurrentPosition());
-//        dashboardTelemetry.update();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+        dashboardTelemetry.addData("target", pid.getSetPoint());
+        dashboardTelemetry.addData("current", getCurrentPosition());
+        dashboardTelemetry.update();
     }
 }

@@ -45,7 +45,7 @@ public class AnglePIDController {
     }
 
     public void setSetPoint(double setPoint) {
-        reference = wrapAngle(setPoint);
+        reference = setPoint;
     }
 
     public double getSetPoint() {
@@ -56,6 +56,10 @@ public class AnglePIDController {
         return (measuredValue - lastMeasuredValue) / (getTimeSinceLastUpdate());
     }
 
+    public double getError() {
+        return wrapAngle(reference - measuredValue);
+    }
+
     public boolean atSetPoint() {
         double positionError = Math.abs(Math.abs(reference) - Math.abs(measuredValue));
         double velocityError = Math.abs(Math.abs(measuredValue) - Math.abs(lastMeasuredValue)) / (getTimeSinceLastUpdate());
@@ -64,10 +68,10 @@ public class AnglePIDController {
     }
 
     public double calculate(double measuredValue) {
-        this.measuredValue = wrapAngle(measuredValue);
+        this.measuredValue = measuredValue;
 
         double time = (double) System.nanoTime() / 1E9;
-        double error = wrapAngle(reference - measuredValue);
+        double error = getError();
         double derivative = (error - lastError) / (time - lastTime);
 
         integralSum += error * (time - lastTime);

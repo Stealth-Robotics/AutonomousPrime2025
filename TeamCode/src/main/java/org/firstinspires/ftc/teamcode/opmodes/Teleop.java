@@ -17,8 +17,8 @@ public class Teleop extends StealthOpMode {
     GamepadEx operatorGamepad;
 
     DriveSubsystem drive;
-    ShooterSubsystem shooter;
-    IntakeSubsystem intake;
+//    ShooterSubsystem shooter;
+//    IntakeSubsystem intake;
     SpindexerSubsystem spindexer;
 
     @Override
@@ -27,8 +27,8 @@ public class Teleop extends StealthOpMode {
         operatorGamepad = new GamepadEx(gamepad2);
 
         drive = new DriveSubsystem(hardwareMap);
-        shooter = new ShooterSubsystem(hardwareMap);
-        intake = new IntakeSubsystem(hardwareMap);
+//        shooter = new ShooterSubsystem(hardwareMap);
+//        intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
 
         register(drive);
@@ -42,11 +42,11 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity());
-        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(shooter.stop());
-
-        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getTrigger(GamepadBindings.OperatorBindings.INTAKE) > 0.01);
-        intakeTrigger.whileActiveContinuous(new IntakeCommand(intake, spindexer));
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(shooter.stop());
+//
+//        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getTrigger(GamepadBindings.OperatorBindings.INTAKE) > 0.01);
+//        intakeTrigger.whileActiveContinuous(new IntakeCommand(intake, spindexer));
     }
 
     @SuppressWarnings("unused")
