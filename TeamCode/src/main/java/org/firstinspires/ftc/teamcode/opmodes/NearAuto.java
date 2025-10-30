@@ -31,7 +31,7 @@ public class NearAuto extends StealthOpMode {
     SpindexerSubsystem spindexer;
     pedroOperation p;
     ElapsedTime time;
-    static Pose startPose, p1Handle1, startIntakePose, finishIntakePose, shootPose;
+    static Pose startPose, startIntakePose, finishIntakePose, shootPose;
     static PathChain startToIntake, intakePath, intakeToShoot;
     @Override
     public void initialize(){
@@ -44,12 +44,11 @@ public class NearAuto extends StealthOpMode {
         spindexer = new SpindexerSubsystem(hardwareMap);
         p = new pedroOperation(Alliance.get());
         startPose = p.Pose(26.77,130.35,Math.toRadians(180));
-        p1Handle1 = p.Pose(81,88);
         startIntakePose = p.Pose(42.868,84.685,Math.toRadians(180));
         finishIntakePose = p.Pose(24.496,84.510,Math.toRadians(180));
         shootPose = p.Pose(33.594,108.481,Math.toRadians(126));
         startToIntake = follower.pathBuilder()
-                .addPath(new BezierCurve(startPose, p1Handle1, startIntakePose))
+                .addPath(new BezierCurve(startPose, p.Pose(81,88), startIntakePose))
                 .setLinearHeadingInterpolation(startPose.getHeading(),startIntakePose.getHeading())
                 .build();
         intakePath = follower.pathBuilder()
