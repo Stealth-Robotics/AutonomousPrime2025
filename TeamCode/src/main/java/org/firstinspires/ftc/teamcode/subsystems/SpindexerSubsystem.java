@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.storage.Artifact;
+import org.firstinspires.ftc.teamcode.Artifact;
 import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
@@ -106,6 +106,15 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
     }
 
+    public Command rotateClosestArtifactToShoot() {
+        return this.runOnce(() -> {
+            Slot slot = nearestFilledSlot();
+            if (slot != null) {
+                pid.setSetPoint(slot.getShootPosition());
+            }
+        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
+    }
+
     //Return the nearest empty slot to the intake position
     private Slot nearestEmptySlot() {
         ArrayList<Slot> emptySlots = new ArrayList<>();
@@ -153,6 +162,29 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
+    private Slot nearestFilledSlot() {
+        ArrayList<Slot> slots = new ArrayList<>();
+        if (slot1.getArtifact() != Artifact.EMPTY)
+            slots.add(slot1);
+        if (slot2.getArtifact() != Artifact.EMPTY)
+            slots.add(slot2);
+        if (slot3.getArtifact() != Artifact.EMPTY)
+            slots.add(slot3);
+
+        Slot nearestSlot = null;
+        double minDistance = Double.MAX_VALUE;
+
+        for (Slot slot : slots) {
+            //Calculate the shortest arc between the slot shoot position and the current position
+            double distance = Math.min((slot.getShootPosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getShootPosition() + 360) % 360);
+            if (distance < minDistance) {
+                nearestSlot = slot;
+                minDistance = distance;
+            }
+        }
+        return nearestSlot;
+    }
+
     public Command updateSlotState(Artifact artifact, boolean intake, boolean outtake) {
         return this.runOnce(() -> {
             if (intake)
@@ -162,10 +194,28 @@ public class SpindexerSubsystem extends StealthSubsystem {
         });
     }
 
-    public boolean hasEmptySlot() {
-        if (slot1.getArtifact() == Artifact.EMPTY) return true;
-        if (slot2.getArtifact() == Artifact.EMPTY) return true;
-        return slot3.getArtifact() == Artifact.EMPTY;
+    public boolean isFull() {
+        return gamepieceCount() == 3;
+    }
+
+    public boolean isEmpty() {
+        return gamepieceCount() == 0;
+    }
+
+    public int gamepieceCount() {
+        int size = 0;
+        if (slot1.getArtifact() != Artifact.EMPTY) size++;
+        if (slot2.getArtifact() != Artifact.EMPTY) size++;
+        if (slot3.getArtifact() != Artifact.EMPTY) size++;
+        return size;
+    }
+
+    public boolean hasMotifColors() {
+        if (slot1.getArtifact() == Artifact.GREEN && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.PURPLE)
+            return true;
+        if (slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.GREEN && slot3.getArtifact() == Artifact.PURPLE)
+            return true;
+        return slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.GREEN;
     }
 
     //Set the power of both servos in parallel

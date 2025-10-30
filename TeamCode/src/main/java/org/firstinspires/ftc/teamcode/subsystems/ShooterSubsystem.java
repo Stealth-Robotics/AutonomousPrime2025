@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -25,10 +26,9 @@ public class ShooterSubsystem extends StealthSubsystem {
     public static double kI = 0.0;
     public static double kD = 0.0;
 
-    private final int MAX_VELOCITY = 2800;
-
-    public static double MAX_HOOD_ANGLE = 0.85;
-    public static double MIN_HOOD_ANGLE = 0.07;
+    //TODO: Tune
+    public static double MAX_HOOD_ANGLE = 1;
+    public static double MIN_HOOD_ANGLE = 0;
 
     private final PIDController velocityPID;
     public static double VELOCITY_TOLERANCE = 5.0;
@@ -36,6 +36,9 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
+
+    // ? Tracks whether the shooter should spin to calculated velocity
+    private boolean spinUp = false;
 
     private double lastTime;
     private int lastTicks;
@@ -72,15 +75,12 @@ public class ShooterSubsystem extends StealthSubsystem {
         return Math.abs(getVelocity() - velocityPID.getSetPoint()) < VELOCITY_TOLERANCE;
     }
 
-    //Spin up the motor to target velocity and then finish
-    public Command spinToVelocity(double velocityPercentage) {
-        return this.runOnce(() -> velocityPID.setSetPoint(velocityPercentage * MAX_VELOCITY))
-                .andThen(run(() -> shooterMotor.setPower(velocityPID.calculate(getVelocity()))).interruptOn(this::atVelocity));
+    public Command spinToVelocity() {
+        return this.runOnce(() -> spinUp = true);
     }
 
-    //Stop the motor
     public Command stop() {
-        return this.runOnce(() -> spinToVelocity(0.0));
+        return this.runOnce(() -> spinUp = false);
     }
 
     //Returns the shooter velocity in ticks per second
@@ -99,5 +99,14 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("velo", getVelocity());
         telemetry.addData("atVelo", atVelocity());
         telemetry.addData("targetVelo", velocityPID.getSetPoint());
+
+        if (spinUp) {
+            velocityPID.setSetPoint(speedTable.get(PoseTracker.getDistanceFromGoal()));
+            setPower(velocityPID.calculate(getVelocity()));
+        }
+        else {
+            velocityPID.setSetPoint(0.0);
+            setPower(velocityPID.calculate(getVelocity()));
+        }
     }
 }

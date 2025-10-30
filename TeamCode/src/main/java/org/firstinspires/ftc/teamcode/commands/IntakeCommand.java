@@ -3,14 +3,14 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
-import org.firstinspires.ftc.teamcode.storage.Artifact;
+import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 
 public class IntakeCommand extends SequentialCommandGroup {
 
     public IntakeCommand(IntakeSubsystem intake, SpindexerSubsystem spindexer) {
-        if (spindexer.hasEmptySlot()) {
+        if (!spindexer.isFull()) {
             addCommands(
                     spindexer.rotateEmptyToIntake(),
                     intake.start(),
@@ -19,7 +19,6 @@ public class IntakeCommand extends SequentialCommandGroup {
                     intake.stop()
             );
         }
-
         addRequirements(intake, spindexer);
     }
 }

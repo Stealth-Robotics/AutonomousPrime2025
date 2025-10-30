@@ -8,6 +8,6 @@ public class GamepadBindings {
     }
 
     public static class OperatorBindings {
-
+        public static GamepadKeys.Trigger INTAKE = GamepadKeys.Trigger.RIGHT_TRIGGER;
     }
 }

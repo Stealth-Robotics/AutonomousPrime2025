@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.storage;
+package org.firstinspires.ftc.teamcode;
 
 public class Motif {
     private static MotifType motif = MotifType.NULL;

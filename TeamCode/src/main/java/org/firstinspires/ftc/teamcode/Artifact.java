@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.storage;
+package org.firstinspires.ftc.teamcode;
 
 public enum Artifact {
     EMPTY,
