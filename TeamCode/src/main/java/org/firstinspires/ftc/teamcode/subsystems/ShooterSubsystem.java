@@ -37,6 +37,8 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
 
+    public static double testVelocity = 1000.0;
+
     // ? Tracks whether the shooter should spin to calculated velocity
     private boolean spinUp = false;
 
@@ -101,7 +103,8 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("targetVelo", velocityPID.getSetPoint());
 
         if (spinUp) {
-            velocityPID.setSetPoint(speedTable.get(PoseTracker.getDistanceFromGoal()));
+//            velocityPID.setSetPoint(speedTable.get(PoseTracker.getDistanceFromGoal()));
+            velocityPID.setSetPoint(testVelocity);
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {
