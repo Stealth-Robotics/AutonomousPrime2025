@@ -6,9 +6,9 @@ import org.stealthrobotics.library.Alliance;
 
 public class PoseTracker {
     private static Pose pose = new Pose();
-    private static Pose allianceGoal;
+    private static Pose allianceGoal = new Pose();
 
-    public static void setAlliance(Alliance alliance) {
+    public static void setAlliance() {
         if (Alliance.get() == Alliance.BLUE) {
             allianceGoal = AprilTagPose.BLUE_GOAL.pose;
         }

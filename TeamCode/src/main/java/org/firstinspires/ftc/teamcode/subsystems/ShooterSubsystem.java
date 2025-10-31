@@ -3,11 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -15,12 +11,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 @Config
+@SuppressWarnings("FieldCanBeLocal")
 public class ShooterSubsystem extends StealthSubsystem {
     private final DcMotorEx shooterMotor;
     private final Servo hoodServo;
@@ -46,7 +41,6 @@ public class ShooterSubsystem extends StealthSubsystem {
     private boolean spinUp = false;
 
     private void generateInterpolationTables() {
-        //Shooter speed
 //        speedTable.add();
 //        speedTable.createLUT();
 //        hoodTable.createLUT();
@@ -110,15 +104,14 @@ public class ShooterSubsystem extends StealthSubsystem {
         dashboardTelemetry.addData("current", currVelo);
         dashboardTelemetry.update();
 
-//        if (spinUp) {
-////            velocityPID.setSetPoint(speedTable.get(PoseTracker.getDistanceFromGoal()));
-//            velocityPID.setSetPoint(rpmToTPS(testVelocity));
-//            setVelocity(velocityPID.calculate(currVelo));
-//        }
-//        else {
-//            velocityPID.setSetPoint(0.0);
-//            setVelocity(velocityPID.calculate(currVelo));
-//        }
-//        shooterMotor.setPower(1.0);
+        if (spinUp) {
+//            velocityPID.setSetPoint(speedTable.get(distanceFromGoal));
+            velocityPID.setSetPoint(rpmToTPS(testVelocity));
+            setVelocity(velocityPID.calculate(currVelo));
+        }
+        else {
+            velocityPID.setSetPoint(0.0);
+            setVelocity(velocityPID.calculate(currVelo));
+        }
     }
 }

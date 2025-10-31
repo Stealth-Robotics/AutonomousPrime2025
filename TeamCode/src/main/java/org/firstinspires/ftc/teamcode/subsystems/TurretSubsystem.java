@@ -13,6 +13,7 @@ import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 
 @Config
+@SuppressWarnings("FieldCanBeLocal")
 public class TurretSubsystem extends StealthSubsystem {
     private final DcMotorEx turretMotor;
 

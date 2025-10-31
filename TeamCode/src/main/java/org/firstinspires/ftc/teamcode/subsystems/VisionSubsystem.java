@@ -25,6 +25,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class VisionSubsystem extends StealthSubsystem {
     private final AprilTagProcessor aprilTagProcessor;
 
@@ -71,11 +72,12 @@ public class VisionSubsystem extends StealthSubsystem {
             FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
     }
 
+    //Converts from FTCCoordinates to PedroCoordinates
     private Pose poseAdjust(Pose old) {
         return new Pose(72 + old.getY(), 72 - old.getX(), old.getHeading() - (Math.PI / 2));
     }
 
-    // ? Returns a new motif if the camera detects a new one
+    // ? Returns the new motif if it has changed since last call
     public Motif.MotifType getUpdatedMotif(Motif.MotifType old) {
         ArrayList<AprilTagDetection> latestDetections = aprilTagProcessor.getFreshDetections();
 
@@ -93,8 +95,6 @@ public class VisionSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-//        TelemetryPacket packet = new TelemetryPacket();
-
         ArrayList<AprilTagDetection> latestDetections = aprilTagProcessor.getDetections();
         if (!latestDetections.isEmpty()) {
             for (AprilTagDetection detection : latestDetections) {
@@ -104,23 +104,9 @@ public class VisionSubsystem extends StealthSubsystem {
                             detection.robotPose.getPosition().y,
                             detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
                     )), false);
-//                    packet.fieldOverlay()
-//                            .drawImage("/dash/decode_field.png", 0, 0, 144, 144);
-//
-//                    packet.fieldOverlay()
-//                            .setFill("black")
-//                            .fillRect(-detection.robotPose.getPosition().x - 8, -detection.robotPose.getPosition().y - 8, 18, 16);
                 }
             }
         }
-
-//        packet.put("x (pedro)", PoseTracker.getEstimatedPose().getX());
-//        packet.put("y (pedro) ", PoseTracker.getEstimatedPose().getY());
-//        packet.put("heading (degrees) (pedro)", (PoseTracker.getEstimatedPose().getHeading() * 180.0) / Math.PI);
-//
-//        FtcDashboard dashboard = FtcDashboard.getInstance();s
-//        dashboard.sendTelemetryPacket(packet);
-        telemetry.addLine("----vision----");
         telemetry.addData("Detected Motif", Motif.getMotif());
     }
 }

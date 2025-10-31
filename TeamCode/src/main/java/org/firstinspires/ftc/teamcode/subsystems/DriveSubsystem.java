@@ -55,13 +55,6 @@ public class DriveSubsystem extends StealthSubsystem {
         pp.resetPosAndIMU();
     }
 
-    public void stop() {
-        leftFront.setPower(0.0);
-        rightFront.setPower(0.0);
-        leftBack.setPower(0.0);
-        rightBack.setPower(0.0);
-    }
-
     public void drive(double x, double y, double rot) {
         double heading = getHeading();
         double dx = x * Math.cos(-heading) - y * Math.sin(-heading);
@@ -99,8 +92,10 @@ public class DriveSubsystem extends StealthSubsystem {
         PoseTracker.updateEstimatedPose(
                 new Pose(-pose.getX(DistanceUnit.INCH), -pose.getY(DistanceUnit.INCH), getHeading()), true
         );
+
+        telemetry.addLine("-----drive-----");
         telemetry.addData("x", PoseTracker.getEstimatedPose().getX());
         telemetry.addData("y", PoseTracker.getEstimatedPose().getY());
-        telemetry.addData("heading", AngleUnit.RADIANS.toDegrees(getHeading()));
+        telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }

@@ -7,23 +7,26 @@ import org.stealthrobotics.library.Alliance;
 public class pedroOperation {
     //Methods for swapping points based on alliance
     public static Pose AlliancePose(Alliance a, Pose inputPose) {
-        if(a.equals(Alliance.BLUE)){
+        if (a.equals(Alliance.BLUE)) {
             return new Pose(144 - inputPose.getX(), inputPose.getY(), 180 - inputPose.getHeading());
-        } else {
+        }
+        else {
             return inputPose;
         }
     }
+
     public static Pose AlliancePose(Alliance a, double x, double y, double heading) {
-        if(a.equals(Alliance.BLUE)){
+        if (a.equals(Alliance.BLUE)) {
             return new Pose(144 - x, y, 180 - heading);
-        } else {
+        }
+        else {
             return new Pose(x, y, heading);
         }
     }
 
     //Added alliance property for efficient implementation
     Alliance a;
-    public pedroOperation(Alliance a){
+    public pedroOperation(Alliance a) {
         this.a = a;
     }
 

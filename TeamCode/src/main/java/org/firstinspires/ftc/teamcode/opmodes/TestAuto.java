@@ -15,8 +15,8 @@ import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class TestAuto extends StealthOpMode {
-    VisionSubsystem vision;
-    Follower follower;
+    private VisionSubsystem vision;
+    private Follower follower;
 
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
@@ -31,7 +31,7 @@ public class TestAuto extends StealthOpMode {
         follower = Constants.createFollower(hardwareMap);
 
         follower.setStartingPose(startPose);
-        PoseTracker.setAlliance(Alliance.get()); // ! Very important for auto and teleop shooting calculations
+        PoseTracker.setAlliance(); // ! Very important for auto and teleop shooting calculations
     }
 
     @Override

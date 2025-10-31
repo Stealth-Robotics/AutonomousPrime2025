@@ -18,7 +18,7 @@ public class Teleop extends StealthOpMode {
 
     DriveSubsystem drive;
     ShooterSubsystem shooter;
-//    IntakeSubsystem intake;
+    IntakeSubsystem intake;
 //    SpindexerSubsystem spindexer;
 
     @Override
@@ -28,10 +28,10 @@ public class Teleop extends StealthOpMode {
 
         drive = new DriveSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
-//        intake = new IntakeSubsystem(hardwareMap);
+        intake = new IntakeSubsystem(hardwareMap);
 //        spindexer = new SpindexerSubsystem(hardwareMap);
 
-        register(drive, shooter);
+        register(drive, shooter, intake);
 
         //Setup default commands
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));

@@ -17,8 +17,8 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("FieldCanBeLocal")
 @Config
+@SuppressWarnings("FieldCanBeLocal")
 public class SpindexerSubsystem extends StealthSubsystem {
     private final CRServo servo1;
     private final CRServo servo2;

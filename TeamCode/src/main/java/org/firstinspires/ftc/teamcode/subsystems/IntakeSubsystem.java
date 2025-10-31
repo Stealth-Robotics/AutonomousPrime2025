@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,9 +8,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.stealthrobotics.library.StealthSubsystem;
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class IntakeSubsystem extends StealthSubsystem {
     private final DcMotorEx transferMotor;
     private final Servo loaderServo;
@@ -21,9 +21,10 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final double LOADER_DEPLOYED_POSITION = 0.0;
     private final double LOADER_RETRACTED_POSITION = 0.0;
 
-    private final double DISTANCE_THRESHOLD_INCHES = 0.0; //Distance has to be less than this to look for a artifact
+    //Distance has to be less than this to look for a artifact
+    private final double DISTANCE_THRESHOLD_INCHES = 0.0;
 
-    private final double transferSpeed = 1.0;
+    private final double TRANSFER_SPEED = 1.0;
 
     public IntakeSubsystem(HardwareMap hardwareMap) {
         transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
@@ -31,7 +32,6 @@ public class IntakeSubsystem extends StealthSubsystem {
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
     }
 
-    //TODO: Tune color thresholds
     public Artifact detectedArtifact() {
         Artifact artifact = Artifact.EMPTY;
         if (colorSensor.getDistance(DistanceUnit.INCH) < DISTANCE_THRESHOLD_INCHES) {
@@ -55,14 +55,24 @@ public class IntakeSubsystem extends StealthSubsystem {
     }
 
     public Command start() {
-        return this.runOnce(() -> setPower(transferSpeed));
+        return this.runOnce(() -> setPower(TRANSFER_SPEED));
     }
 
     public Command stop() {
-        return this.runOnce(() -> setPower(0));
+        return this.runOnce(() -> setPower(0.0));
     }
 
     private void setPower(double power) {
         transferMotor.setPower(power);
+    }
+
+    @Override
+    public void periodic() {
+        // ! For tuning only (delete after)
+        telemetry.addData("red", colorSensor.red());
+        telemetry.addData("green", colorSensor.green());
+        telemetry.addData("blue", colorSensor.blue());
+
+        telemetry.addData("distance", colorSensor.getDistance(DistanceUnit.INCH));
     }
 }
