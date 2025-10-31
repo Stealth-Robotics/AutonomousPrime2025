@@ -22,7 +22,6 @@ public class TurretSubsystem extends StealthSubsystem {
     public static double kP = 0.01;
     public static double kI = 0.0045;
     public static double kD = 0.0008;
-    public static double kF = 0.0;
 
     public static double tickP = 0.008;
     public static double tickI = 0.005;
@@ -39,7 +38,7 @@ public class TurretSubsystem extends StealthSubsystem {
     public TurretSubsystem(HardwareMap hardwareMap) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
 
-        pid = new AnglePIDController(kP, kI, kD, kF);
+        pid = new AnglePIDController(kP, kI, kD);
         tickPID = new PIDController(tickP, tickI, tickD);
 
         pid.setPositionTolerance(POSITION_TOLERANCE_DEGREES);

@@ -15,10 +15,16 @@ public class AnglePIDController {
     private double lastError;
 
     private double tolerance;
-    private double velocityTolerance;
 
-    private double lastMeasuredValue;
     private double lastTime;
+
+    public AnglePIDController(double kP, double kI, double kD) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+        this.kF = 0;
+        this.lastTime = (double) System.nanoTime() / 1E9;
+    }
 
     public AnglePIDController(double kP, double kI, double kD, double kF) {
         this.kP = kP;
@@ -28,32 +34,16 @@ public class AnglePIDController {
         this.lastTime = (double) System.nanoTime() / 1E9;
     }
 
-    public AnglePIDController(double kP, double kI, double kD) {
-        this.kP = kP;
-        this.kI = kI;
-        this.kD = kD;
-        this.kF = 0.0;
-        this.lastTime = (double) System.nanoTime() / 1E9;
-    }
-
     public void setPositionTolerance(double newTolerance) {
         tolerance = newTolerance;
     }
 
-    public void setVelocityTolerance(double velocityTolerance) {
-        this.velocityTolerance = velocityTolerance;
-    }
-
     public void setSetPoint(double setPoint) {
-        reference = setPoint;
+        reference = wrapAngle(setPoint);
     }
 
     public double getSetPoint() {
         return reference;
-    }
-
-    public double getVelocityError() {
-        return (measuredValue - lastMeasuredValue) / (getTimeSinceLastUpdate());
     }
 
     public double getError() {
@@ -61,10 +51,8 @@ public class AnglePIDController {
     }
 
     public boolean atSetPoint() {
-        double positionError = Math.abs(Math.abs(reference) - Math.abs(measuredValue));
-        double velocityError = Math.abs(Math.abs(measuredValue) - Math.abs(lastMeasuredValue)) / (getTimeSinceLastUpdate());
-
-        return positionError <= tolerance && velocityError <= velocityTolerance;
+        double positionError = Math.abs(getError());
+        return positionError <= tolerance;
     }
 
     public double calculate(double measuredValue) {
@@ -77,17 +65,12 @@ public class AnglePIDController {
         integralSum += error * (time - lastTime);
 
         lastError = error;
-        lastMeasuredValue = measuredValue;
         lastTime = time;
 
-        return (kP * error) + (kI * integralSum) + (kD * derivative) + kF;
+        return (kP * error) + (kI * integralSum) + (kD * derivative) + ((-Math.signum(error)) * kF);
     }
 
     private double wrapAngle(double theta) {
         return AngleUnit.normalizeDegrees(theta);
-    }
-
-    private double getTimeSinceLastUpdate() {
-        return (double) System.nanoTime() / 1E9 - lastTime;
     }
 }

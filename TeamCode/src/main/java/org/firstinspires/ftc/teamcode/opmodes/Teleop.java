@@ -17,9 +17,9 @@ public class Teleop extends StealthOpMode {
     GamepadEx operatorGamepad;
 
     DriveSubsystem drive;
-//    ShooterSubsystem shooter;
+    ShooterSubsystem shooter;
 //    IntakeSubsystem intake;
-    SpindexerSubsystem spindexer;
+//    SpindexerSubsystem spindexer;
 
     @Override
     public void initialize() {
@@ -27,11 +27,11 @@ public class Teleop extends StealthOpMode {
         operatorGamepad = new GamepadEx(gamepad2);
 
         drive = new DriveSubsystem(hardwareMap);
-//        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystem(hardwareMap);
 //        intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap);
+//        spindexer = new SpindexerSubsystem(hardwareMap);
 
-        register(drive);
+        register(drive, shooter);
 
         //Setup default commands
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
@@ -44,7 +44,9 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity());
 //        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(shooter.stop());
-//
+        driveGamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(() -> shooter.setHoodPercentage(0.0));
+        driveGamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> shooter.setHoodPercentage(1.0));
+
 //        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getTrigger(GamepadBindings.OperatorBindings.INTAKE) > 0.01);
 //        intakeTrigger.whileActiveContinuous(new IntakeCommand(intake, spindexer));
     }

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -25,11 +26,13 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx encoder;
 
     //PID constants
-    public static double kP = 0.002;
-    public static double kI = 0.0;
-    public static double kD = 0.0;
+    public static double kP = 0.0034;
+    public static double kI = 0.0001;
+    public static double kD = 0.00025;
+    public static double kF = 0.051;
 
-    public static double testPosition = 20;
+    // ! Only for testing
+    public static double testPosition = 0;
 
     //Variables to keep track of the state of the slots
     private Slot intakeSlot = null;
@@ -37,7 +40,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     private final double TICKS_PER_REVOLUTION = 8192;
 
-    private final double ANGLE_TOLERANCE = 1; //TODO: Tune for accuracy
+    private final double ANGLE_TOLERANCE = 2;
 
     private final AnglePIDController pid;
 
@@ -78,7 +81,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         servo2 = hardwareMap.get(CRServo.class, "spindexerServo2");
         encoder = hardwareMap.get(DcMotorEx.class, "spindexerEncoder"); //TODO: Change to correct motor port
 
-        pid = new AnglePIDController(kP, kI, kD);
+        pid = new AnglePIDController(kP, kI, kD, kF);
         pid.setPositionTolerance(ANGLE_TOLERANCE);
 
         resetEncoder();
@@ -88,15 +91,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    //Position in degrees from [0, 360)
+    //Position in degrees from [-180, 180)
     public double getCurrentPosition() {
-        return wrapAngle((encoder.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
-    }
-
-    private double wrapAngle(double theta) {
-        while (theta >= 360) theta -= 360;
-        while (theta < 0) theta += 360;
-        return theta;
+        return AngleUnit.normalizeDegrees((encoder.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
     }
 
     //Rotate the nearest empty slot to the intake if it exists
@@ -233,20 +230,18 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     //Set the power of both servos in parallel
     private void setPower(double power) {
-        servo1.setPower(power);
-        servo2.setPower(power);
+        servo1.setPower(-power);
+        servo2.setPower(-power);
     }
 
     @Override
     public void periodic() {
         telemetry.addData("position: ", getCurrentPosition());
-//        telemetry.addData("slot 1: ", slot1.getArtifact());
-//        telemetry.addData("slot 2: ", slot2.getArtifact());
-//        telemetry.addData("slot 3: ", slot3.getArtifact());
-        telemetry.addData("setpoint: ", pid.getSetPoint());
-        telemetry.addData("kP", kP);
-        telemetry.addData("error: ", pid.getError());
-        telemetry.addData("atSetpoint: ", pid.atSetPoint());
+        telemetry.addData("slot 1: ", slot1.getArtifact());
+        telemetry.addData("slot 2: ", slot2.getArtifact());
+        telemetry.addData("slot 3: ", slot3.getArtifact());
+        telemetry.addData("atPosition: ", pid.atSetPoint());
+        telemetry.addData("error", pid.getError());
 
         pid.setSetPoint(testPosition);
         setPower(pid.calculate(getCurrentPosition()));
