@@ -124,6 +124,10 @@ public class TurretSubsystem extends StealthSubsystem {
         return pid.calculate(getPosition());
     }
 
+    public boolean atAngle() {
+        return pid.atSetPoint();
+    }
+
     public void setTargetAngle(double angle) {
         pid.setSetPoint(angle);
     }
