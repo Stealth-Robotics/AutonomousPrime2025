@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.MathFunctions;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.AprilTagPose;
 import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
@@ -25,6 +31,9 @@ public class TurretDefaultCommand extends CommandBase {
     public void execute() {
         Pose currentPose = PoseTracker.getEstimatedPose();
         double targetAngle = Math.atan2(goalPose.getY() - currentPose.getY(), goalPose.getX() - currentPose.getX());
-        turret.setTargetAngle(currentPose.getHeading() - targetAngle);
+        turret.setTargetAngle(MathFunctions.clamp(
+                AngleUnit.normalizeDegrees(AngleUnit.RADIANS.toDegrees(currentPose.getHeading() - targetAngle)), -60, 60
+        ));
+        turret.setPower(turret.calculatePIDPower());
     }
 }

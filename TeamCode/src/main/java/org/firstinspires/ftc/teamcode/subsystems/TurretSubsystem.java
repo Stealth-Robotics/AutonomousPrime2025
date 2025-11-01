@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 
@@ -20,13 +24,13 @@ public class TurretSubsystem extends StealthSubsystem {
     private final AnglePIDController pid;
     private final PIDController tickPID;
 
-    public static double kP = 0.01;
-    public static double kI = 0.0045;
-    public static double kD = 0.0008;
+    public static double kP = 0.05;
+    public static double kI = 0;
+    public static double kD = 0;
 
-    public static double tickP = 0.008;
-    public static double tickI = 0.005;
-    public static double tickD = 0.002;
+    public static double tickP = 0.01;
+    public static double tickI = 0.75;
+    public static double tickD = 0.001;
 
     public static double POSITION_TOLERANCE_DEGREES = 0.5;
     public static double POSITION_TOLERANCE_TICKS = 15;
@@ -65,6 +69,11 @@ public class TurretSubsystem extends StealthSubsystem {
             }
 
             @Override
+            public void end(boolean interrupted) {
+                setPower(0);
+            }
+
+            @Override
             public void execute() {
                 setPower(tickPID.calculate(turretMotor.getCurrentPosition()));
             }
@@ -90,26 +99,25 @@ public class TurretSubsystem extends StealthSubsystem {
             }
 
             @Override
+            public void end(boolean interrupted) {
+                setPower(0);
+            }
+
+            @Override
             public boolean isFinished() {
                 return tickPID.atSetPoint();
             }
         };
     }
 
-    //Turret angle in [0, 360)
+    //Turret angle in [-180, 180)
     public double getPosition() {
-        return wrapAngle((turretMotor.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
+        return AngleUnit.normalizeDegrees((turretMotor.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
     }
 
     //Get the wrap count (- or +)
     public double getCurrentWraps() {
         return turretMotor.getCurrentPosition() / TICKS_PER_REVOLUTION;
-    }
-
-    private double wrapAngle(double theta) {
-        while (theta >= 360) theta -= 360;
-        while (theta < 0) theta += 360;
-        return theta;
     }
 
     public double calculatePIDPower() {
@@ -120,19 +128,19 @@ public class TurretSubsystem extends StealthSubsystem {
         pid.setSetPoint(angle);
     }
 
-    private void setPower(double power) {
+    public void setPower(double power) {
         turretMotor.setPower(power);
     }
 
     @Override
     public void periodic() {
-        if (Math.abs(Math.abs(getCurrentWraps()) - Math.abs(MAX_ROTATION_WRAP)) < WRAP_TOLERANCE) {
-            unWrapFully().schedule(); // ! unwrap partially or fully?
-        }
+//        if (Math.abs(Math.abs(getCurrentWraps()) - Math.abs(MAX_ROTATION_WRAP)) < WRAP_TOLERANCE) {
+//            unWrapFully().schedule(); // ! unwrap partially or fully?
+//        }
 
         telemetry.addLine("----------turret----------");
-        telemetry.addData("angle: ", getPosition());
-        telemetry.addData("wraps: ", getCurrentWraps());
-        telemetry.addData("ticks: ", turretMotor.getCurrentPosition());
+        telemetry.addData("angle", getPosition());
+        telemetry.addData("wraps", getCurrentWraps());
+        telemetry.addData("ticks", turretMotor.getCurrentPosition());
     }
 }

@@ -18,7 +18,6 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 public class IntakeSubsystem extends StealthSubsystem {
     private final DcMotorEx transferMotor;
     private final Servo loaderServo;
-    private final RevColorSensorV3 colorSensor;
 
     private final double LOADER_DEPLOYED_POSITION = 0.5;
     private final double LOADER_RETRACTED_POSITION = 0.1;
@@ -31,16 +30,10 @@ public class IntakeSubsystem extends StealthSubsystem {
     public IntakeSubsystem(HardwareMap hardwareMap) {
         transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
         loaderServo = hardwareMap.get(Servo.class, "loaderServo");
-        colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
 
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         retractLoader().schedule();
-    }
-
-    // ! Only looking at distance
-    public boolean detectsArtifact() {
-        return colorSensor.getDistance(DistanceUnit.INCH) < DISTANCE_THRESHOLD_INCHES;
     }
 
     public Command retractLoader() {
@@ -65,11 +58,5 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     public void setPower(double power) {
         transferMotor.setPower(power);
-    }
-
-    @Override
-    public void periodic() {
-        telemetry.addData("distance", colorSensor.getDistance(DistanceUnit.INCH));
-        telemetry.addData("detectsArtifact", detectsArtifact());
     }
 }

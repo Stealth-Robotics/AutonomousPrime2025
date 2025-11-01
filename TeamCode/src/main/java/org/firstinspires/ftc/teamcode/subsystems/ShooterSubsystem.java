@@ -30,19 +30,14 @@ public class ShooterSubsystem extends StealthSubsystem {
     public static double MIN_HOOD_ANGLE = 0;
 
     private final PIDFController velocityPID;
-    public static double VELOCITY_TOLERANCE = 5.0;
+    public static double VELOCITY_TOLERANCE = 10;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
 
-    public static int testVelocity = 0;
-
     // ? Tracks whether the shooter should spin to calculated velocity
     private boolean spinUp = false;
-    private boolean intakeThroughShooter = false;
-
-    public static double INTAKE_FROM_SHOOTER_VELO = 1000;
 
     private void generateInterpolationTables() {
 //        speedTable.add();
@@ -81,10 +76,6 @@ public class ShooterSubsystem extends StealthSubsystem {
         return this.runOnce(() -> spinUp = false);
     }
 
-    public Command setIntaking(boolean doIntake) {
-        return this.runOnce(() -> intakeThroughShooter = doIntake);
-    }
-
     //Returns the shooter velocity in ticks per second
     private double getVelocity() {
         return shooterMotor.getVelocity();
@@ -106,15 +97,13 @@ public class ShooterSubsystem extends StealthSubsystem {
 
         if (spinUp) {
 //            velocityPID.setSetPoint(speedTable.get(distanceFromGoal));
-            velocityPID.setSetPoint(rpmToTPS(testVelocity));
+            velocityPID.setSetPoint(1000);
             setVelocity(velocityPID.calculate(currVelo));
-        }
-        else if (intakeThroughShooter) {
-            velocityPID.setSetPoint(-INTAKE_FROM_SHOOTER_VELO);
-            setVelocity(velocityPID.calculate(currVelo));
+            setHoodPercentage(1.0);
         }
         else {
             setVelocity(0.0);
+            setHoodPercentage(0.0);
         }
     }
 }

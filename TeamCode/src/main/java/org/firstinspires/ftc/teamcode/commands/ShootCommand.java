@@ -8,14 +8,15 @@ import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 
 public class ShootCommand extends SequentialCommandGroup {
-    public ShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer) {
+    public ShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake) {
         addCommands(
                 shooter.spinToVelocity(),
                 intake.start(),
                 intake.deployLoader(),
-                spindexer.shootArtifact(), //Update spindexer slot states
-                new WaitCommand(500), //TODO Tune to smallest value that still works
-                intake.retractLoader()
+                new WaitCommand(1000), //TODO Tune to smallest value that still works
+                intake.retractLoader(),
+                intake.stop(),
+                shooter.stop()
         );
 
         addRequirements(intake, shooter);

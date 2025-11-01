@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.Command;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -45,6 +47,7 @@ public class DriveSubsystem extends StealthSubsystem {
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pp.resetPosAndIMU();
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, 9, 9, AngleUnit.DEGREES, 180));
     }
 
     public double getHeading() {
@@ -52,6 +55,10 @@ public class DriveSubsystem extends StealthSubsystem {
     }
 
     public void resetHeading() {
+        pp.setHeading(0, AngleUnit.RADIANS);
+    }
+
+    public void resetIMU() {
         pp.resetPosAndIMU();
     }
 
@@ -86,8 +93,6 @@ public class DriveSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        pp.update();
-
         Pose2D pose = pp.getPosition();
         PoseTracker.updateEstimatedPose(
                 new Pose(-pose.getX(DistanceUnit.INCH), -pose.getY(DistanceUnit.INCH), getHeading()), true
@@ -97,5 +102,7 @@ public class DriveSubsystem extends StealthSubsystem {
         telemetry.addData("x", PoseTracker.getEstimatedPose().getX());
         telemetry.addData("y", PoseTracker.getEstimatedPose().getY());
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
+
+        pp.update();
     }
 }
