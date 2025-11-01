@@ -6,12 +6,15 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -24,7 +27,7 @@ public class ShooterSubsystem extends StealthSubsystem {
     public static double kP = 30.0;
     public static double kI = 5.0;
     public static double kD = 0.0;
-    public static double kF = 0.8;
+    public static double kF = 12;
 
     public static double MAX_HOOD_ANGLE = 0.8;
     public static double MIN_HOOD_ANGLE = 0;
@@ -40,9 +43,24 @@ public class ShooterSubsystem extends StealthSubsystem {
     private boolean spinUp = false;
 
     private void generateInterpolationTables() {
-//        speedTable.add();
-//        speedTable.createLUT();
-//        hoodTable.createLUT();
+        try {
+            speedTable.add(0, 0.4);
+            speedTable.add(20, 0.5);
+            speedTable.add(80, 0.65);
+            speedTable.add(124, 0.78);
+            speedTable.add(200, 0.9);
+            speedTable.add(2000, 1.0);
+
+            speedTable.createLUT();
+
+            hoodTable.add(0, 0);
+            hoodTable.add(20, 0.3);
+            hoodTable.add(80, 0.92);
+            hoodTable.add(124, 1.0);
+            hoodTable.add(2000, 1.0);
+
+            hoodTable.createLUT();
+        } catch (Exception ignored) {}
     }
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
@@ -68,8 +86,8 @@ public class ShooterSubsystem extends StealthSubsystem {
         return Math.abs(getVelocity() - velocityPID.getSetPoint()) < VELOCITY_TOLERANCE;
     }
 
-    public Command spinToVelocity() {
-        return this.runOnce(() -> spinUp = true).andThen(new WaitUntilCommand(this::atVelocity));
+    public Command toggleSpinning() {
+        return this.runOnce(() -> spinUp = !spinUp);
     }
 
     public Command stop() {
@@ -81,29 +99,27 @@ public class ShooterSubsystem extends StealthSubsystem {
         return shooterMotor.getVelocity();
     }
 
-    //Convert rpms to ticks per second
-    private double rpmToTPS(int rpm) {
-        double rotationsPerSecond = rpm / 60.0;
-        return 28 * rotationsPerSecond;
-    }
 
     @Override
     public void periodic() {
-        double currVelo = getVelocity();
         telemetry.addLine("-----shooter-----");
-        telemetry.addData("velo", currVelo);
-        telemetry.addData("atVelo", atVelocity());
-        telemetry.addData("targetVelo", velocityPID.getSetPoint());
+        telemetry.addData("shooter power", shooterMotor.getPower());
+        telemetry.addData("spinUp", spinUp);
 
+        double distanceFromGoal = PoseTracker.getDistanceFromGoal();
         if (spinUp) {
-//            velocityPID.setSetPoint(speedTable.get(distanceFromGoal));
-            velocityPID.setSetPoint(1000);
-            setVelocity(velocityPID.calculate(currVelo));
-            setHoodPercentage(1.0);
+            try {
+                shooterMotor.setPower(speedTable.get(distanceFromGoal));
+            }
+            catch (Exception ignored) {};
         }
         else {
             setVelocity(0.0);
-            setHoodPercentage(0.0);
         }
+
+        try {
+            setHoodPercentage(hoodTable.get(distanceFromGoal));
+        }
+        catch (Exception ignored) {};
     }
 }

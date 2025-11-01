@@ -30,7 +30,7 @@ public class AlignTurretCommand extends CommandBase {
         Pose currentPose = PoseTracker.getEstimatedPose();
         double targetAngle = Math.atan2(goalPose.getY() - currentPose.getY(), goalPose.getX() - currentPose.getX());
         turret.setTargetAngle(MathFunctions.clamp(
-                AngleUnit.normalizeDegrees(AngleUnit.RADIANS.toDegrees(currentPose.getHeading() - targetAngle)), -60, 60
+                AngleUnit.normalizeDegrees(AngleUnit.RADIANS.toDegrees(currentPose.getHeading() - targetAngle)), -120, 58
         ));
         turret.setPower(turret.calculatePIDPower());
     }

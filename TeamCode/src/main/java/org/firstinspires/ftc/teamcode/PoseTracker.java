@@ -5,7 +5,7 @@ import com.pedropathing.geometry.Pose;
 import org.stealthrobotics.library.Alliance;
 
 public class PoseTracker {
-    private static Pose pose = new Pose(0, 0);
+    private static Pose pose = new Pose();
     private static Pose allianceGoal = new Pose();
 
     public static void setAlliance() {

@@ -4,6 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -12,7 +14,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.PoseTracker;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.function.DoubleSupplier;
@@ -26,11 +30,11 @@ public class DriveSubsystem extends StealthSubsystem {
     private final DcMotorEx rightFront;
     private final DcMotorEx rightBack;
 
-    private double headingOffset = 0.0;
+    private double headingOffset;
 
     private final GoBildaPinpointDriver pp;
 
-    public DriveSubsystem(HardwareMap hardwareMap, Pose startPose) {
+    public DriveSubsystem(HardwareMap hardwareMap) {
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
@@ -47,24 +51,46 @@ public class DriveSubsystem extends StealthSubsystem {
         pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pp.setOffsets(3.167, -7.456, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        pp.resetPosAndIMU();
+        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
+
+        startupRoutine().schedule();
+    }
+
+    private Command startupRoutine() {
+        return this.runOnce(pp::resetPosAndIMU).andThen(new WaitCommand(300)).andThen(new InstantCommand(() -> {
+            if (Alliance.get() == Alliance.BLUE) {
+                setStartPose(new Pose(57.224, 8.67, Math.toRadians(90)));
+            }
+            else {
+                setStartPose(new Pose(86.776, 8.67, Math.toRadians(90)));
+            }
+
+            PoseTracker.setAlliance();
+        }));
     }
 
     public void setStartPose(Pose startPose) {
         pp.setPosition(new Pose2D(DistanceUnit.INCH, startPose.getX(), startPose.getY(), AngleUnit.RADIANS, startPose.getHeading()));
     }
 
-    public double getHeading() {
+    public double getHeadingOffset() {
         return pp.getHeading(AngleUnit.RADIANS) + headingOffset;
     }
 
+    public double getHeading() {
+        return pp.getHeading(AngleUnit.RADIANS);
+    }
+
+    public void resetPosition() {
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, 72, 72, AngleUnit.RADIANS, getHeading()));
+    }
+
     public void resetHeading() {
-        headingOffset = pp.getHeading(AngleUnit.RADIANS);
+        headingOffset = -pp.getHeading(AngleUnit.RADIANS);
     }
 
     public void drive(double x, double y, double rot) {
-        double heading = getHeading();
+        double heading = getHeadingOffset();
         double dx = x * Math.cos(-heading) - y * Math.sin(-heading);
         double dy = x * Math.sin(-heading) + y * Math.cos(-heading);
 
@@ -96,13 +122,17 @@ public class DriveSubsystem extends StealthSubsystem {
     public void periodic() {
         Pose2D pose = pp.getPosition();
         PoseTracker.updateEstimatedPose(
-                new Pose(-pose.getX(DistanceUnit.INCH), -pose.getY(DistanceUnit.INCH), getHeading()), true
+                new Pose(pose.getX(DistanceUnit.INCH), pose.getY(DistanceUnit.INCH), pp.getHeading(AngleUnit.RADIANS)), true
         );
 
         telemetry.addLine("-----drive-----");
         telemetry.addData("x", PoseTracker.getEstimatedPose().getX());
         telemetry.addData("y", PoseTracker.getEstimatedPose().getY());
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
+
+        telemetry.addData("field-centric heading", getHeadingOffset());
+
+        telemetry.addData("distanceFromGoal", PoseTracker.getDistanceFromGoal());
 
         pp.update();
     }

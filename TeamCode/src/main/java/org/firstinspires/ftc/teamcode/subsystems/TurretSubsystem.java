@@ -32,7 +32,7 @@ public class TurretSubsystem extends StealthSubsystem {
     public static double tickI = 0.75;
     public static double tickD = 0.001;
 
-    public static double POSITION_TOLERANCE_DEGREES = 0.5;
+    public static double POSITION_TOLERANCE_DEGREES = 2.0;
     public static double POSITION_TOLERANCE_TICKS = 15;
 
     private final double TICKS_PER_REVOLUTION = 1538; // (output ratio) * PPR = 4 * 384.5

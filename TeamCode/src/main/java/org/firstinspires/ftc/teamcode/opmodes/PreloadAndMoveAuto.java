@@ -7,9 +7,12 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.firstinspires.ftc.teamcode.commands.AlignTurretCommand;
+import org.firstinspires.ftc.teamcode.commands.ShootCommand;
 import org.firstinspires.ftc.teamcode.commands.TurretDefaultCommand;
+import org.firstinspires.ftc.teamcode.pedroPathing.pedroOperation;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
@@ -25,31 +28,39 @@ public class PreloadAndMoveAuto extends StealthOpMode {
     private TurretSubsystem turret;
     private SpindexerSubsystem spindexer;
 
-    private final Pose startPose = new Pose(55, 7.9, Math.toRadians(90));
+    //Flips to alliance relative pose
+    private final Pose startPose = pedroOperation.AlliancePose(Alliance.get(), new Pose(57.224, 8.67, Math.toRadians(90)));
 
     @Override
     public void initialize() {
-        drive = new DriveSubsystem(hardwareMap, startPose);
+        drive = new DriveSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
 
-        PoseTracker.setAlliance(); // ! Very important for auto and teleop shooting calculations
+        PoseTracker.updateEstimatedPose(startPose, true);
+        PoseTracker.setAlliance();
     }
 
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> drive.setStartPose(startPose)),
-                new AlignTurretCommand(turret, Alliance.get())
-//                new WaitCommand(1000), //Variable pause
+                new AlignTurretCommand(turret, Alliance.get()),
+                spindexer.rotateToShoot(SpindexerSubsystem.SpindexerSlot.TWO).withTimeout(1000).andThen(new InstantCommand(() -> spindexer.setPower(0))),
+                new WaitCommand(300),
+                shooter.toggleSpinning(),
+                new WaitCommand(3000),
+                new ShootCommand(shooter, intake),
+                new WaitCommand(800),
+                shooter.toggleSpinning(),
 //                new SequentialCommandGroup(
-//                        new InstantCommand(() -> drive.drive(0, 0.5, 0)),
-//                        new WaitCommand(800),
+//                        new InstantCommand(() -> drive.drive(-0.5, 0, 0)),
+//                        new WaitCommand(900),
 //                        new InstantCommand(() -> drive.drive(0, 0, 0))
 //                ),
-//                turret.unWrapFully() // ! VERY IMPORTANT, otherwise turret will commit die
+                turret.unWrapFully() // ! VERY IMPORTANT, otherwise turret will commit die
         );
     }
 

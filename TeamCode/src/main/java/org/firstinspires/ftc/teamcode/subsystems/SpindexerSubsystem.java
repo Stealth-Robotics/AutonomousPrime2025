@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,6 +14,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.pedroPathing.pedroOperation;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
@@ -138,7 +141,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     //Set the power of both servos in parallel
-    private void setPower(double power) {
+    public void setPower(double power) {
         servo1.setPower(-power);
         servo2.setPower(-power);
     }
