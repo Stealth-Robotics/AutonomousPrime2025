@@ -104,14 +104,6 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("atVelo", atVelocity());
         telemetry.addData("targetVelo", velocityPID.getSetPoint());
 
-        // ! For graphing
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-        dashboardTelemetry.addData("target", velocityPID.getSetPoint());
-        dashboardTelemetry.addData("current", currVelo);
-        dashboardTelemetry.update();
-
         if (spinUp) {
 //            velocityPID.setSetPoint(speedTable.get(distanceFromGoal));
             velocityPID.setSetPoint(rpmToTPS(testVelocity));

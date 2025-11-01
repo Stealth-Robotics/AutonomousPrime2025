@@ -24,7 +24,7 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final double LOADER_RETRACTED_POSITION = 0.1;
 
     //Distance has to be less than this to look for a artifact
-    private final double DISTANCE_THRESHOLD_INCHES = 4;
+    private final double DISTANCE_THRESHOLD_INCHES = 3.5;
 
     public static double TRANSFER_SPEED = 1.0;
 
@@ -38,18 +38,9 @@ public class IntakeSubsystem extends StealthSubsystem {
         retractLoader().schedule();
     }
 
-    public Artifact detectedArtifact() {
-        Artifact artifact = Artifact.EMPTY;
-        if (colorSensor.getDistance(DistanceUnit.INCH) < DISTANCE_THRESHOLD_INCHES) {
-            int r = colorSensor.red(), g = colorSensor.green(), b = colorSensor.blue();
-            if ((r < 55 && r > 50) && (g > 92 && g < 110) && (b > 100 && b < 120)) {
-                artifact = Artifact.GREEN;
-            }
-            else if ((r < 60 && r > 50) && (g > 85 && g < 93) && (b > 100 && b < 125)) {
-                artifact = Artifact.PURPLE;
-            }
-        }
-        return artifact;
+    // ! Only looking at distance
+    public boolean detectsArtifact() {
+        return colorSensor.getDistance(DistanceUnit.INCH) < DISTANCE_THRESHOLD_INCHES;
     }
 
     public Command retractLoader() {
@@ -69,21 +60,16 @@ public class IntakeSubsystem extends StealthSubsystem {
     }
 
     public Command stop() {
-        return this.runOnce(() -> setPower(0.0));
+        return this.runOnce(() -> setPower(0));
     }
 
-    private void setPower(double power) {
+    public void setPower(double power) {
         transferMotor.setPower(power);
     }
 
     @Override
     public void periodic() {
-        // ! For tuning only (delete after)
-        telemetry.addData("red", colorSensor.red());
-        telemetry.addData("green", colorSensor.green());
-        telemetry.addData("blue", colorSensor.blue());
-
-        telemetry.addData("detectedArtifact", detectedArtifact());
         telemetry.addData("distance", colorSensor.getDistance(DistanceUnit.INCH));
+        telemetry.addData("detectsArtifact", detectsArtifact());
     }
 }

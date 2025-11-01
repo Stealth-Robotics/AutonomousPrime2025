@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -15,6 +16,8 @@ import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 
 @Config
@@ -26,37 +29,36 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx encoder;
 
     //PID constants
-    public static double kP = 0.0034;
-    public static double kI = 0.0001;
-    public static double kD = 0.00025;
-    public static double kF = 0.051;
+    public static double kP = 0.0042;
+    public static double kI = 0.0;
+    public static double kD = 0.00033;
+    public static double kF = 0.0;
 
-    // ! Only for testing
-    public static double testPosition = 0;
+    private final double TICKS_PER_REVOLUTION = 8192;
+
+    private final double ANGLE_TOLERANCE = 10;
+
+    private final AnglePIDController pid;
+
+    //TODO: Starting Configuration
+    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, "slot1");
+    private final Slot slot2 = new Slot(Artifact.EMPTY, 240, 60, "slot2");
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 300, "slot3");
 
     //Variables to keep track of the state of the slots
     private Slot intakeSlot = null;
     private Slot shooterSlot = null;
 
-    private final double TICKS_PER_REVOLUTION = 8192;
-
-    private final double ANGLE_TOLERANCE = 2;
-
-    private final AnglePIDController pid;
-
-    //TODO: Starting Configuration
-    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180);
-    private final Slot slot2 = new Slot(Artifact.EMPTY, 120, 60);
-    private final Slot slot3 = new Slot(Artifact.EMPTY, 240, 300);
-
     private static class Slot {
         private Artifact artifact;
         private final double intakePosition, shootPosition;
+        private final String name;
 
-        public Slot(Artifact artifact, double intakePosition, double shootPosition) {
+        public Slot(Artifact artifact, double intakePosition, double shootPosition, String name) {
             this.artifact = artifact;
             this.intakePosition = intakePosition;
             this.shootPosition = shootPosition;
+            this.name = name;
         }
 
         public void setArtifact(Artifact artifact) {
@@ -73,6 +75,12 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         public double getShootPosition() {
             return shootPosition;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return name;
         }
     }
 
@@ -102,8 +110,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
             Slot slot = nearestEmptySlot(false);
             if (slot != null) {
                 pid.setSetPoint(slot.getIntakePosition());
+                intakeSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
+        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
     //Rotate the nearest empty slot to the shooter if it exists
@@ -112,8 +121,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
             Slot slot = nearestEmptySlot(true);
             if (slot != null) {
                 pid.setSetPoint(slot.getShootPosition());
+                shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
+        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
 
@@ -123,8 +133,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
             Slot slot = nearestFilledSlot(artifactColor);
             if (slot != null) {
                 pid.setSetPoint(slot.getShootPosition());
+                shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
+        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
     public Command rotateClosestArtifactToShoot() {
@@ -132,8 +143,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
             Slot slot = nearestFilledSlot();
             if (slot != null) {
                 pid.setSetPoint(slot.getShootPosition());
+                shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
+        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
     //Return the nearest empty slot to the intake position
@@ -274,22 +286,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        telemetry.addData("position: ", getCurrentPosition());
+        telemetry.addLine("-----spindexer-----");
         telemetry.addData("slot 1: ", slot1.getArtifact());
         telemetry.addData("slot 2: ", slot2.getArtifact());
         telemetry.addData("slot 3: ", slot3.getArtifact());
-        telemetry.addData("atPosition: ", pid.atSetPoint());
-        telemetry.addData("error", pid.getError());
-
-        pid.setSetPoint(testPosition);
-        setPower(pid.calculate(getCurrentPosition()));
-
-        // ! For graphing
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-        dashboardTelemetry.addData("target", pid.getSetPoint());
-        dashboardTelemetry.addData("current", getCurrentPosition());
-        dashboardTelemetry.update();
     }
 }
