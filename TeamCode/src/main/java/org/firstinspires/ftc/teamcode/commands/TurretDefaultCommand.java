@@ -12,7 +12,6 @@ public class TurretDefaultCommand extends CommandBase {
     private final TurretSubsystem turret;
     private final Pose goalPose;
 
-
     public TurretDefaultCommand(TurretSubsystem turret, Alliance alliance) {
         this.turret = turret;
 

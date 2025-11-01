@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.IntakeCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeFromShooterCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
@@ -19,7 +20,7 @@ public class Teleop extends StealthOpMode {
     DriveSubsystem drive;
     ShooterSubsystem shooter;
     IntakeSubsystem intake;
-//    SpindexerSubsystem spindexer;
+    SpindexerSubsystem spindexer;
 
     @Override
     public void initialize() {
@@ -29,9 +30,9 @@ public class Teleop extends StealthOpMode {
         drive = new DriveSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
-//        spindexer = new SpindexerSubsystem(hardwareMap);
+        spindexer = new SpindexerSubsystem(hardwareMap);
 
-        register(drive, shooter, intake);
+        register(drive, shooter, intake, spindexer);
 
         //Setup default commands
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
@@ -42,13 +43,15 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-//        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(shooter.spinToVelocity());
-//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(shooter.stop());
-        driveGamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(() -> shooter.setHoodPercentage(0.0));
-        driveGamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(() -> shooter.setHoodPercentage(1.0));
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(intake.deployLoader());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(intake.retractLoader());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(intake.start());
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(intake.stop());
 
 //        Trigger intakeTrigger = new Trigger(() -> operatorGamepad.getTrigger(GamepadBindings.OperatorBindings.INTAKE) > 0.01);
 //        intakeTrigger.whileActiveContinuous(new IntakeCommand(intake, spindexer));
+
+//        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.INTAKE_FROM_SHOOTER).whenPressed(new IntakeFromShooterCommand())
     }
 
     @SuppressWarnings("unused")

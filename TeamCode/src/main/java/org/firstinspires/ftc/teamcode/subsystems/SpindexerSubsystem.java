@@ -99,12 +99,23 @@ public class SpindexerSubsystem extends StealthSubsystem {
     //Rotate the nearest empty slot to the intake if it exists
     public Command rotateEmptyToIntake() {
         return this.runOnce(() -> {
-            Slot slot = nearestEmptySlot();
+            Slot slot = nearestEmptySlot(false);
             if (slot != null) {
                 pid.setSetPoint(slot.getIntakePosition());
             }
         }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
     }
+
+    //Rotate the nearest empty slot to the shooter if it exists
+    public Command rotateEmptyToShooter() {
+        return this.runOnce(() -> {
+            Slot slot = nearestEmptySlot(true);
+            if (slot != null) {
+                pid.setSetPoint(slot.getShootPosition());
+            }
+        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint));
+    }
+
 
     // Rotate the nearest artifact of the specified color to the shooter position
     public Command rotateArtifactToShoot(Artifact artifactColor) {
@@ -126,7 +137,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     //Return the nearest empty slot to the intake position
-    private Slot nearestEmptySlot() {
+    //If toShooter is true it will find the closest slot to the shooter
+    private Slot nearestEmptySlot(boolean toShooter) {
         ArrayList<Slot> emptySlots = new ArrayList<>();
         if (slot1.getArtifact() == Artifact.EMPTY)
             emptySlots.add(slot1);
@@ -139,8 +151,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         double minDistance = Double.MAX_VALUE;
 
         for (Slot slot : emptySlots) {
-            //Calculate the shortest arc between the slot intake position and the current position
-            double distance = Math.min((slot.getIntakePosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getIntakePosition() + 360) % 360);
+            //Calculate the shortest arc between the slot's (intake/shoot) position and the current spindexer position
+            double distance = (toShooter) ?
+                    Math.min((slot.getShootPosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getShootPosition() + 360) % 360) :
+                    Math.min((slot.getIntakePosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getIntakePosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -195,12 +209,18 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
-    public Command updateSlotState(Artifact artifact, boolean intake, boolean outtake) {
+    public Command intakeArtifact(Artifact artifact, boolean fromShooter) {
         return this.runOnce(() -> {
-            if (intake)
-                intakeSlot.setArtifact(artifact);
-            else if (outtake)
+            if (fromShooter)
                 shooterSlot.setArtifact(artifact);
+            else
+                intakeSlot.setArtifact(artifact);
+        });
+    }
+
+    public Command shootArtifact() {
+        return this.runOnce(() -> {
+            shooterSlot.setArtifact(Artifact.EMPTY);
         });
     }
 
@@ -218,6 +238,24 @@ public class SpindexerSubsystem extends StealthSubsystem {
         if (slot2.getArtifact() != Artifact.EMPTY) size++;
         if (slot3.getArtifact() != Artifact.EMPTY) size++;
         return size;
+    }
+
+    //Returns the excess artifacts unneeded for the motif
+    public ArrayList<Artifact> getExtraArtifacts() {
+        ArrayList<Artifact> extra = new ArrayList<>();
+        int g = 0, p = 0;
+
+        if (slot1.getArtifact() == Artifact.GREEN) g++;
+        else if (slot1.getArtifact() == Artifact.PURPLE) p++;
+        if (slot2.getArtifact() == Artifact.GREEN) g++;
+        else if (slot2.getArtifact() == Artifact.PURPLE) p++;
+        if (slot2.getArtifact() == Artifact.GREEN) g++;
+        else if (slot2.getArtifact() == Artifact.PURPLE) p++;
+
+        while (g --> 1) extra.add(Artifact.GREEN);
+        if (p > 2) extra.add(Artifact.PURPLE);
+
+        return extra;
     }
 
     public boolean hasMotifColors() {

@@ -15,7 +15,7 @@ public class IntakeCommand extends SequentialCommandGroup {
                     spindexer.rotateEmptyToIntake(),
                     intake.start(),
                     new WaitUntilCommand(() -> intake.detectedArtifact() != Artifact.EMPTY),
-                    spindexer.updateSlotState(intake.detectedArtifact(), true, false),
+                    spindexer.intakeArtifact(intake.detectedArtifact(), false), //Update spindexer slot states
                     intake.stop()
             );
         }

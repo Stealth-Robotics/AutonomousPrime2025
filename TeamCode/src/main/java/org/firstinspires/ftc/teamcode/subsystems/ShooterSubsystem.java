@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -20,10 +21,10 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final DcMotorEx shooterMotor;
     private final Servo hoodServo;
 
-    public static double kP = 15.0;
-    public static double kI = 0.0;
+    public static double kP = 30.0;
+    public static double kI = 5.0;
     public static double kD = 0.0;
-    public static double kF = 0.35;
+    public static double kF = 0.8;
 
     public static double MAX_HOOD_ANGLE = 0.8;
     public static double MIN_HOOD_ANGLE = 0;
@@ -39,6 +40,9 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     // ? Tracks whether the shooter should spin to calculated velocity
     private boolean spinUp = false;
+    private boolean intakeThroughShooter = false;
+
+    public static double INTAKE_FROM_SHOOTER_VELO = 1000;
 
     private void generateInterpolationTables() {
 //        speedTable.add();
@@ -70,11 +74,15 @@ public class ShooterSubsystem extends StealthSubsystem {
     }
 
     public Command spinToVelocity() {
-        return this.runOnce(() -> spinUp = true);
+        return this.runOnce(() -> spinUp = true).andThen(new WaitUntilCommand(this::atVelocity));
     }
 
     public Command stop() {
         return this.runOnce(() -> spinUp = false);
+    }
+
+    public Command setIntaking(boolean doIntake) {
+        return this.runOnce(() -> intakeThroughShooter = doIntake);
     }
 
     //Returns the shooter velocity in ticks per second
@@ -109,9 +117,12 @@ public class ShooterSubsystem extends StealthSubsystem {
             velocityPID.setSetPoint(rpmToTPS(testVelocity));
             setVelocity(velocityPID.calculate(currVelo));
         }
-        else {
-            velocityPID.setSetPoint(0.0);
+        else if (intakeThroughShooter) {
+            velocityPID.setSetPoint(-INTAKE_FROM_SHOOTER_VELO);
             setVelocity(velocityPID.calculate(currVelo));
+        }
+        else {
+            setVelocity(0.0);
         }
     }
 }
