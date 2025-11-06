@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.firstinspires.ftc.teamcode.commands.TurretDefaultCommand;
+import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
@@ -24,25 +25,23 @@ public class TestAuto extends StealthOpMode {
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
     @Override
-    public void whileWaitingToStart() {
-        Motif.setMotif(vision.getUpdatedMotif(Motif.getMotif())); // ! Set the motif
-    }
-
-    @Override
     public void initialize() {
         vision = new VisionSubsystem(hardwareMap);
+
         follower = Constants.createFollower(hardwareMap);
-
-        turret.setDefaultCommand(new TurretDefaultCommand(turret, Alliance.get()));
-
         follower.setStartingPose(startPose);
-        PoseTracker.setAlliance(); // ! Very important for auto and teleop shooting calculations
+
+        Motif.setMotif(vision.getUpdatedMotif(Motif.getMotif()));
+
+        //Add all poses in the autonomous here
+        AlliancePoseFlipper.flip(Alliance.get(), new Pose[]{
+                startPose
+        });
     }
 
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
-
         );
     }
 

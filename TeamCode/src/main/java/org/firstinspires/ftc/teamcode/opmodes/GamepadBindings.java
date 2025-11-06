@@ -8,7 +8,5 @@ public class GamepadBindings {
     }
 
     public static class OperatorBindings {
-        public static GamepadKeys.Trigger INTAKE = GamepadKeys.Trigger.RIGHT_TRIGGER;
-        public static GamepadKeys.Button INTAKE_FROM_SHOOTER = GamepadKeys.Button.BACK;
     }
 }
