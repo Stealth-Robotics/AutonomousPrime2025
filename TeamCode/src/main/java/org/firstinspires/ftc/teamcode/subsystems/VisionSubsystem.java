@@ -79,7 +79,7 @@ public class VisionSubsystem extends StealthSubsystem {
 
     // ? Returns the new motif if it has changed since last call
     public Motif.MotifType getUpdatedMotif(Motif.MotifType old) {
-        ArrayList<AprilTagDetection> latestDetections = aprilTagProcessor.getFreshDetections();
+        ArrayList<AprilTagDetection> latestDetections = aprilTagProcessor.getDetections();
 
         for (AprilTagDetection detection : latestDetections) {
             if (detection.id == MOTIF_PPG_ID && old != Motif.MotifType.PPG)
