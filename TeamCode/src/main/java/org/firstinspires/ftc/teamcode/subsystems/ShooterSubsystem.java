@@ -38,9 +38,11 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     public static int testVelocity = 0;
 
-    // ? Tracks whether the shooter should spin to calculated velocity
-    private boolean spinUp = false;
-    private boolean intakeThroughShooter = false;
+    public enum ShooterState {
+        SHOOT,
+        IDLE,
+        INTAKE
+    }
 
     public static double INTAKE_FROM_SHOOTER_VELO = 1000;
 

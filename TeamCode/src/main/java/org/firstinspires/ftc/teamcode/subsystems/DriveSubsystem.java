@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,7 +11,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.PoseTracker;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.function.DoubleSupplier;
@@ -87,15 +87,6 @@ public class DriveSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         pp.update();
-
-        Pose2D pose = pp.getPosition();
-        PoseTracker.updateEstimatedPose(
-                new Pose(-pose.getX(DistanceUnit.INCH), -pose.getY(DistanceUnit.INCH), getHeading()), true
-        );
-
-        telemetry.addLine("-----drive-----");
-        telemetry.addData("x", PoseTracker.getEstimatedPose().getX());
-        telemetry.addData("y", PoseTracker.getEstimatedPose().getY());
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }
