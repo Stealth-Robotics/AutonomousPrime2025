@@ -30,6 +30,8 @@ public class VisionSubsystem extends StealthSubsystem {
     private final int MOTIF_GPP_ID = 21, MOTIF_PGP_ID = 22, MOTIF_PPG_ID = 23;
     private final int GOAL_BLUE_ID = 20, GOAL_RED_ID = 24;
 
+    private ArrayList<AprilTagDetection> detections = new ArrayList<>();
+
     public VisionSubsystem(HardwareMap hardwareMap) {
         alliance = Alliance.get();
 
@@ -68,17 +70,23 @@ public class VisionSubsystem extends StealthSubsystem {
         return old; //No new motif found
     }
 
-    @Override
-    public void periodic() {
-        ArrayList<AprilTagDetection> latestDetections = aprilTagProcessor.getDetections();
-        if (!latestDetections.isEmpty()) {
-            for (AprilTagDetection detection : latestDetections) {
+    private void updateGoalEstimates() {
+        if (!detections.isEmpty()) {
+            for (AprilTagDetection detection : detections) {
                 if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED &&  detection.id == GOAL_RED_ID) {
                     LatestGoalData.updateGoalData(detection.ftcPose.bearing, detection.ftcPose.range);
                 }
                 else LatestGoalData.tagInvisible();
             }
         }
+    }
+
+    @Override
+    public void periodic() {
+        //Update april tag detections each loop
+        detections = aprilTagProcessor.getDetections();
+
+        updateGoalEstimates();
 
         telemetry.addLine("----vision----");
         telemetry.addData("fps", visionPortal.getFps());
