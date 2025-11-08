@@ -89,6 +89,7 @@ public class TurretSubsystem extends StealthSubsystem {
         }
         else {
             //Assume any other state is IDLE (non-moving)
+            setPower(0.0);
         }
 
         telemetry.addLine("----turret----");

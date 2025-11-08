@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.LatestGoalData;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -21,6 +22,10 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final DcMotorEx shooterMotor;
     private final Servo hoodServo;
 
+    private ShooterState state = ShooterState.IDLE;
+
+    private final PIDFController velocityPID;
+
     public static double kP = 30.0;
     public static double kI = 5.0;
     public static double kD = 0.0;
@@ -29,27 +34,22 @@ public class ShooterSubsystem extends StealthSubsystem {
     public static double MAX_HOOD_ANGLE = 0.8;
     public static double MIN_HOOD_ANGLE = 0;
 
-    private final PIDFController velocityPID;
     public static double VELOCITY_TOLERANCE = 5.0;
+
+    public static double INTAKE_VELOCITY = -1000;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
 
-    public static int testVelocity = 0;
-
     public enum ShooterState {
         SHOOT,
-        IDLE,
-        INTAKE
+        INTAKE,
+        IDLE
     }
 
-    public static double INTAKE_FROM_SHOOTER_VELO = 1000;
-
+    //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
-//        speedTable.add();
-//        speedTable.createLUT();
-//        hoodTable.createLUT();
     }
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
@@ -62,29 +62,25 @@ public class ShooterSubsystem extends StealthSubsystem {
         generateInterpolationTables();
     }
 
-    //[0.0, 1.0]
-    public void setHoodPercentage(double percentage) {
+    public void setState(ShooterState newState) {
+        state = newState;
+    }
+
+    public ShooterState getState() {
+        return state;
+    }
+
+    //A percentage between 0.0 and 1.0 inclusive
+    private void setHoodPercentage(double percentage) {
         hoodServo.setPosition(((MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * percentage) + MIN_HOOD_ANGLE);
     }
 
-    public void setVelocity(double velo) {
-        shooterMotor.setVelocity(velo);
+    private void setVelocity(double targetVelocity) {
+        shooterMotor.setVelocity(targetVelocity);
     }
 
     public boolean atVelocity() {
         return Math.abs(getVelocity() - velocityPID.getSetPoint()) < VELOCITY_TOLERANCE;
-    }
-
-    public Command spinToVelocity() {
-        return this.runOnce(() -> spinUp = true).andThen(new WaitUntilCommand(this::atVelocity));
-    }
-
-    public Command stop() {
-        return this.runOnce(() -> spinUp = false);
-    }
-
-    public Command setIntaking(boolean doIntake) {
-        return this.runOnce(() -> intakeThroughShooter = doIntake);
     }
 
     //Returns the shooter velocity in ticks per second
@@ -92,30 +88,27 @@ public class ShooterSubsystem extends StealthSubsystem {
         return shooterMotor.getVelocity();
     }
 
-    //Convert rpms to ticks per second
-    private double rpmToTPS(int rpm) {
-        double rotationsPerSecond = rpm / 60.0;
-        return 28 * rotationsPerSecond;
-    }
-
     @Override
     public void periodic() {
-        double currVelo = getVelocity();
-        telemetry.addLine("-----shooter-----");
-        telemetry.addData("velo", currVelo);
-        telemetry.addData("atVelo", atVelocity());
-        telemetry.addData("targetVelo", velocityPID.getSetPoint());
+        telemetry.addLine("----shooter----");
+        telemetry.addData("state", state);
+        telemetry.addData("velocity", getVelocity());
 
-        if (spinUp) {
-//            velocityPID.setSetPoint(speedTable.get(distanceFromGoal));
-            velocityPID.setSetPoint(rpmToTPS(testVelocity));
-            setVelocity(velocityPID.calculate(currVelo));
+        //State-machine
+        if (state == ShooterState.SHOOT) {
+            velocityPID.setSetPoint(speedTable.get(LatestGoalData.getDistanceFromGoal()));
+            setVelocity(velocityPID.calculate(getVelocity()));
+
+            setHoodPercentage(hoodTable.get(LatestGoalData.getDistanceFromGoal()));
         }
-        else if (intakeThroughShooter) {
-            velocityPID.setSetPoint(-INTAKE_FROM_SHOOTER_VELO);
-            setVelocity(velocityPID.calculate(currVelo));
+        else if (state == ShooterState.INTAKE) {
+            velocityPID.setSetPoint(INTAKE_VELOCITY);
+            setVelocity(velocityPID.calculate(getVelocity()));
+
+            setHoodPercentage(0.0); //Hood fully down to help balls intake
         }
         else {
+            //Assume any other state is IDLE (including null)
             setVelocity(0.0);
         }
     }
