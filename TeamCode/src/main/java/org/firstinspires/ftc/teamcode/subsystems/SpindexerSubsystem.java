@@ -7,11 +7,13 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
@@ -23,42 +25,36 @@ import java.util.ArrayList;
 @Config
 @SuppressWarnings("FieldCanBeLocal")
 public class SpindexerSubsystem extends StealthSubsystem {
-    private final CRServo servo1;
-    private final CRServo servo2;
+    private final DcMotorEx spindexerMotor;
 
-    private final DcMotorEx encoder;
-
-    //PID constants
-    public static double kP = 0.0042;
+    public static double kP = 0.0;
     public static double kI = 0.0;
-    public static double kD = 0.00033;
-    public static double kF = 0.0;
+    public static double kD = 0.0;
 
-    private final double TICKS_PER_REVOLUTION = 8192;
-
-    private final double ANGLE_TOLERANCE = 10;
+    private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
+    private final double ANGLE_TOLERANCE_DEGREES = 2;
 
     private final AnglePIDController pid;
 
     //TODO: Starting Configuration
-    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, "slot1");
-    private final Slot slot2 = new Slot(Artifact.EMPTY, 240, 60, "slot2");
-    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 300, "slot3");
+    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
+    private final Slot slot2 = new Slot(Artifact.EMPTY, 240, 60, 2);
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 300, 3);
 
-    //Variables to keep track of the state of the slots
+    //Variables to keep track of which slots are where
     private Slot intakeSlot = null;
     private Slot shooterSlot = null;
 
     private static class Slot {
         private Artifact artifact;
         private final double intakePosition, shootPosition;
-        private final String name;
+        private final int id;
 
-        public Slot(Artifact artifact, double intakePosition, double shootPosition, String name) {
+        public Slot(Artifact artifact, double intakePosition, double shootPosition, int id) {
             this.artifact = artifact;
             this.intakePosition = intakePosition;
             this.shootPosition = shootPosition;
-            this.name = name;
+            this.id = id;
         }
 
         public void setArtifact(Artifact artifact) {
@@ -80,34 +76,34 @@ public class SpindexerSubsystem extends StealthSubsystem {
         @NonNull
         @Override
         public String toString() {
-            return name;
+            return String.valueOf(id);
         }
     }
 
-    public SpindexerSubsystem(HardwareMap hardwareMap) {
-        servo1 = hardwareMap.get(CRServo.class, "spindexerServo1");
-        servo2 = hardwareMap.get(CRServo.class, "spindexerServo2");
-        encoder = hardwareMap.get(DcMotorEx.class, "spindexerEncoder"); //TODO: Change to correct motor port
+    public SpindexerSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
+        spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
+        spindexerMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        pid = new AnglePIDController(kP, kI, kD, kF);
-        pid.setPositionTolerance(ANGLE_TOLERANCE);
+        pid = new AnglePIDController(kP, kI, kD);
+        pid.setPositionTolerance(ANGLE_TOLERANCE_DEGREES);
 
-        resetEncoder();
+        if (isAutonomous) resetEncoder();
     }
 
     private void resetEncoder() {
-        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     //Position in degrees from [-180, 180)
     public double getCurrentPosition() {
-        return AngleUnit.normalizeDegrees((encoder.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
+        return AngleUnit.normalizeDegrees((spindexerMotor.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
     }
 
-    //Rotate the nearest empty slot to the intake if it exists
+    //Rotate the nearest empty slot to the intake
     public Command rotateEmptyToIntake() {
         return this.runOnce(() -> {
-            Slot slot = nearestEmptySlot(false);
+            Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
             if (slot != null) {
                 pid.setSetPoint(slot.getIntakePosition());
                 intakeSlot = slot;
@@ -115,10 +111,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
-    //Rotate the nearest empty slot to the shooter if it exists
+    //Rotate the nearest empty slot to the shooter
     public Command rotateEmptyToShooter() {
         return this.runOnce(() -> {
-            Slot slot = nearestEmptySlot(true);
+            Slot slot = getNearestEmptySlot(ArtifactSource.SHOOTER);
             if (slot != null) {
                 pid.setSetPoint(slot.getShootPosition());
                 shooterSlot = slot;
@@ -130,7 +126,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     // Rotate the nearest artifact of the specified color to the shooter position
     public Command rotateArtifactToShoot(Artifact artifactColor) {
         return this.runOnce(() -> {
-            Slot slot = nearestFilledSlot(artifactColor);
+            Slot slot = getNearestFilledSlotToShooter(artifactColor);
             if (slot != null) {
                 pid.setSetPoint(slot.getShootPosition());
                 shooterSlot = slot;
@@ -138,9 +134,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
+    // Rotate the nearest artifact to the shooter position regardless of color
     public Command rotateClosestArtifactToShoot() {
         return this.runOnce(() -> {
-            Slot slot = nearestFilledSlot();
+            Slot slot = getNearestFilledSlotToShooter();
             if (slot != null) {
                 pid.setSetPoint(slot.getShootPosition());
                 shooterSlot = slot;
@@ -148,23 +145,16 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
     }
 
-    //Return the nearest empty slot to the intake position
-    //If toShooter is true it will find the closest slot to the shooter
-    private Slot nearestEmptySlot(boolean toShooter) {
-        ArrayList<Slot> emptySlots = new ArrayList<>();
-        if (slot1.getArtifact() == Artifact.EMPTY)
-            emptySlots.add(slot1);
-        if (slot2.getArtifact() == Artifact.EMPTY)
-            emptySlots.add(slot2);
-        if (slot3.getArtifact() == Artifact.EMPTY)
-            emptySlots.add(slot3);
+    //Return the nearest empty slot to the desired position (intake/shooter)
+    private Slot getNearestEmptySlot(ArtifactSource source) {
+        ArrayList<Slot> emptySlots = getSlotsWithArtifact(Artifact.EMPTY);
 
         Slot nearestSlot = null;
         double minDistance = Double.MAX_VALUE;
 
         for (Slot slot : emptySlots) {
             //Calculate the shortest arc between the slot's (intake/shoot) position and the current spindexer position
-            double distance = (toShooter) ?
+            double distance = (source == ArtifactSource.SHOOTER) ?
                     Math.min((slot.getShootPosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getShootPosition() + 360) % 360) :
                     Math.min((slot.getIntakePosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getIntakePosition() + 360) % 360);
             if (distance < minDistance) {
@@ -175,14 +165,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
-    private Slot nearestFilledSlot(Artifact artifact) {
-        ArrayList<Slot> slots = new ArrayList<>();
-        if (slot1.getArtifact() == artifact)
-            slots.add(slot1);
-        if (slot2.getArtifact() == artifact)
-            slots.add(slot2);
-        if (slot3.getArtifact() == artifact)
-            slots.add(slot3);
+    private Slot getNearestFilledSlotToShooter(Artifact artifact) {
+        ArrayList<Slot> slots = getSlotsWithArtifact(artifact);
 
         Slot nearestSlot = null;
         double minDistance = Double.MAX_VALUE;
@@ -198,14 +182,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
-    private Slot nearestFilledSlot() {
-        ArrayList<Slot> slots = new ArrayList<>();
-        if (slot1.getArtifact() != Artifact.EMPTY)
-            slots.add(slot1);
-        if (slot2.getArtifact() != Artifact.EMPTY)
-            slots.add(slot2);
-        if (slot3.getArtifact() != Artifact.EMPTY)
-            slots.add(slot3);
+    private Slot getNearestFilledSlotToShooter() {
+        ArrayList<Slot> slots = getSlotsWithArtifact(Artifact.GREEN);
+        slots.addAll(getSlotsWithArtifact(Artifact.PURPLE));
 
         Slot nearestSlot = null;
         double minDistance = Double.MAX_VALUE;
@@ -221,30 +200,39 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
-    public Command intakeArtifact(Artifact artifact, boolean fromShooter) {
-        return this.runOnce(() -> {
-            if (fromShooter)
-                shooterSlot.setArtifact(artifact);
-            else
-                intakeSlot.setArtifact(artifact);
-        });
+    //Return a list of all the slots with the desired artifact type
+    private ArrayList<Slot> getSlotsWithArtifact(Artifact color) {
+        ArrayList<Slot> slots = new ArrayList<>();
+        if (slot1.getArtifact() == color)
+            slots.add(slot1);
+        if (slot2.getArtifact() == color)
+            slots.add(slot2);
+        if (slot3.getArtifact() == color)
+            slots.add(slot3);
+
+        return slots;
     }
 
-    public Command shootArtifact() {
-        return this.runOnce(() -> {
-            shooterSlot.setArtifact(Artifact.EMPTY);
-        });
+    //Update the spindexer's slot states depending on whether we are intaking/shooting an artifact
+    public void updateArtifactState(Artifact artifact, ArtifactSource source) {
+        if (source == ArtifactSource.INTAKE) {
+            intakeSlot.setArtifact(artifact);
+        }
+        else {
+            shooterSlot.setArtifact(artifact);
+        }
     }
 
     public boolean isFull() {
-        return gamepieceCount() == 3;
+        return size() == 3;
     }
 
     public boolean isEmpty() {
-        return gamepieceCount() == 0;
+        return size() == 0;
     }
 
-    public int gamepieceCount() {
+    //Returns the number of artifacts in the spindexer
+    public int size() {
         int size = 0;
         if (slot1.getArtifact() != Artifact.EMPTY) size++;
         if (slot2.getArtifact() != Artifact.EMPTY) size++;
@@ -252,7 +240,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return size;
     }
 
-    //Returns the excess artifacts unneeded for the motif
+    //Returns any unnecessary artifact colors for a motif
     public ArrayList<Artifact> getExtraArtifacts() {
         ArrayList<Artifact> extra = new ArrayList<>();
         int g = 0, p = 0;
@@ -270,6 +258,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return extra;
     }
 
+    //Has all the needed artifact colors to make a motif
     public boolean hasMotifColors() {
         if (slot1.getArtifact() == Artifact.GREEN && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.PURPLE)
             return true;
@@ -278,15 +267,13 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.GREEN;
     }
 
-    //Set the power of both servos in parallel
     private void setPower(double power) {
-        servo1.setPower(-power);
-        servo2.setPower(-power);
+        spindexerMotor.setPower(power);
     }
 
     @Override
     public void periodic() {
-        telemetry.addLine("-----spindexer-----");
+        telemetry.addLine("----spindexer----");
         telemetry.addData("slot 1: ", slot1.getArtifact());
         telemetry.addData("slot 2: ", slot2.getArtifact());
         telemetry.addData("slot 3: ", slot3.getArtifact());

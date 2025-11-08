@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class Teleop extends StealthOpMode {
@@ -20,6 +21,7 @@ public class Teleop extends StealthOpMode {
     private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
     private SpindexerSubsystem spindexer;
+    private TurretSubsystem turret;
 
     private final Gamepad.RumbleEffect readyShootRumble = new Gamepad.RumbleEffect.Builder()
             .addStep(1.0, 1.0, 800)
@@ -33,9 +35,11 @@ public class Teleop extends StealthOpMode {
         drive = new DriveSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap);
+        spindexer = new SpindexerSubsystem(hardwareMap, false);
+        turret = new TurretSubsystem(hardwareMap, false);
 
-        register(drive, shooter, intake, spindexer);
+        //Figure out which subsystems need to be registered
+        register(drive);
 
         //Setup default commands
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));

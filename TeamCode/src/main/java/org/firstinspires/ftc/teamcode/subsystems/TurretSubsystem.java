@@ -42,11 +42,13 @@ public class TurretSubsystem extends StealthSubsystem {
         SEARCH
     }
 
-    public TurretSubsystem(HardwareMap hardwareMap) {
+    public TurretSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
 
         pid = new PIDController(kP, kI, kD);
         pid.setTolerance(POSITION_TOLERANCE_TICKS);
+
+        if (isAutonomous) resetEncoder();
     }
 
     public void setState(TurretState newState) {
@@ -57,7 +59,7 @@ public class TurretSubsystem extends StealthSubsystem {
         return state;
     }
 
-    public void resetEncoder() {
+    private void resetEncoder() {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }

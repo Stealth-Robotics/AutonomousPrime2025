@@ -18,16 +18,12 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 public class IntakeSubsystem extends StealthSubsystem {
     private final DcMotorEx intakeMotor;
     private final Servo loaderServo;
+    private final RevColorSensorV3 colorSensor;
 
     private IntakeState state = IntakeState.IDLE;
 
-    private final RevColorSensorV3 colorSensor;
-
     private final double LOADER_DEPLOYED_POSITION = 0.5;
     private final double LOADER_RETRACTED_POSITION = 0.1;
-
-    //Distance has to be less than this to look for a artifact
-    private final double DISTANCE_THRESHOLD_INCHES = 3.5;
 
     public static double OPERATING_SPEED = 1.0;
 
@@ -46,8 +42,9 @@ public class IntakeSubsystem extends StealthSubsystem {
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
+    //TODO: Implement logic once color sensor position is finalized
     public Artifact getSensedArtifact() {
-
+        return Artifact.EMPTY;
     }
 
     public void setPower(double power) {
