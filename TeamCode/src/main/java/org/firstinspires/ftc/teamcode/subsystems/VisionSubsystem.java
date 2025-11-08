@@ -51,6 +51,7 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTagProcessor)
                 .setCameraResolution(new Size(640, 480))
+                .setAutoStopLiveView(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .build();
     }
