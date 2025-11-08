@@ -38,7 +38,6 @@ public class Teleop extends StealthOpMode {
         register(drive, shooter, intake, spindexer);
 
         //Setup default commands
-        intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> (driveGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - driveGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))));
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
         //Configure gamepad bindings
