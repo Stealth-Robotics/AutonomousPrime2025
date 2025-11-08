@@ -11,7 +11,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.stealthrobotics.library.ColorRange;
+import org.stealthrobotics.library.ColorSensorMatcher;
 import org.stealthrobotics.library.StealthSubsystem;
+import org.stealthrobotics.library.math.filter.Debouncer;
+
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -21,7 +25,13 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final Servo loaderServo;
     private final RevColorSensorV3 colorSensor;
 
+    private final Debouncer colorDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
+    private final ColorRange greenArtifactRange = new ColorRange(0, 0, 0, 0, 0, 0);
+    private final ColorRange purpleArtifactRange = new ColorRange(0, 0, 0, 0, 0, 0);
+
     private IntakeState state = IntakeState.IDLE;
+
+    private Artifact sensedArtifact = Artifact.EMPTY;
 
     private final double LOADER_DEPLOYED_POSITION = 0.5;
     private final double LOADER_RETRACTED_POSITION = 0.1;
@@ -44,9 +54,8 @@ public class IntakeSubsystem extends StealthSubsystem {
         return state;
     }
 
-    //TODO: Implement logic once color sensor position is finalized
     public Artifact getSensedArtifact() {
-        return Artifact.EMPTY;
+        return sensedArtifact;
     }
 
     public void setPower(double power) {
@@ -55,6 +64,13 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        //Debounce color sensor for artifact colors
+        if (colorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, purpleArtifactRange)))
+            sensedArtifact = Artifact.PURPLE;
+        else if (colorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, greenArtifactRange)))
+            sensedArtifact = Artifact.GREEN;
+        else sensedArtifact =  Artifact.EMPTY;
+
         //State-machine
         if (state == IntakeState.INTAKE) {
             setPower(OPERATING_SPEED);

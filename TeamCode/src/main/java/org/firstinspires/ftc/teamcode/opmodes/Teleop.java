@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
@@ -44,10 +47,18 @@ public class Teleop extends StealthOpMode {
 
         //Configure gamepad bindings
         configureBindings();
+
+        //Configure subsystem triggers (state transitions)
+        configureTriggers();
     }
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+    }
+
+    private void configureTriggers() {
+        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && intake.getSensedArtifact() != Artifact.EMPTY && !spindexer.isFull()));
+        spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
     }
 
     @SuppressWarnings("unused")
