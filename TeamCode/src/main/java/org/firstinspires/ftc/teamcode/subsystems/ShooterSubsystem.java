@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,8 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LatestGoalData;
+import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -41,12 +38,6 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
-
-    public enum ShooterState {
-        SHOOT,
-        INTAKE,
-        IDLE
-    }
 
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {

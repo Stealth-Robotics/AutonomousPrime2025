@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.IntakeState;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -27,19 +28,20 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     public static double OPERATING_SPEED = 1.0;
 
-    public enum IntakeState {
-        INTAKE,
-        OUTTAKE,
-        TRANSFERRING,
-        IDLE
-    }
-
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         loaderServo = hardwareMap.get(Servo.class, "loaderServo");
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
 
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void setState(IntakeState newState) {
+        state = newState;
+    }
+
+    public IntakeState getState() {
+        return state;
     }
 
     //TODO: Implement logic once color sensor position is finalized

@@ -1,16 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
@@ -36,7 +33,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     private final AnglePIDController pid;
 
-    //TODO: Starting Configuration
+    //TODO: Set Starting Configuration
     private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
     private final Slot slot2 = new Slot(Artifact.EMPTY, 240, 60, 2);
     private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 300, 3);

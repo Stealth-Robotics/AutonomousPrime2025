@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
@@ -13,31 +14,31 @@ import java.util.ArrayList;
 
 public class ShootPatternCommand extends SequentialCommandGroup {
     public ShootPatternCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer) {
-        if (spindexer.hasMotifColors()) {
-            //Has the colors to shoot a full motif
-            Artifact[] pattern = Motif.getPattern();
-            for (int i = 0; i < 3; i++) {
-                addCommands(
-                        spindexer.rotateArtifactToShoot(pattern[i]),
-                        new ShootCommand(shooter, intake, spindexer),
-                        new WaitCommand(500) //Space shots to allow motif to be scored
-                );
-            }
-        }
-        else {
-            //Otherwise shoot any colors that stop us from intaking artifacts for a motif
-            ArrayList<Artifact> extras = spindexer.getExtraArtifacts();
-            for (Artifact extra : extras) {
-                addCommands(
-                        spindexer.rotateArtifactToShoot(extra),
-                        new ShootCommand(shooter, intake, spindexer),
-                        new WaitCommand(500) //Space shots to allow motif to be scored
-                );
-            }
-        }
-
-        addCommands(new EndShootingCommand(shooter, intake)); //Stop all subsystems from spinning
-
-        addRequirements(shooter, spindexer, intake);
+        addCommands(
+                new InstantCommand(() -> {
+                    if (spindexer.hasMotifColors()) {
+                        Artifact[] pattern = Motif.getPattern();
+                        for (int i = 0; i < 3; i++) {
+                            boolean finalShot = (i == 2);
+                            addCommands(
+                                    spindexer.rotateArtifactToShoot(pattern[i]),
+                                    new ShootCommand(shooter, intake, spindexer, finalShot),
+                                    new WaitCommand(500) //Space shots to allow motif to be scored
+                            );
+                        }
+                    }
+                    else {
+                        //Otherwise shoot any excess artifacts
+                        ArrayList<Artifact> extras = spindexer.getExtraArtifacts();
+                        for (int i = 0; i < extras.size(); i++) {
+                            boolean finalShot = (i == extras.size()-1);
+                            addCommands(
+                                    spindexer.rotateArtifactToShoot(extras.get(i)),
+                                    new ShootCommand(shooter, intake, spindexer, finalShot)
+                            );
+                        }
+                    }
+                })
+        );
     }
 }

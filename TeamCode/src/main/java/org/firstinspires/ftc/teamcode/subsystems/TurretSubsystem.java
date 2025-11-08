@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,7 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import org.firstinspires.ftc.teamcode.LatestGoalData;
-import org.stealthrobotics.library.AnglePIDController;
+import org.firstinspires.ftc.teamcode.TurretState;
 import org.stealthrobotics.library.StealthSubsystem;
 
 @Config
@@ -35,12 +33,6 @@ public class TurretSubsystem extends StealthSubsystem {
     private final double MAX_TICKS_LEFT = 0;
 
     private boolean searchingRight = true;
-
-    public enum TurretState {
-        IDLE,
-        TARGET,
-        SEARCH
-    }
 
     public TurretSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
@@ -88,6 +80,13 @@ public class TurretSubsystem extends StealthSubsystem {
             double targetTicks = getCurrentTicks() + (LatestGoalData.getHeadingOffsetFromGoal() * TICKS_PER_DEGREE);
             pid.setSetPoint(targetTicks);
             setPower(pid.calculate(getCurrentTicks()));
+        }
+        else if (state == TurretState.HOME) {
+            pid.setSetPoint(0); //Home turret
+            setPower(pid.calculate(getCurrentTicks()));
+            if (pid.atSetPoint()) {
+                setState(TurretState.IDLE);
+            }
         }
         else {
             setPower(0.0);

@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
 
 import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 
@@ -22,6 +23,12 @@ public class IntakeDefaultCommand extends CommandBase {
 
     @Override
     public void execute() {
-        intake.setPower(intakeSupplier.getAsDouble());
+        if (intakeSupplier.getAsDouble() > 0.1) {
+            intake.setState(IntakeState.INTAKE);
+        }
+        else if (intakeSupplier.getAsDouble() < -0.1) {
+            intake.setState(IntakeState.OUTTAKE);
+        }
+        else intake.setState(IntakeState.IDLE);
     }
 }

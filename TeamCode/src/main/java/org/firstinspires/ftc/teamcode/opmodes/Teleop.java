@@ -38,10 +38,8 @@ public class Teleop extends StealthOpMode {
         spindexer = new SpindexerSubsystem(hardwareMap, false);
         turret = new TurretSubsystem(hardwareMap, false);
 
-        //Figure out which subsystems need to be registered
-        register(drive);
-
         //Setup default commands
+        intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) - driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE)));
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
         //Configure gamepad bindings
