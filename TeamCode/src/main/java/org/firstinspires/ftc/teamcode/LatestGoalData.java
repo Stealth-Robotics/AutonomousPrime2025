@@ -5,7 +5,7 @@ public class LatestGoalData {
     private static double headingOffsetFromGoal = 0.0;
     private static double distanceFromGoal = 0.0;
 
-    public static boolean seesTag() {
+    public static boolean canSeeTag() {
         return seesTag;
     }
 

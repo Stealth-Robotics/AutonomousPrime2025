@@ -108,7 +108,6 @@ public class ShooterSubsystem extends StealthSubsystem {
             setHoodPercentage(0.0); //Hood fully down to help balls intake
         }
         else {
-            //Assume any other state is IDLE (including null)
             setVelocity(0.0);
         }
     }

@@ -88,7 +88,6 @@ public class TurretSubsystem extends StealthSubsystem {
             setPower(pid.calculate(getCurrentTicks()));
         }
         else {
-            //Assume any other state is IDLE (non-moving)
             setPower(0.0);
         }
 

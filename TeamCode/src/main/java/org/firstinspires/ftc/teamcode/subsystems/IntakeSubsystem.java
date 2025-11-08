@@ -16,8 +16,11 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 @SuppressWarnings("FieldCanBeLocal")
 @Config
 public class IntakeSubsystem extends StealthSubsystem {
-    private final DcMotorEx transferMotor;
+    private final DcMotorEx intakeMotor;
     private final Servo loaderServo;
+
+    private IntakeState state = IntakeState.IDLE;
+
     private final RevColorSensorV3 colorSensor;
 
     private final double LOADER_DEPLOYED_POSITION = 0.5;
@@ -26,50 +29,53 @@ public class IntakeSubsystem extends StealthSubsystem {
     //Distance has to be less than this to look for a artifact
     private final double DISTANCE_THRESHOLD_INCHES = 3.5;
 
-    public static double TRANSFER_SPEED = 1.0;
+    public static double OPERATING_SPEED = 1.0;
+
+    public enum IntakeState {
+        INTAKE,
+        OUTTAKE,
+        TRANSFERRING,
+        IDLE
+    }
 
     public IntakeSubsystem(HardwareMap hardwareMap) {
-        transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         loaderServo = hardwareMap.get(Servo.class, "loaderServo");
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
 
-        transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        retractLoader().schedule();
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    // ! Only looking at distance
-    public boolean detectsArtifact() {
-        return colorSensor.getDistance(DistanceUnit.INCH) < DISTANCE_THRESHOLD_INCHES;
-    }
+    public Artifact getSensedArtifact() {
 
-    public Command retractLoader() {
-        return this.runOnce(() -> loaderServo.setPosition(LOADER_RETRACTED_POSITION));
-    }
-
-    public Command deployLoader() {
-        return this.runOnce(() -> loaderServo.setPosition(LOADER_DEPLOYED_POSITION));
-    }
-
-    public Command start() {
-        return this.runOnce(() -> setPower(TRANSFER_SPEED));
-    }
-
-    public Command startReverse() {
-        return this.runOnce(() -> setPower(-TRANSFER_SPEED));
-    }
-
-    public Command stop() {
-        return this.runOnce(() -> setPower(0));
     }
 
     public void setPower(double power) {
-        transferMotor.setPower(power);
+        intakeMotor.setPower(power);
     }
 
     @Override
     public void periodic() {
-        telemetry.addData("distance", colorSensor.getDistance(DistanceUnit.INCH));
-        telemetry.addData("detectsArtifact", detectsArtifact());
+        //State-machine
+        if (state == IntakeState.INTAKE) {
+            setPower(OPERATING_SPEED);
+            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
+        }
+        else if (state == IntakeState.OUTTAKE) {
+            setPower(-OPERATING_SPEED);
+            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
+        }
+        else if (state == IntakeState.TRANSFERRING) {
+            setPower(OPERATING_SPEED);
+            loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
+        }
+        else {
+            setPower(0.0);
+            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
+        }
+
+        telemetry.addLine("----intake----");
+        telemetry.addData("state", state);
+        telemetry.addData("detected artifact", getSensedArtifact());
     }
 }
