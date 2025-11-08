@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
@@ -20,14 +25,30 @@ public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
     private GamepadEx operatorGamepad;
 
+    private double matchTime;
+    private boolean doEndgameSignal = true;
+
     private DriveSubsystem drive;
     private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
     private SpindexerSubsystem spindexer;
     private TurretSubsystem turret;
 
-    private final Gamepad.RumbleEffect readyShootRumble = new Gamepad.RumbleEffect.Builder()
+    private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
+    private final Gamepad.RumbleEffect readyToShootRumble = new Gamepad.RumbleEffect.Builder()
             .addStep(1.0, 1.0, 800)
+            .build();
+
+    private final Gamepad.RumbleEffect endgameRumble = new Gamepad.RumbleEffect.Builder()
+            .addStep(1.0, 0.0, 400)
+            .addStep(0.0, 1.0, 400)
+            .addStep(1.0, 0.0, 400)
+            .addStep(0.0, 1.0, 400)
+            .addStep(1.0, 0.0, 400)
+            .addStep(0.0, 1.0, 400)
+            .addStep(1.0, 0.0, 400)
+            .addStep(0.0, 1.0, 400)
             .build();
 
     @Override
@@ -57,8 +78,25 @@ public class Teleop extends StealthOpMode {
     }
 
     private void configureTriggers() {
+        Trigger endGameBuzz = new Trigger(() -> doEndgameSignal && matchTime <= 20);
+        endGameBuzz.whenActive(new ParallelCommandGroup(
+                new InstantCommand(() -> gamepad1.runRumbleEffect(endgameRumble)),
+                new InstantCommand(() -> doEndgameSignal = false)
+        ));
+
         Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && intake.getSensedArtifact() != Artifact.EMPTY && !spindexer.isFull()));
         spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
+    }
+
+    @Override
+    public Command getAutoCommand() {
+        return new InstantCommand(matchTimer::reset);
+    }
+
+    @Override
+    public void printTelemetry() {
+        matchTime = Math.max(0, 150.0 - matchTimer.time());
+        telemetry.addData("time left", (matchTime / 60) + ":" + (matchTime - ((matchTime / 60) * 60)));
     }
 
     @SuppressWarnings("unused")
