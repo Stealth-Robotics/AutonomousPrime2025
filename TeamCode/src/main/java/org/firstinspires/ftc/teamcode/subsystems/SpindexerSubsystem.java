@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.pedropathing.control.PIDFController;
+import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
@@ -24,14 +28,13 @@ import java.util.ArrayList;
 public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
 
-    public static double kP = 0.002;
+    public static double kP = 0.005;
     public static double kI = 0.0;
-    public static double kD = 0.0;
+    public static double kD = 0.00007;
+    public static double kF = 0.1;
 
-    public static double spindexerSetpoint = 0.0;
-
-    private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
-    private final double ANGLE_TOLERANCE_DEGREES = 2;
+    private final double TICKS_PER_REVOLUTION = (((1+((double) 46 /17))) * (1+((double) 46 /11))) * 28; //Gobilda 312 RPM Yellow Jacket
+    private final double ANGLE_TOLERANCE_DEGREES = 0.5;
 
     private final AnglePIDController pid;
 
@@ -41,7 +44,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 300, 3);
 
     //Variables to keep track of which slots are where
-    private Slot intakeSlot = null;
+    private Slot intakeSlot = slot1;
     private Slot shooterSlot = null;
 
     private static class Slot {
@@ -81,7 +84,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     public SpindexerSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
-        spindexerMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -228,10 +231,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return size() == 3;
     }
 
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
     //Returns the number of artifacts in the spindexer
     public int size() {
         int size = 0;
@@ -269,19 +268,23 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     private void setPower(double power) {
+        //Feedforward
+        power += Math.signum(power) * kF;
+
+        //Set motor power
         spindexerMotor.setPower(power);
     }
 
     @Override
     public void periodic() {
-        pid.setSetPoint(spindexerSetpoint);
-        if (!pid.atSetPoint()) {
-            setPower(pid.calculate(getCurrentPosition()));
-        }
+//        FtcDashboard dashboard = FtcDashboard.getInstance();
+//        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+//
+//        dashboardTelemetry.addData("targetAngle", pid.getSetPoint());
+//        dashboardTelemetry.addData("currentAngle", getCurrentPosition());
+//        dashboardTelemetry.update();
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("ticks", spindexerMotor.getCurrentPosition());
-        telemetry.addData("angle", getCurrentPosition());
         telemetry.addData("slot 1: ", slot1.getArtifact());
         telemetry.addData("slot 2: ", slot2.getArtifact());
         telemetry.addData("slot 3: ", slot3.getArtifact());

@@ -3,10 +3,10 @@ package org.stealthrobotics.library;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class AnglePIDController {
-    private final double kP;
-    private final double kI;
-    private final double kD;
-    private final double kF;
+    private double kP;
+    private double kI;
+    private double kD;
+    private double kF;
 
     private double reference;
     private double measuredValue;
@@ -17,6 +17,8 @@ public class AnglePIDController {
     private double tolerance;
 
     private double lastTime;
+
+    private double lastReference;
 
     public AnglePIDController(double kP, double kI, double kD) {
         this.kP = kP;
@@ -39,6 +41,7 @@ public class AnglePIDController {
     }
 
     public void setSetPoint(double setPoint) {
+        lastReference = reference;
         reference = wrapAngle(setPoint);
     }
 
@@ -62,7 +65,19 @@ public class AnglePIDController {
         double error = getError();
         double derivative = (error - lastError) / (time - lastTime);
 
+        // reset the integral if the reference is changed.
+        if (reference != lastReference) {
+            integralSum = 0;
+        }
+
         integralSum += error * (time - lastTime);
+
+        if (integralSum > 10000) {
+            integralSum = 10000;
+        }
+        if (integralSum < -10000) {
+            integralSum = -10000;
+        }
 
         lastError = error;
         lastTime = time;

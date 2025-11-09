@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.RanAuto;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
@@ -31,6 +32,7 @@ public class Teleop extends StealthOpMode {
 
     private int matchTime;
     private boolean doEndgameSignal = true;
+    private boolean doReadyToShootRumble = true;
 
     private DriveSubsystem drive;
 //    private ShooterSubsystem shooter;
@@ -73,6 +75,9 @@ public class Teleop extends StealthOpMode {
         //Configure gamepad bindings
         configureBindings();
 
+        //Setup triggers for gamepad rumble
+        configureRumble();
+
         //Configure subsystem triggers (state transitions)
         configureTriggers();
 
@@ -82,17 +87,35 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+
+        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(spindexer.rotateEmptyToIntake());
+        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(spindexer.rotateClosestArtifactToShoot());
+        driveGamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(spindexer.rotateArtifactToShoot(Artifact.GREEN));
     }
 
-    private void configureTriggers() {
+    private void configureRumble() {
         Trigger endGameBuzz = new Trigger(() -> doEndgameSignal && matchTime <= 20);
         endGameBuzz.whenActive(new ParallelCommandGroup(
                 new InstantCommand(() -> gamepad1.runRumbleEffect(endgameRumble)),
                 new InstantCommand(() -> doEndgameSignal = false)
         ));
 
-//        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && intake.getSensedArtifact() != Artifact.EMPTY && !spindexer.isFull()));
-//        spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
+        Trigger readyToShootRumbleTrigger = new Trigger(() -> spindexer.isFull() && doReadyToShootRumble);
+        readyToShootRumbleTrigger.whenActive(new ParallelCommandGroup(
+                new InstantCommand(() -> gamepad1.runRumbleEffect(readyToShootRumble)),
+                new InstantCommand(() -> doReadyToShootRumble = false)
+        ));
+
+        Trigger resetReadyToShootRumble = new Trigger(() -> !doReadyToShootRumble && !spindexer.isFull());
+        resetReadyToShootRumble.whenActive(new InstantCommand(() -> doReadyToShootRumble = true));
+    }
+
+    private void configureTriggers() {
+//        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && !spindexer.isFull()));
+//        spindexerSpinEmptyToIntakeTrigger.whileActiveContinuous(spindexer.rotateEmptyToIntake());
+//
+//        Trigger indexArtifact = new Trigger(() -> (spindexer.isEmptySlotAtIntake() && intake.getSensedArtifact() != Artifact.EMPTY));
+//        indexArtifact.whenActive(new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE)));
     }
 
     @Override
