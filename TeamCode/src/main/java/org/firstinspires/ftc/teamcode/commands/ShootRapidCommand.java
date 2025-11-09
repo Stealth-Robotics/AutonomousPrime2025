@@ -16,7 +16,7 @@ public class ShootRapidCommand extends SequentialCommandGroup {
                         boolean finalShot = (i == size - 1);
                         addCommands(
                                 spindexer.rotateClosestArtifactToShoot(),
-                                new ShootCommand(shooter, intake, spindexer, finalShot)
+                                new ShootCommand(shooter, intake, spindexer, () -> finalShot)
                         );
                     }
                 })

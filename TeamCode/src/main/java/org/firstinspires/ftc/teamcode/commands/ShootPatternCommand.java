@@ -22,7 +22,7 @@ public class ShootPatternCommand extends SequentialCommandGroup {
                             boolean finalShot = (i == 2);
                             addCommands(
                                     spindexer.rotateArtifactToShoot(pattern[i]),
-                                    new ShootCommand(shooter, intake, spindexer, finalShot),
+                                    new ShootCommand(shooter, intake, spindexer, () -> finalShot),
                                     new WaitCommand(500) //Space shots to allow motif to be scored
                             );
                         }
@@ -34,7 +34,7 @@ public class ShootPatternCommand extends SequentialCommandGroup {
                             boolean finalShot = (i == extras.size()-1);
                             addCommands(
                                     spindexer.rotateArtifactToShoot(extras.get(i)),
-                                    new ShootCommand(shooter, intake, spindexer, finalShot)
+                                    new ShootCommand(shooter, intake, spindexer, () -> finalShot)
                             );
                         }
                     }

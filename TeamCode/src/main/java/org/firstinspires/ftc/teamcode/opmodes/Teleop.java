@@ -23,16 +23,16 @@ import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
-    private GamepadEx operatorGamepad;
+//    private GamepadEx operatorGamepad;
 
     private double matchTime;
     private boolean doEndgameSignal = true;
 
     private DriveSubsystem drive;
-    private ShooterSubsystem shooter;
+//    private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
-    private SpindexerSubsystem spindexer;
-    private TurretSubsystem turret;
+//    private SpindexerSubsystem spindexer;
+//    private TurretSubsystem turret;
 
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
@@ -54,13 +54,13 @@ public class Teleop extends StealthOpMode {
     @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
-        operatorGamepad = new GamepadEx(gamepad2);
+//        operatorGamepad = new GamepadEx(gamepad2);
 
         drive = new DriveSubsystem(hardwareMap);
-        shooter = new ShooterSubsystem(hardwareMap);
+//        shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap, false);
-        turret = new TurretSubsystem(hardwareMap, false);
+//        spindexer = new SpindexerSubsystem(hardwareMap, false);
+//        turret = new TurretSubsystem(hardwareMap, false);
 
         //Setup default commands
         intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) - driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE)));
@@ -84,8 +84,8 @@ public class Teleop extends StealthOpMode {
                 new InstantCommand(() -> doEndgameSignal = false)
         ));
 
-        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && intake.getSensedArtifact() != Artifact.EMPTY && !spindexer.isFull()));
-        spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
+//        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && intake.getSensedArtifact() != Artifact.EMPTY && !spindexer.isFull()));
+//        spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
     }
 
     @Override
