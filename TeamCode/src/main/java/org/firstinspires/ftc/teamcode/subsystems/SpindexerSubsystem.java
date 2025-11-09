@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -112,7 +113,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getIntakePosition());
                 intakeSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
+        }).andThen(new WaitUntilCommand(this::atPosition));
     }
 
     //Rotate the nearest empty slot to the shooter
@@ -123,7 +124,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition());
                 shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
+        }).andThen(new WaitUntilCommand(this::atPosition));
     }
 
 
@@ -135,7 +136,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition());
                 shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
+        }).andThen(new WaitUntilCommand(this::atPosition));
     }
 
     // Rotate the nearest artifact to the shooter position regardless of color
@@ -146,7 +147,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition());
                 shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getCurrentPosition()))).interruptOn(pid::atSetPoint)).andThen(new InstantCommand(() -> setPower(0)));
+        }).andThen(new WaitUntilCommand(this::atPosition));
     }
 
     //Return the nearest empty slot to the desired position (intake/shooter)
@@ -267,6 +268,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.GREEN;
     }
 
+    public boolean atPosition() {
+        return pid.atSetPoint();
+    }
+
     private void setPower(double power) {
         //Feedforward
         power += Math.signum(power) * kF;
@@ -277,6 +282,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        setPower(pid.calculate(getCurrentPosition()));
 //        FtcDashboard dashboard = FtcDashboard.getInstance();
 //        Telemetry dashboardTelemetry = dashboard.getTelemetry();
 //

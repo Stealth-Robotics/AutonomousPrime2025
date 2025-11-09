@@ -43,7 +43,7 @@ public class Teleop extends StealthOpMode {
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
     private final Gamepad.RumbleEffect readyToShootRumble = new Gamepad.RumbleEffect.Builder()
-            .addStep(1.0, 1.0, 800)
+            .addStep(1.0, 1.0, 500)
             .build();
 
     private final Gamepad.RumbleEffect endgameRumble = new Gamepad.RumbleEffect.Builder()
@@ -111,11 +111,21 @@ public class Teleop extends StealthOpMode {
     }
 
     private void configureTriggers() {
-//        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) && !spindexer.isFull()));
-//        spindexerSpinEmptyToIntakeTrigger.whileActiveContinuous(spindexer.rotateEmptyToIntake());
-//
-//        Trigger indexArtifact = new Trigger(() -> (spindexer.isEmptySlotAtIntake() && intake.getSensedArtifact() != Artifact.EMPTY));
-//        indexArtifact.whenActive(new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE)));
+        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((
+                intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) &&
+                !spindexer.isFull()));
+        spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
+
+        Trigger indexArtifact = new Trigger(() -> ((
+                        (intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) &&
+                        !spindexer.isFull()) &&
+                        spindexer.atPosition() &&
+                        intake.getSensedArtifact() != Artifact.EMPTY)
+        );
+        indexArtifact.whenActive(new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE)));
+
+        //After intaking rotate spindexer to empty slot if not full yet
+        indexArtifact.and(new Trigger(() -> !spindexer.isFull())).whenActive(spindexer.rotateEmptyToIntake());
     }
 
     @Override
