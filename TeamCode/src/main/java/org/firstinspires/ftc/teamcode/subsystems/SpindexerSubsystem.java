@@ -5,7 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
-import com.pedropathing.control.PIDFController;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -30,19 +30,22 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
 
     public static double kP = 0.005;
-    public static double kI = 0.0;
-    public static double kD = 0.00007;
-    public static double kF = 0.1;
+    public static double kI = 0.075;
+    public static double kD = 0.00025;
+    public static double kF = 0.0;
 
-    private final double TICKS_PER_REVOLUTION = (((1+((double) 46 /17))) * (1+((double) 46 /11))) * 28; //Gobilda 312 RPM Yellow Jacket
-    private final double ANGLE_TOLERANCE_DEGREES = 0.5;
+    private final double TICKS_PER_REVOLUTION = 537.689839572; //Gobilda 312 RPM Yellow Jacket
+    private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360;
+    private final double POSITION_TOLERANCE_TICKS = 10;
 
-    private final AnglePIDController pid;
+    private final double MAX_POWER = 0.25;
+
+    private final PIDController pid;
 
     //TODO: Set Starting Configuration
-    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
-    private final Slot slot2 = new Slot(Artifact.EMPTY, 240, 60, 2);
-    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 300, 3);
+    private final Slot slot1 = new Slot(Artifact.GREEN, 0, 258, 1);
+    private final Slot slot2 = new Slot(Artifact.EMPTY, -168, 88, 2);
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 170, -82, 3);
 
     //Variables to keep track of which slots are where
     private Slot intakeSlot = slot1;
@@ -87,10 +90,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
         spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        pid = new AnglePIDController(kP, kI, kD);
-        pid.setPositionTolerance(ANGLE_TOLERANCE_DEGREES);
+        pid = new PIDController(kP, kI, kD);
+        pid.setTolerance(POSITION_TOLERANCE_TICKS);
 
         if (isAutonomous) resetEncoder();
     }
@@ -100,9 +101,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    //Position in degrees from [-180, 180)
     public double getCurrentPosition() {
-        return AngleUnit.normalizeDegrees((spindexerMotor.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360);
+        return spindexerMotor.getCurrentPosition();
     }
 
     //Rotate the nearest empty slot to the intake
@@ -273,24 +273,21 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     private void setPower(double power) {
-        //Feedforward
-        power += Math.signum(power) * kF;
-
-        //Set motor power
-        spindexerMotor.setPower(power);
+        spindexerMotor.setPower(MathFunctions.clamp(power, -MAX_POWER, MAX_POWER));
     }
 
     @Override
     public void periodic() {
-        setPower(pid.calculate(getCurrentPosition()));
-//        FtcDashboard dashboard = FtcDashboard.getInstance();
-//        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-//
-//        dashboardTelemetry.addData("targetAngle", pid.getSetPoint());
-//        dashboardTelemetry.addData("currentAngle", getCurrentPosition());
-//        dashboardTelemetry.update();
+//        setPower(pid.calculate(getCurrentPosition()));
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+        dashboardTelemetry.addData("targetTicks", pid.getSetPoint());
+        dashboardTelemetry.addData("currentTicks", getCurrentPosition());
+        dashboardTelemetry.update();
 
         telemetry.addLine("----spindexer----");
+        telemetry.addData("ticks", getCurrentPosition());
         telemetry.addData("slot 1: ", slot1.getArtifact());
         telemetry.addData("slot 2: ", slot2.getArtifact());
         telemetry.addData("slot 3: ", slot3.getArtifact());
