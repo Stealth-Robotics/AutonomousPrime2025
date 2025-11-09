@@ -26,9 +26,13 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final Servo loaderServo;
     private final RevColorSensorV3 colorSensor;
 
-    private final Debouncer colorDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
-    private final ColorRange greenArtifactRange = new ColorRange(0, 0, 0, 0, 0, 0);
-    private final ColorRange purpleArtifactRange = new ColorRange(0, 0, 0, 0, 0, 0);
+    private final Debouncer purpleColorDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+    private final Debouncer greenColorDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+
+    private final double DISTANCE_THRESHOLD_MM = 100.0;
+
+    private final ColorRange greenArtifactRange = new ColorRange(0, 90, 80, 1000, 0, 1000);
+    private final ColorRange purpleArtifactRange = new ColorRange(40, 1000, 0, 120, 0, 1000);
 
     private IntakeState state = IntakeState.IDLE;
 
@@ -66,12 +70,16 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        //Debounce color sensor for artifact colors
-        if (colorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, purpleArtifactRange)))
-            sensedArtifact = Artifact.PURPLE;
-        else if (colorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, greenArtifactRange)))
-            sensedArtifact = Artifact.GREEN;
-        else sensedArtifact =  Artifact.EMPTY;
+        //Only look for artifacts if something is in front of color sensor
+        if (colorSensor.getDistance(DistanceUnit.MM) < DISTANCE_THRESHOLD_MM) {
+            //Debounce color sensor for artifact colors
+            boolean isPurple = purpleColorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, purpleArtifactRange));
+            boolean isGreen = greenColorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, greenArtifactRange));
+
+            if (isPurple) sensedArtifact = Artifact.PURPLE;
+            else if (isGreen) sensedArtifact = Artifact.GREEN;
+            else sensedArtifact = Artifact.EMPTY;
+        }
 
         //State-machine
         if (state == IntakeState.INTAKE) {
