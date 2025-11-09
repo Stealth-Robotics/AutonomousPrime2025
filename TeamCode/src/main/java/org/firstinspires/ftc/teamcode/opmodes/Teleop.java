@@ -11,8 +11,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.RanAuto;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
@@ -21,17 +23,19 @@ import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
+import java.util.Locale;
+
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
 //    private GamepadEx operatorGamepad;
 
-    private double matchTime;
+    private int matchTime;
     private boolean doEndgameSignal = true;
 
     private DriveSubsystem drive;
 //    private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
-//    private SpindexerSubsystem spindexer;
+    private SpindexerSubsystem spindexer;
 //    private TurretSubsystem turret;
 
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -59,11 +63,11 @@ public class Teleop extends StealthOpMode {
         drive = new DriveSubsystem(hardwareMap);
 //        shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
-//        spindexer = new SpindexerSubsystem(hardwareMap, false);
+        spindexer = new SpindexerSubsystem(hardwareMap, !RanAuto.didRunAuto());
 //        turret = new TurretSubsystem(hardwareMap, false);
 
         //Setup default commands
-        intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) - driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE)));
+        intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) - driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE)));
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
         //Configure gamepad bindings
@@ -71,6 +75,9 @@ public class Teleop extends StealthOpMode {
 
         //Configure subsystem triggers (state transitions)
         configureTriggers();
+
+//        telemetry.speak("Who Da Best?");
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
     }
 
     private void configureBindings() {
@@ -95,8 +102,9 @@ public class Teleop extends StealthOpMode {
 
     @Override
     public void printTelemetry() {
-        matchTime = Math.max(0, 150.0 - matchTimer.time());
-        telemetry.addData("time left", (matchTime / 60) + ":" + (matchTime - ((matchTime / 60) * 60)));
+        matchTime = (int) Math.max(0, 120 - matchTimer.time());
+        String timeStr = String.format(Locale.US, "%02d", (matchTime / 60)) + ":" + String.format(Locale.US, "%02d", (matchTime - ((matchTime / 60) * 60)));
+        telemetry.addLine("<h4>MATCH TIME: " + timeStr + "</h4>");
     }
 
     @SuppressWarnings("unused")

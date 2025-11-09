@@ -24,9 +24,11 @@ import java.util.ArrayList;
 public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
 
-    public static double kP = 0.0;
+    public static double kP = 0.002;
     public static double kI = 0.0;
     public static double kD = 0.0;
+
+    public static double spindexerSetpoint = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
     private final double ANGLE_TOLERANCE_DEGREES = 2;
@@ -80,6 +82,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
     public SpindexerSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
         spindexerMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pid = new AnglePIDController(kP, kI, kD);
         pid.setPositionTolerance(ANGLE_TOLERANCE_DEGREES);
@@ -270,7 +274,14 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        pid.setSetPoint(spindexerSetpoint);
+        if (!pid.atSetPoint()) {
+            setPower(pid.calculate(getCurrentPosition()));
+        }
+
         telemetry.addLine("----spindexer----");
+        telemetry.addData("ticks", spindexerMotor.getCurrentPosition());
+        telemetry.addData("angle", getCurrentPosition());
         telemetry.addData("slot 1: ", slot1.getArtifact());
         telemetry.addData("slot 2: ", slot2.getArtifact());
         telemetry.addData("slot 3: ", slot3.getArtifact());

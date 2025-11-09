@@ -27,10 +27,10 @@ public class DriveSubsystem extends StealthSubsystem {
     private final GoBildaPinpointDriver pp;
 
     public DriveSubsystem(HardwareMap hardwareMap) {
-        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
-        leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
-        rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
+        rightBack = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftBack = hardwareMap.get(DcMotorEx.class, "rightFront");
+        rightFront = hardwareMap.get(DcMotorEx.class, "leftBack");
+        leftFront = hardwareMap.get(DcMotorEx.class, "rightBack");
 
         rightBack.setDirection(DcMotorEx.Direction.REVERSE);
         rightFront.setDirection(DcMotorEx.Direction.REVERSE);
@@ -72,12 +72,6 @@ public class DriveSubsystem extends StealthSubsystem {
         leftBack.setPower(leftBackPower);
         rightFront.setPower(rightFrontPower);
         rightBack.setPower(rightBackPower);
-
-        telemetry.addData("leftFrontPower", leftFrontPower);
-        telemetry.addData("leftBackPower", leftBackPower);
-        telemetry.addData("rightFrontPower", rightFrontPower);
-        telemetry.addData("rightBackPower", rightBackPower);
-
     }
 
     public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
@@ -87,6 +81,7 @@ public class DriveSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         pp.update();
+        telemetry.addLine("----drive----");
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }

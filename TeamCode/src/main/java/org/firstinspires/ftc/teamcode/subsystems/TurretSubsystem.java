@@ -38,6 +38,8 @@ public class TurretSubsystem extends StealthSubsystem {
     public TurretSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
 
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         pid = new PIDController(kP, kI, kD);
         pid.setTolerance(POSITION_TOLERANCE_TICKS);
 

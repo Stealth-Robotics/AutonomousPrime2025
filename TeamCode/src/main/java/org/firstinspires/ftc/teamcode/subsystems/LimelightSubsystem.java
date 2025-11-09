@@ -93,6 +93,7 @@ public class LimelightSubsystem extends StealthSubsystem {
         telemetry.addLine("----vision----");
         telemetry.addData("pipeline", currentPipeline);
         telemetry.addData("status", limelight.getStatus());
+        telemetry.addData("distance from goal", getDistanceToGoal());
         telemetry.addData("motif", Motif.getMotif());
     }
 }

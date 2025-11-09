@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -33,8 +34,8 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     private Artifact sensedArtifact = Artifact.EMPTY;
 
-    private final double LOADER_DEPLOYED_POSITION = 0.5;
-    private final double LOADER_RETRACTED_POSITION = 0.1;
+    public static double LOADER_DEPLOYED_POSITION = 0.25;
+    public static double LOADER_RETRACTED_POSITION = 0.04;
 
     public static double OPERATING_SPEED = 1.0;
 
@@ -43,6 +44,7 @@ public class IntakeSubsystem extends StealthSubsystem {
         loaderServo = hardwareMap.get(Servo.class, "loaderServo");
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
 
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
