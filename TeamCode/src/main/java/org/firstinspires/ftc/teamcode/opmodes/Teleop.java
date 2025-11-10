@@ -15,10 +15,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.LatestGoalData;
 import org.firstinspires.ftc.teamcode.RanAuto;
+import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
@@ -38,7 +41,8 @@ public class Teleop extends StealthOpMode {
 //    private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
     private SpindexerSubsystem spindexer;
-//    private TurretSubsystem turret;
+    private TurretSubsystem turret;
+    private LimelightSubsystem limelight;
 
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
@@ -66,7 +70,8 @@ public class Teleop extends StealthOpMode {
 //        shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap, !RanAuto.didRunAuto());
-//        turret = new TurretSubsystem(hardwareMap, false);
+        turret = new TurretSubsystem(hardwareMap, !RanAuto.didRunAuto());
+        limelight = new LimelightSubsystem(hardwareMap);
 
         //Setup default commands
         intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) - driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE)));
@@ -81,16 +86,14 @@ public class Teleop extends StealthOpMode {
         //Configure subsystem triggers (state transitions)
         configureTriggers();
 
-//        telemetry.speak("Who Da Best?");
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
+
+        //Set limelight to track the alliance's goal
+        limelight.setGoalTracking();
     }
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-
-        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(spindexer.rotateEmptyToIntake());
-        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(spindexer.rotateClosestArtifactToShoot());
-        driveGamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(spindexer.rotateArtifactToShoot(Artifact.GREEN));
     }
 
     private void configureRumble() {
@@ -126,6 +129,14 @@ public class Teleop extends StealthOpMode {
 
         //After intaking rotate spindexer to empty slot if not full yet
         indexArtifact.and(new Trigger(() -> !spindexer.isFull())).whenActive(spindexer.rotateEmptyToIntake());
+
+//        Trigger turretSearchingToTargeting = new Trigger(() -> (
+//                turret.getState() == TurretState.SEARCH && LatestGoalData.canSeeTag()));
+//        turretSearchingToTargeting.whenActive(new InstantCommand(() -> turret.setState(TurretState.TARGET)));
+//
+//        Trigger turretTargetingToSearching = new Trigger(() -> (
+//                turret.getState() == TurretState.TARGET && !LatestGoalData.canSeeTag()));
+//        turretTargetingToSearching.whenActive(new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
     }
 
     @Override

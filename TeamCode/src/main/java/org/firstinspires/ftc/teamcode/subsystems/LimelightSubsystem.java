@@ -19,9 +19,9 @@ import org.stealthrobotics.library.StealthSubsystem;
 public class LimelightSubsystem extends StealthSubsystem {
     private final Limelight3A limelight;
 
-    private final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 0.0;
-    private final double LIMELIGHT_DISTANCE_OFF_FLOOR_INCHES = 0.0;
-    private final double GOAL_TAG_HEIGHT_INCHES = 27.5;
+    private final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 20.0;
+    private final double LIMELIGHT_DISTANCE_OFF_FLOOR_INCHES = 15.25;
+    private final double GOAL_TAG_HEIGHT_INCHES = 29.5;
 
     private final int MOTIF_GPP_ID = 21, MOTIF_PGP_ID = 22, MOTIF_PPG_ID = 23;
     private final int GOAL_BLUE_ID = 20, GOAL_RED_ID = 24;
@@ -43,7 +43,7 @@ public class LimelightSubsystem extends StealthSubsystem {
     public LimelightSubsystem(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
         limelight.start();
-        limelight.pipelineSwitch(Pipeline.OBELISK.pipelineID);
+        setMotifTracking();
     }
 
     //Call once we want to start goal tracking
@@ -53,8 +53,14 @@ public class LimelightSubsystem extends StealthSubsystem {
         limelight.pipelineSwitch(goalPipeline.pipelineID);
     }
 
+    public void setMotifTracking() {
+        Pipeline goalPipeline = Pipeline.OBELISK;
+        currentPipeline = goalPipeline;
+        limelight.pipelineSwitch(goalPipeline.pipelineID);
+    }
+
     public Motif.MotifType getUpdatedMotif(Motif.MotifType old) {
-        if (latestResult.isValid()) {
+        if (latestResult != null && latestResult.isValid()) {
             for (LLResultTypes.FiducialResult tag : latestResult.getFiducialResults()) {
                 if (tag.getFiducialId() == MOTIF_GPP_ID && old != Motif.MotifType.GPP) {
                     return Motif.MotifType.GPP;
@@ -71,7 +77,7 @@ public class LimelightSubsystem extends StealthSubsystem {
     }
 
     public void updateGoalEstimates() {
-        if (latestResult.isValid()) {
+        if (latestResult != null && latestResult.isValid()) {
             LatestGoalData.updateGoalData(latestResult.getTx(), getDistanceToGoal());
         }
         else LatestGoalData.tagInvisible();
@@ -84,7 +90,13 @@ public class LimelightSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        latestResult = limelight.getLatestResult();
+        //Update more than once per loop
+        for (int i = 0; i < 5; i++) {
+            latestResult = limelight.getLatestResult();
+            if (latestResult != null && latestResult.isValid()) {
+                break;
+            }
+        }
 
         //Only update goal estimates if
         if (currentPipeline.pipelineID != Pipeline.OBELISK.pipelineID)
@@ -92,8 +104,8 @@ public class LimelightSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----vision----");
         telemetry.addData("pipeline", currentPipeline);
-        telemetry.addData("status", limelight.getStatus());
-        telemetry.addData("distance from goal", getDistanceToGoal());
+        telemetry.addData("seesGoal", (latestResult != null && latestResult.isValid()));
+        telemetry.addData("distanceToGoal", (latestResult != null) ? getDistanceToGoal() : "unknown");
         telemetry.addData("motif", Motif.getMotif());
     }
 }

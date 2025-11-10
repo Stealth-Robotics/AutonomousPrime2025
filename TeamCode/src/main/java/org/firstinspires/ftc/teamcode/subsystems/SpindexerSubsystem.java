@@ -279,12 +279,12 @@ public class SpindexerSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
 //        setPower(pid.calculate(getCurrentPosition()));
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-        dashboardTelemetry.addData("targetTicks", pid.getSetPoint());
-        dashboardTelemetry.addData("currentTicks", getCurrentPosition());
-        dashboardTelemetry.update();
+//        FtcDashboard dashboard = FtcDashboard.getInstance();
+//        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+//
+//        dashboardTelemetry.addData("targetTicks", pid.getSetPoint());
+//        dashboardTelemetry.addData("currentTicks", getCurrentPosition());
+//        dashboardTelemetry.update();
 
         telemetry.addLine("----spindexer----");
         telemetry.addData("ticks", getCurrentPosition());
