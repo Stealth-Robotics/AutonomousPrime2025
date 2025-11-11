@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.math.MathFunctions;
@@ -12,11 +10,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
-import org.stealthrobotics.library.AnglePIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -28,24 +24,29 @@ import java.util.ArrayList;
 @SuppressWarnings("FieldCanBeLocal")
 public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
+    private final PIDController pid;
 
     public static double kP = 0.005;
     public static double kI = 0.075;
     public static double kD = 0.00025;
-    public static double kF = 0.0;
+
+    private double encoderOffset = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 537.689839572; //Gobilda 312 RPM Yellow Jacket
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360;
-    private final double POSITION_TOLERANCE_TICKS = 10;
+    private final double POSITION_TOLERANCE_DEGREES = 0.5;
 
-    private final double MAX_POWER = 0.25;
+    private final double MAX_POWER = 0.6;
 
-    private final PIDController pid;
+    /* Slot numbers increase going counter-clockwise
+                    3-------2
+                     \     /
+                        1
+     */
 
-    //TODO: Set Starting Configuration
-    private final Slot slot1 = new Slot(Artifact.GREEN, 0, 258, 1);
-    private final Slot slot2 = new Slot(Artifact.EMPTY, -168, 88, 2);
-    private final Slot slot3 = new Slot(Artifact.EMPTY, 170, -82, 3);
+    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
+    private final Slot slot2 = new Slot(Artifact.EMPTY, -120, -60, 2);
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 60, 3);
 
     //Variables to keep track of which slots are where
     private Slot intakeSlot = slot1;
@@ -86,14 +87,14 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }
     }
 
-    public SpindexerSubsystem(HardwareMap hardwareMap, boolean isAutonomous) {
+    public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
         spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         pid = new PIDController(kP, kI, kD);
-        pid.setTolerance(POSITION_TOLERANCE_TICKS);
+        pid.setTolerance(POSITION_TOLERANCE_DEGREES);
 
-        if (isAutonomous) resetEncoder();
+        resetEncoder();
     }
 
     private void resetEncoder() {
@@ -101,8 +102,28 @@ public class SpindexerSubsystem extends StealthSubsystem {
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public double getCurrentPosition() {
+    public void setStartingConfig(Artifact slot1, Artifact slot2, Artifact slot3) {
+        this.slot1.setArtifact(slot1);
+        this.slot2.setArtifact(slot2);
+        this.slot3.setArtifact(slot3);
+    }
+
+    /** @return the spindexer's artifacts in the order s1, s2, s3 **/
+    public Artifact[] getCurrentArtifacts() {
+        return new Artifact[] {slot1.getArtifact(), slot2.getArtifact(), slot3.getArtifact()};
+    }
+
+    //Essentially re-zeros the motor encoder without homing
+    public void setEncoderOffset(double encoderOffset) {
+        this.encoderOffset = encoderOffset;
+    }
+
+    public double getTicks() {
         return spindexerMotor.getCurrentPosition();
+    }
+
+    public double getAngle() {
+        return AngleUnit.normalizeDegrees(((spindexerMotor.getCurrentPosition() + encoderOffset) / TICKS_PER_REVOLUTION) * 360);
     }
 
     //Rotate the nearest empty slot to the intake
@@ -110,10 +131,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return this.runOnce(() -> {
             Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
             if (slot != null) {
-                pid.setSetPoint(slot.getIntakePosition());
+                pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
                 intakeSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
     }
 
     //Rotate the nearest empty slot to the shooter
@@ -121,10 +142,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return this.runOnce(() -> {
             Slot slot = getNearestEmptySlot(ArtifactSource.SHOOTER);
             if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition());
+                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
     }
 
 
@@ -133,10 +154,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return this.runOnce(() -> {
             Slot slot = getNearestFilledSlotToShooter(artifactColor);
             if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition());
+                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
     }
 
     // Rotate the nearest artifact to the shooter position regardless of color
@@ -144,10 +165,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return this.runOnce(() -> {
             Slot slot = getNearestFilledSlotToShooter();
             if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition());
+                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
     }
 
     //Return the nearest empty slot to the desired position (intake/shooter)
@@ -160,8 +181,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         for (Slot slot : emptySlots) {
             //Calculate the shortest arc between the slot's (intake/shoot) position and the current spindexer position
             double distance = (source == ArtifactSource.SHOOTER) ?
-                    Math.min((slot.getShootPosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getShootPosition() + 360) % 360) :
-                    Math.min((slot.getIntakePosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getIntakePosition() + 360) % 360);
+                    Math.min((slot.getShootPosition() - getAngle() + 360) % 360, (getAngle() - slot.getShootPosition() + 360) % 360) :
+                    Math.min((slot.getIntakePosition() - getAngle() + 360) % 360, (getAngle() - slot.getIntakePosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -178,7 +199,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         for (Slot slot : slots) {
             //Calculate the shortest arc between the slot shoot position and the current position
-            double distance = Math.min((slot.getShootPosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getShootPosition() + 360) % 360);
+            double distance = Math.min((slot.getShootPosition() - getAngle() + 360) % 360, (getAngle() - slot.getShootPosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -196,7 +217,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         for (Slot slot : slots) {
             //Calculate the shortest arc between the slot shoot position and the current position
-            double distance = Math.min((slot.getShootPosition() - getCurrentPosition() + 360) % 360, (getCurrentPosition() - slot.getShootPosition() + 360) % 360);
+            double distance = Math.min((slot.getShootPosition() - getAngle() + 360) % 360, (getAngle() - slot.getShootPosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -278,18 +299,18 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-//        setPower(pid.calculate(getCurrentPosition()));
 //        FtcDashboard dashboard = FtcDashboard.getInstance();
 //        Telemetry dashboardTelemetry = dashboard.getTelemetry();
 //
 //        dashboardTelemetry.addData("targetTicks", pid.getSetPoint());
-//        dashboardTelemetry.addData("currentTicks", getCurrentPosition());
+//        dashboardTelemetry.addData("currentTicks", getAngle());
 //        dashboardTelemetry.update();
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("ticks", getCurrentPosition());
-        telemetry.addData("slot 1: ", slot1.getArtifact());
-        telemetry.addData("slot 2: ", slot2.getArtifact());
-        telemetry.addData("slot 3: ", slot3.getArtifact());
+        telemetry.addData("ticks", spindexerMotor.getCurrentPosition());
+        telemetry.addData("angle", getAngle());
+        telemetry.addData("1", slot1.getArtifact());
+        telemetry.addData("2", slot2.getArtifact());
+        telemetry.addData("3", slot3.getArtifact());
     }
 }

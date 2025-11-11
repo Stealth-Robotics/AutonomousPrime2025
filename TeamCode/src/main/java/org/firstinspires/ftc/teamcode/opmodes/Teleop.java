@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,14 +13,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.firstinspires.ftc.teamcode.IntakeState;
-import org.firstinspires.ftc.teamcode.LatestGoalData;
-import org.firstinspires.ftc.teamcode.RanAuto;
-import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
+import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
@@ -69,8 +64,8 @@ public class Teleop extends StealthOpMode {
         drive = new DriveSubsystem(hardwareMap);
 //        shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap, !RanAuto.didRunAuto());
-        turret = new TurretSubsystem(hardwareMap, drive, !RanAuto.didRunAuto());
+        spindexer = new SpindexerSubsystem(hardwareMap);
+        turret = new TurretSubsystem(hardwareMap, drive);
         limelight = new LimelightSubsystem(hardwareMap);
 
         //Setup default commands
@@ -88,8 +83,9 @@ public class Teleop extends StealthOpMode {
 
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
-        //Set limelight to track the alliance's goal
-        limelight.setGoalTracking();
+        //Transfer subsystem data from auto into teleop
+        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(drive, spindexer, turret);
+        loadAutoDataIntoTeleop.schedule();
     }
 
     private void configureBindings() {

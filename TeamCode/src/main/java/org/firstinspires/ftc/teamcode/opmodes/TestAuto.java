@@ -7,9 +7,11 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
 import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.Alliance;
@@ -20,11 +22,6 @@ public class TestAuto extends StealthOpMode {
     private Follower follower;
 
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
-
-    @Override
-    public void whileWaitingToStart() {
-        Motif.setMotif(limelight.getUpdatedMotif(Motif.getMotif()));
-    }
 
     @Override
     public void initialize() {
@@ -41,9 +38,7 @@ public class TestAuto extends StealthOpMode {
 
     @Override
     public Command getAutoCommand() {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> limelight.setGoalTracking())
-        );
+        return new SequentialCommandGroup();
     }
 
     @SuppressWarnings("unused")

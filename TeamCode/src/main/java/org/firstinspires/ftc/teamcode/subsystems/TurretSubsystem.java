@@ -32,6 +32,8 @@ public class TurretSubsystem extends StealthSubsystem {
     private final DriveSubsystem drive;
     private final Pose goalPose;
 
+    private double encoderOffset = 0.0;
+
     private TurretState state = TurretState.SEARCH;
 
     public static double tickP = 0.005;
@@ -54,16 +56,18 @@ public class TurretSubsystem extends StealthSubsystem {
     private final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
     private final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
 
-    public TurretSubsystem(HardwareMap hardwareMap, DriveSubsystem drive, boolean isAutonomous) {
+    public TurretSubsystem(HardwareMap hardwareMap, DriveSubsystem drive) {
         this.drive = drive;
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
 
         trackingPID = new PIDController(angleP, angleI, angleD);
 
-        if (Alliance.get() == Alliance.BLUE) goalPose = BLUE_GOAL_POSE;
-        else goalPose = RED_GOAL_POSE;
+        if (Alliance.get() == Alliance.BLUE)
+            goalPose = BLUE_GOAL_POSE;
+        else
+            goalPose = RED_GOAL_POSE;
 
-        if (isAutonomous) resetEncoder();
+        resetEncoder();
     }
 
     public void setState(TurretState newState) {
@@ -83,8 +87,19 @@ public class TurretSubsystem extends StealthSubsystem {
         turretMotor.setPower(power);
     }
 
-    private int getCurrentTicks() {
+    //Essentially re-zeros the motor encoder without homing
+    public void setEncoderOffset(double encoderOffset) {
+        this.encoderOffset = encoderOffset;
+    }
+
+    //Returns the raw, unaltered ticks of the motor
+    public int getRawTicks() {
         return turretMotor.getCurrentPosition();
+    }
+
+    //Returns the ticks based off of where 0 should be
+    private double getCurrentTicks() {
+        return turretMotor.getCurrentPosition() + encoderOffset;
     }
 
     private double getCurrentDegrees() {
@@ -119,7 +134,11 @@ public class TurretSubsystem extends StealthSubsystem {
                 setState(TurretState.SEARCH);
             }
         }
+        else if (state == TurretState.HOME) {
+            //Home and then set state to IDLE
+        }
         else {
+            //IDLE
             setPower(0.0);
         }
 
