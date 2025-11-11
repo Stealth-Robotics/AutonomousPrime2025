@@ -70,7 +70,7 @@ public class Teleop extends StealthOpMode {
 //        shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap, !RanAuto.didRunAuto());
-        turret = new TurretSubsystem(hardwareMap, !RanAuto.didRunAuto());
+        turret = new TurretSubsystem(hardwareMap, drive, !RanAuto.didRunAuto());
         limelight = new LimelightSubsystem(hardwareMap);
 
         //Setup default commands
@@ -94,6 +94,9 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(spindexer.rotateArtifactToShoot(Artifact.GREEN));
+//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(spindexer.rotateEmptyToIntake());
     }
 
     private void configureRumble() {

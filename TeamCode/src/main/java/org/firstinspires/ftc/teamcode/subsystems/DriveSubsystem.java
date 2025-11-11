@@ -26,6 +26,8 @@ public class DriveSubsystem extends StealthSubsystem {
 
     private final GoBildaPinpointDriver pp;
 
+    private double headingOffset = 0.0;
+
     public DriveSubsystem(HardwareMap hardwareMap) {
         rightBack = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "rightFront");
@@ -43,8 +45,12 @@ public class DriveSubsystem extends StealthSubsystem {
         pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pp.setOffsets(3.167, -7.456, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        pp.resetPosAndIMU();
+        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, 72, 72, AngleUnit.DEGREES, 90));
+    }
+
+    public Pose2D getPose() {
+        return pp.getPosition();
     }
 
     public double getHeading() {
@@ -52,11 +58,11 @@ public class DriveSubsystem extends StealthSubsystem {
     }
 
     public void resetHeading() {
-        pp.resetPosAndIMU();
+        headingOffset = -pp.getHeading(AngleUnit.RADIANS);
     }
 
     public void drive(double x, double y, double rot) {
-        double heading = getHeading();
+        double heading = getHeading() + headingOffset;
         double dx = x * Math.cos(-heading) - y * Math.sin(-heading);
         double dy = x * Math.sin(-heading) + y * Math.cos(-heading);
 
@@ -82,6 +88,8 @@ public class DriveSubsystem extends StealthSubsystem {
     public void periodic() {
         pp.update();
         telemetry.addLine("----drive----");
+        telemetry.addData("x", pp.getPosX(DistanceUnit.INCH));
+        telemetry.addData("y", pp.getPosY(DistanceUnit.INCH));
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }
