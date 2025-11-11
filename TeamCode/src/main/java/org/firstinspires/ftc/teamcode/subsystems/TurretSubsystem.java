@@ -135,10 +135,24 @@ public class TurretSubsystem extends StealthSubsystem {
             }
         }
         else if (state == TurretState.HOME) {
-            //Home and then set state to IDLE
+            //Set PID to HOME turret and then transition to HOMING to finish
+            trackingPID.setPID(tickP, tickI, tickD);
+            trackingPID.reset();
+
+            //Center turret back to starting position (0 degrees, 0 ticks)
+            trackingPID.setSetPoint(0);
+
+            setState(TurretState.HOMING);
+        }
+        else if (state == TurretState.HOMING) {
+            //Finish HOMING and then set state to IDLE
+            setPower(trackingPID.calculate(getCurrentTicks()));
+
+            if (trackingPID.atSetPoint())
+                setState(TurretState.IDLE);
         }
         else {
-            //IDLE
+            //Stop all turret movement
             setPower(0.0);
         }
 

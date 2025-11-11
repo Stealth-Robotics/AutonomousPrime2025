@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
@@ -78,9 +79,7 @@ public class Teleop extends StealthOpMode {
         //Setup triggers for gamepad rumble
         configureRumble();
 
-        //Configure subsystem triggers (state transitions)
-        configureTriggers();
-
+        //Set DS telemetry to allow rich text formatting
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
         //Transfer subsystem data from auto into teleop
@@ -91,8 +90,9 @@ public class Teleop extends StealthOpMode {
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
 
-//        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(spindexer.rotateArtifactToShoot(Artifact.GREEN));
-//        driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(spindexer.rotateEmptyToIntake());
+        //Toggles turret between homing and searching for the goal
+        Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_TURRET_TOGGLE));
+        homeTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.HOME)), new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
     }
 
     private void configureRumble() {
@@ -112,32 +112,6 @@ public class Teleop extends StealthOpMode {
         resetReadyToShootRumble.whenActive(new InstantCommand(() -> doReadyToShootRumble = true));
     }
 
-    private void configureTriggers() {
-        Trigger spindexerSpinEmptyToIntakeTrigger = new Trigger(() -> ((
-                intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) &&
-                !spindexer.isFull()));
-        spindexerSpinEmptyToIntakeTrigger.whenActive(spindexer.rotateEmptyToIntake());
-
-        Trigger indexArtifact = new Trigger(() -> ((
-                        (intake.getState() == IntakeState.INTAKE || intake.getState() == IntakeState.OUTTAKE) &&
-                        !spindexer.isFull()) &&
-                        spindexer.atPosition() &&
-                        intake.getSensedArtifact() != Artifact.EMPTY)
-        );
-        indexArtifact.whenActive(new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE)));
-
-        //After intaking rotate spindexer to empty slot if not full yet
-        indexArtifact.and(new Trigger(() -> !spindexer.isFull())).whenActive(spindexer.rotateEmptyToIntake());
-
-//        Trigger turretSearchingToTargeting = new Trigger(() -> (
-//                turret.getState() == TurretState.SEARCH && LatestGoalData.canSeeTag()));
-//        turretSearchingToTargeting.whenActive(new InstantCommand(() -> turret.setState(TurretState.TARGET)));
-//
-//        Trigger turretTargetingToSearching = new Trigger(() -> (
-//                turret.getState() == TurretState.TARGET && !LatestGoalData.canSeeTag()));
-//        turretTargetingToSearching.whenActive(new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
-    }
-
     @Override
     public Command getAutoCommand() {
         return new InstantCommand(matchTimer::reset);
@@ -152,11 +126,9 @@ public class Teleop extends StealthOpMode {
 
     @SuppressWarnings("unused")
     @TeleOp(name = "Red Teleop", group = "Red")
-    public static class RedTeleop extends Teleop {
-    }
+    public static class RedTeleop extends Teleop { }
 
     @SuppressWarnings("unused")
     @TeleOp(name = "Blue Teleop", group = "Blue")
-    public static class BlueTeleop extends Teleop {
-    }
+    public static class BlueTeleop extends Teleop { }
 }

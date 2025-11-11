@@ -4,5 +4,6 @@ public enum TurretState {
     IDLE,
     TARGET,
     HOME,
+    HOMING,
     SEARCH
 }

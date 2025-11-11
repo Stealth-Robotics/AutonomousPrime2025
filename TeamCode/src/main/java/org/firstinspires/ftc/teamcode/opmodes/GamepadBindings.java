@@ -8,6 +8,8 @@ public class GamepadBindings {
 
         public static GamepadKeys.Trigger INTAKE = GamepadKeys.Trigger.RIGHT_TRIGGER;
         public static GamepadKeys.Trigger OUTTAKE = GamepadKeys.Trigger.LEFT_TRIGGER;
+
+        public static GamepadKeys.Button HOME_TURRET_TOGGLE = GamepadKeys.Button.A;
     }
 
     public static class OperatorBindings {
