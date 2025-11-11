@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.TurretState;
+import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
@@ -89,10 +90,12 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
         //Toggles turret between homing and searching for the goal
-        Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_TURRET_TOGGLE));
+        Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_AND_UNHOME_TURRET));
         homeTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.HOME)), new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
+
     }
 
     private void configureRumble() {

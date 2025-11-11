@@ -102,7 +102,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void setStartingConfig(Artifact slot1, Artifact slot2, Artifact slot3) {
+    public void setArtifactsInSpindexerManually(Artifact slot1, Artifact slot2, Artifact slot3) {
         this.slot1.setArtifact(slot1);
         this.slot2.setArtifact(slot2);
         this.slot3.setArtifact(slot3);
@@ -147,7 +147,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
             }
         }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
     }
-
 
     // Rotate the nearest artifact of the specified color to the shooter position
     public Command rotateArtifactToShoot(Artifact artifactColor) {
