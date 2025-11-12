@@ -137,7 +137,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
     }
 
-    //Rotate the nearest empty slot to the shooter
+    //Rotate the nearest empty slot to the shooter (only for intaking through shooter)
     public Command rotateEmptyToShooter() {
         return this.runOnce(() -> {
             Slot slot = getNearestEmptySlot(ArtifactSource.SHOOTER);

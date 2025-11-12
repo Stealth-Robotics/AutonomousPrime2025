@@ -25,7 +25,7 @@ public class ShootCommand extends SequentialCommandGroup {
                             new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING)),
                             new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER)),
                             new WaitCommand(500),
-                            new InstantCommand(() -> intake.setState(IntakeState.INTAKE))
+                            new InstantCommand(() -> intake.setState(IntakeState.OUTTAKE))
                     );
 
                     if (finalShot.getAsBoolean()) {

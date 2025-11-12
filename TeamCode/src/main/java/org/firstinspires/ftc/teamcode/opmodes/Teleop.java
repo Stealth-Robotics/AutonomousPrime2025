@@ -10,13 +10,11 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.teamcode.ArtifactSource;
-import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.TurretState;
+import org.firstinspires.ftc.teamcode.commands.DumbOuttakeCommand;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
-import org.firstinspires.ftc.teamcode.commands.IntakeDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
+import org.firstinspires.ftc.teamcode.commands.SmartIntakeCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
@@ -28,14 +26,12 @@ import java.util.Locale;
 
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
-//    private GamepadEx operatorGamepad;
 
     private int matchTime;
     private boolean doEndgameSignal = true;
     private boolean doReadyToShootRumble = true;
 
     private DriveSubsystem drive;
-//    private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
     private SpindexerSubsystem spindexer;
     private TurretSubsystem turret;
@@ -61,17 +57,14 @@ public class Teleop extends StealthOpMode {
     @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
-//        operatorGamepad = new GamepadEx(gamepad2);
 
         drive = new DriveSubsystem(hardwareMap);
-//        shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap, drive);
         limelight = new LimelightSubsystem(hardwareMap);
 
         //Setup default commands
-        intake.setDefaultCommand(new IntakeDefaultCommand(intake, () -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) - driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE)));
         drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
 
         //Configure gamepad bindings
@@ -92,10 +85,15 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
+        Trigger intakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01);
+        intakeTrigger.whenActive(new SmartIntakeCommand(intake, spindexer, () -> intakeTrigger.negate().get()));
+
+        Trigger outtakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01);
+        outtakeTrigger.whenActive(new DumbOuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
+
         //Toggles turret between homing and searching for the goal
         Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_AND_UNHOME_TURRET));
         homeTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.HOME)), new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
-
     }
 
     private void configureRumble() {
