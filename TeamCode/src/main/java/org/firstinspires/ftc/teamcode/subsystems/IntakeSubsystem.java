@@ -14,10 +14,13 @@ import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
 import org.stealthrobotics.library.ColorRange;
 import org.stealthrobotics.library.ColorSensorMatcher;
+import org.stealthrobotics.library.HSVDetector;
 import org.stealthrobotics.library.StealthSubsystem;
 import org.stealthrobotics.library.math.filter.Debouncer;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
+import android.graphics.Color;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
@@ -31,8 +34,10 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     private final double DISTANCE_THRESHOLD_MM = 100.0;
 
-    private final ColorRange greenArtifactRange = new ColorRange(0, 90, 80, 1000, 0, 1000);
-    private final ColorRange purpleArtifactRange = new ColorRange(40, 1000, 0, 120, 0, 1000);
+//    private final ColorRange greenArtifactRange = new ColorRange(0, 90, 80, 1000, 0, 1000);
+//    private final ColorRange purpleArtifactRange = new ColorRange(40, 1000, 0, 120, 0, 1000);
+    private final double GREEN_HUE = 120, PURPLE_HUE = 290;
+    private final double HUE_THRESHOLD_DEGREES = 40;
 
     private IntakeState state = IntakeState.IDLE;
 
@@ -73,8 +78,10 @@ public class IntakeSubsystem extends StealthSubsystem {
         //Only look for artifacts if something is in front of color sensor
         if (colorSensor.getDistance(DistanceUnit.MM) < DISTANCE_THRESHOLD_MM) {
             //Debounce color sensor for artifact colors
-            boolean isPurple = purpleColorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, purpleArtifactRange));
-            boolean isGreen = greenColorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, greenArtifactRange));
+//            boolean isPurple = purpleColorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, purpleArtifactRange));
+//            boolean isGreen = greenColorDebouncer.calculate(ColorSensorMatcher.inRange(colorSensor, greenArtifactRange));
+            boolean isPurple = purpleColorDebouncer.calculate(HSVDetector.hueInProximity(colorSensor, PURPLE_HUE, HUE_THRESHOLD_DEGREES));
+            boolean isGreen = greenColorDebouncer.calculate(HSVDetector.hueInProximity(colorSensor, GREEN_HUE, HUE_THRESHOLD_DEGREES));
 
             if (isPurple) sensedArtifact = Artifact.PURPLE;
             else if (isGreen) sensedArtifact = Artifact.GREEN;
