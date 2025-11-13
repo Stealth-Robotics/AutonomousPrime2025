@@ -18,22 +18,18 @@ public class SmartIntakeCommand extends SequentialCommandGroup {
      */
 
     public SmartIntakeCommand(IntakeSubsystem intake, SpindexerSubsystem spindexer, BooleanSupplier stop) {
-        addCommands(
-                new InstantCommand(() -> {
-                    int artifactCount = spindexer.size();
-                    for (int i = 0; i < artifactCount; i++) {
-                        addCommands(
-                                spindexer.rotateEmptyToIntake(),
-                                new InstantCommand(() -> intake.setState(IntakeState.INTAKE)),
-                                new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
-                                new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE))
-                        );
-                    }
+        int artifactCount = spindexer.size();
+        for (int i = 0; i < (3 - artifactCount); i++) {
+            addCommands(
+                    spindexer.rotateEmptyToIntake(),
+                    new InstantCommand(() -> intake.setState(IntakeState.INTAKE)),
+                    new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
+                    new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE))
+            );
+        }
 
-                    //Stop intaking if done
-                    addCommands(new InstantCommand(() -> intake.setState(IntakeState.IDLE)));
-                })
-        );
+        //Stop intaking if done
+        addCommands(new InstantCommand(() -> intake.setState(IntakeState.IDLE)));
 
         raceWith(
                 new WaitUntilCommand(stop).andThen(new InstantCommand(() -> intake.setState(IntakeState.IDLE)))

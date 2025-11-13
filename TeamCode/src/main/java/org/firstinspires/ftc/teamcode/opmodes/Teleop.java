@@ -3,13 +3,19 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.PoseSupplier;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.DumbOuttakeCommand;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
@@ -61,7 +67,8 @@ public class Teleop extends StealthOpMode {
         drive = new DriveSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
-        turret = new TurretSubsystem(hardwareMap, drive);
+        //! Undo after testing
+//        turret = new TurretSubsystem(hardwareMap, new PoseSupplier(() -> drive.getPoseX(), () -> drive.getPoseY(), () -> AngleUnit.RADIANS.toDegrees(drive.getHeading())));
         limelight = new LimelightSubsystem(hardwareMap);
 
         //Setup default commands
@@ -77,23 +84,26 @@ public class Teleop extends StealthOpMode {
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
         //Transfer subsystem data from auto into teleop
-        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(drive, spindexer, turret);
-        loadAutoDataIntoTeleop.schedule();
+        //! Undo after testing
+//        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(drive, spindexer, turret);
+//        loadAutoDataIntoTeleop.schedule();
     }
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
+        //!Undo after testing
+//        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
+//
         Trigger intakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01);
-        intakeTrigger.whenActive(new SmartIntakeCommand(intake, spindexer, () -> intakeTrigger.negate().get()));
-
-        Trigger outtakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01);
-        outtakeTrigger.whenActive(new DumbOuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
-
-        //Toggles turret between homing and searching for the goal
-        Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_AND_UNHOME_TURRET));
-        homeTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.HOME)), new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
+        intakeTrigger.whenActive(new InstantCommand(() ->  gamepad1.runRumbleEffect(readyToShootRumble)));
+//
+//        Trigger outtakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01);
+//        outtakeTrigger.whenActive(new DumbOuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
+////
+//        //Toggles turret between homing and searching for the goal
+//        Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_AND_UNHOME_TURRET));
+//        homeTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.HOME)), new InstantCommand(() -> turret.setState(TurretState.SEARCH)));
     }
 
     private void configureRumble() {

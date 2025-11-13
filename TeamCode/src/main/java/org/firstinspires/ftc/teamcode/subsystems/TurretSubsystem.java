@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.LatestGoalData;
+import org.firstinspires.ftc.teamcode.PoseSupplier;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -29,7 +30,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private final DcMotorEx turretMotor;
     private final PIDController trackingPID;
 
-    private final DriveSubsystem drive;
+    private final PoseSupplier poseSupplier;
     private final Pose goalPose;
 
     private double encoderOffset = 0.0;
@@ -56,9 +57,9 @@ public class TurretSubsystem extends StealthSubsystem {
     private final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
     private final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
 
-    public TurretSubsystem(HardwareMap hardwareMap, DriveSubsystem drive) {
-        this.drive = drive;
+    public TurretSubsystem(HardwareMap hardwareMap, PoseSupplier poseSupplier) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
+        this.poseSupplier = poseSupplier;
 
         trackingPID = new PIDController(angleP, angleI, angleD);
 
@@ -110,7 +111,7 @@ public class TurretSubsystem extends StealthSubsystem {
     public void periodic() {
         if (state == TurretState.SEARCH) {
             if (!LatestGoalData.canSeeTag()) {
-                Pose2D robotPose = drive.getPose();
+                Pose2D robotPose = poseSupplier.getAsPose();
                 Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
                 double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPosePedro.getY(), goalPose.getX() - robotPosePedro.getX()));
                 trackingPID.setSetPoint(MathFunctions.clamp(AngleUnit.normalizeDegrees(robotPosePedro.getHeading() - targetAngleDegrees), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));

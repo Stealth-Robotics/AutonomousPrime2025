@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.math.MathFunctions;
@@ -26,17 +27,15 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
     private final PIDController pid;
 
-    public static double kP = 0.005;
-    public static double kI = 0.075;
-    public static double kD = 0.00025;
+    public static double kP = 0.0038;
+    public static double kI = 0.0;
+    public static double kD = 0.0001;
 
     private double encoderOffset = 0.0;
 
-    private final double TICKS_PER_REVOLUTION = 537.689839572; //Gobilda 312 RPM Yellow Jacket
-    private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360;
-    private final double POSITION_TOLERANCE_DEGREES = 0.5;
-
-    private final double MAX_POWER = 0.6;
+    private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
+    private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
+    private final double POSITION_TOLERANCE_TICKS = 1;
 
     /* Slot numbers increase going counter-clockwise
                     3-------2
@@ -92,7 +91,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         pid = new PIDController(kP, kI, kD);
-        pid.setTolerance(POSITION_TOLERANCE_DEGREES);
+        pid.setTolerance(POSITION_TOLERANCE_TICKS);
 
         resetEncoder();
     }
@@ -122,8 +121,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return spindexerMotor.getCurrentPosition();
     }
 
-    public double getAngle() {
-        return AngleUnit.normalizeDegrees(((spindexerMotor.getCurrentPosition() + encoderOffset) / TICKS_PER_REVOLUTION) * 360);
+    public double getCurrentTicks() {
+        return spindexerMotor.getCurrentPosition() + encoderOffset;
     }
 
     //Rotate the nearest empty slot to the intake
@@ -134,7 +133,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
                 intakeSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
+        });
     }
 
     //Rotate the nearest empty slot to the shooter (only for intaking through shooter)
@@ -145,7 +144,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
+        });
     }
 
     // Rotate the nearest artifact of the specified color to the shooter position
@@ -156,7 +155,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
+        });
     }
 
     // Rotate the nearest artifact to the shooter position regardless of color
@@ -167,7 +166,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(run(() -> setPower(pid.calculate(getAngle()))).interruptOn(this::atPosition));
+        });
     }
 
     //Return the nearest empty slot to the desired position (intake/shooter)
@@ -180,8 +179,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         for (Slot slot : emptySlots) {
             //Calculate the shortest arc between the slot's (intake/shoot) position and the current spindexer position
             double distance = (source == ArtifactSource.SHOOTER) ?
-                    Math.min((slot.getShootPosition() - getAngle() + 360) % 360, (getAngle() - slot.getShootPosition() + 360) % 360) :
-                    Math.min((slot.getIntakePosition() - getAngle() + 360) % 360, (getAngle() - slot.getIntakePosition() + 360) % 360);
+                    Math.min((slot.getShootPosition() - getCurrentTicks() + 360) % 360, (getCurrentTicks() - slot.getShootPosition() + 360) % 360) :
+                    Math.min((slot.getIntakePosition() - getCurrentTicks() + 360) % 360, (getCurrentTicks() - slot.getIntakePosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -198,7 +197,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         for (Slot slot : slots) {
             //Calculate the shortest arc between the slot shoot position and the current position
-            double distance = Math.min((slot.getShootPosition() - getAngle() + 360) % 360, (getAngle() - slot.getShootPosition() + 360) % 360);
+            double distance = Math.min((slot.getShootPosition() - getCurrentTicks() + 360) % 360, (getCurrentTicks() - slot.getShootPosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -216,7 +215,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         for (Slot slot : slots) {
             //Calculate the shortest arc between the slot shoot position and the current position
-            double distance = Math.min((slot.getShootPosition() - getAngle() + 360) % 360, (getAngle() - slot.getShootPosition() + 360) % 360);
+            double distance = Math.min((slot.getShootPosition() - getCurrentTicks() + 360) % 360, (getCurrentTicks() - slot.getShootPosition() + 360) % 360);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -293,23 +292,27 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     private void setPower(double power) {
-        spindexerMotor.setPower(MathFunctions.clamp(power, -MAX_POWER, MAX_POWER));
+        spindexerMotor.setPower(MathFunctions.clamp(power, -0.5, 0.5));
     }
 
     @Override
     public void periodic() {
+        setPower(pid.calculate(getCurrentTicks()));
 //        FtcDashboard dashboard = FtcDashboard.getInstance();
 //        Telemetry dashboardTelemetry = dashboard.getTelemetry();
 //
 //        dashboardTelemetry.addData("targetTicks", pid.getSetPoint());
-//        dashboardTelemetry.addData("currentTicks", getAngle());
+//        dashboardTelemetry.addData("currentTicks", getCurrentTicks());
 //        dashboardTelemetry.update();
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("ticks", spindexerMotor.getCurrentPosition());
-        telemetry.addData("angle", getAngle());
+        telemetry.addData("ticks", getCurrentTicks());
+        telemetry.addData("atPosition", atPosition());
+        telemetry.addData("setpoint", pid.getSetPoint());
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());
         telemetry.addData("3", slot3.getArtifact());
+
+        pid.setPID(kP, kI, kD);
     }
 }
