@@ -17,6 +17,10 @@ public class GamepadBindings {
 
         // SPINDEXER
         public static Button EMERGENCY_RESET_SPINDEXER = Button.BACK;
+
+        // SHOOTING
+        public static Button SHOOT_RAPID = Button.RIGHT_BUMPER;
+        public static Button SHOOT_PATTERN = Button.LEFT_BUMPER;
     }
 
     public static class OperatorBindings {

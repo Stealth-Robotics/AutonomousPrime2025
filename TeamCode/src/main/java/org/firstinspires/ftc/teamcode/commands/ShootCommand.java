@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -15,10 +16,24 @@ import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 
 import java.util.function.BooleanSupplier;
 
-public class ShootCommand extends SequentialCommandGroup {
+public class ShootCommand extends CommandBase {
+    private final SequentialCommandGroup shootSequence = new SequentialCommandGroup();
+
+    private final ShooterSubsystem shooter;
+    private final SpindexerSubsystem spindexer;
+    private final IntakeSubsystem intake;
+    private final BooleanSupplier finalShot;
+
     public ShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer, BooleanSupplier finalShot) {
-        SequentialCommandGroup shootCommand = new SequentialCommandGroup();
-        shootCommand.addCommands(
+        this.shooter = shooter;
+        this.intake = intake;
+        this.spindexer = spindexer;
+        this.finalShot = finalShot;
+    }
+
+    @Override
+    public void initialize() {
+        shootSequence.addCommands(
                 new InstantCommand(() -> shooter.setState(ShooterState.SHOOT)),
                 new WaitUntilCommand(shooter::atVelocity),
                 new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING)),
@@ -28,12 +43,17 @@ public class ShootCommand extends SequentialCommandGroup {
         );
 
         if (finalShot.getAsBoolean()) {
-            shootCommand.addCommands(
+            shootSequence.addCommands(
                     new InstantCommand(() -> shooter.setState(ShooterState.IDLE)),
                     new InstantCommand(() -> intake.setState(IntakeState.IDLE))
             );
         }
 
-        addCommands(shootCommand);
+        shootSequence.schedule();
+    }
+
+    @Override
+    public boolean isFinished() {
+        return shootSequence.isFinished();
     }
 }

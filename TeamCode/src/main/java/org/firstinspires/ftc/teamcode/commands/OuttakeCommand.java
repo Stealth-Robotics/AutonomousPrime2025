@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
 import java.util.function.BooleanSupplier;
 
-public class DumbOuttakeCommand extends SequentialCommandGroup {
-    public DumbOuttakeCommand(IntakeSubsystem intake, BooleanSupplier stop) {
+public class OuttakeCommand extends SequentialCommandGroup {
+    public OuttakeCommand(IntakeSubsystem intake, BooleanSupplier stop) {
         addCommands(
                 new InstantCommand(() -> intake.setState(IntakeState.OUTTAKE)),
                 new WaitUntilCommand(stop),

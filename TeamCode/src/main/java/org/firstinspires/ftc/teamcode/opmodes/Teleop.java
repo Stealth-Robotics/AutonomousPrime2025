@@ -3,26 +3,22 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.RepeatCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.PoseSupplier;
 import org.firstinspires.ftc.teamcode.TurretState;
-import org.firstinspires.ftc.teamcode.commands.DumbOuttakeCommand;
+import org.firstinspires.ftc.teamcode.commands.OuttakeCommand;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
-import org.firstinspires.ftc.teamcode.commands.SmartIntakeCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeCommand;
+import org.firstinspires.ftc.teamcode.commands.ShootPatternCommand;
+import org.firstinspires.ftc.teamcode.commands.ShootRapidCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
@@ -98,11 +94,14 @@ public class Teleop extends StealthOpMode {
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_RAPID).whenPressed(new ShootRapidCommand(shooter, intake, spindexer));
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PATTERN).whenPressed(new ShootPatternCommand(shooter, intake, spindexer));
+
         Trigger intakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01);
-        intakeTrigger.whenActive(new SmartIntakeCommand(intake, spindexer, () -> intakeTrigger.negate().get()));
+        intakeTrigger.whenActive(new IntakeCommand(intake, spindexer, () -> intakeTrigger.negate().get()));
 
         Trigger outtakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01);
-        outtakeTrigger.whenActive(new DumbOuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
+        outtakeTrigger.whenActive(new OuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
 
         //Toggles turret between homing and searching for the goal
         Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_AND_UNHOME_TURRET));
