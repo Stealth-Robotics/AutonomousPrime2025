@@ -22,7 +22,7 @@ public class SampleAuto extends StealthOpMode {
         limelightSubsystem = new LimelightSubsystem(hardwareMap);
         shooterSubsystem = new ShooterSubsystem(hardwareMap);
         spindexerSubsystem = new SpindexerSubsystem(hardwareMap);
-        turretSubsystem = new TurretSubsystem(hardwareMap, followerSubsystem);
+//        turretSubsystem = new TurretSubsystem(hardwareMap, followerSubsystem);
 
     }
 }
