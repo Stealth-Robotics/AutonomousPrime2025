@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.Command;
+import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,18 +10,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import android.graphics.Color;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
-import org.stealthrobotics.library.ColorRange;
-import org.stealthrobotics.library.ColorSensorMatcher;
 import org.stealthrobotics.library.HSVDetector;
 import org.stealthrobotics.library.StealthSubsystem;
 import org.stealthrobotics.library.math.filter.Debouncer;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
-
-import android.graphics.Color;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Config
@@ -35,8 +33,8 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     private final double DISTANCE_THRESHOLD_MM = 100.0;
 
-    private final double GREEN_HUE = 120, PURPLE_HUE = 290;
-    private final double GREEN_HUE_THRESHOLD = 40, PURPLE_HUE_THRESHOLD = 40;
+    private final double GREEN_HUE = 120, PURPLE_HUE = 250;
+    private final double GREEN_HUE_THRESHOLD = 50, PURPLE_HUE_THRESHOLD = 50;
 
     private IntakeState state = IntakeState.IDLE;
 
@@ -84,6 +82,7 @@ public class IntakeSubsystem extends StealthSubsystem {
             else if (isGreen) sensedArtifact = Artifact.GREEN;
             else sensedArtifact = Artifact.EMPTY;
         }
+        else sensedArtifact = Artifact.EMPTY;
 
         //State-machine
         if (state == IntakeState.INTAKE) {

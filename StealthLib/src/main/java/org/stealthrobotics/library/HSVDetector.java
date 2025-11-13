@@ -1,7 +1,9 @@
 package org.stealthrobotics.library;
 
+import android.graphics.Color;
+
+import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 public class HSVDetector {
     /**
@@ -12,9 +14,9 @@ public class HSVDetector {
      * @return True if the hueTarget is within the threshold, otherwise return false
      */
     public static boolean hueInProximity(RevColorSensorV3 colorSensor, double hueTarget, double threshold) {
-        NormalizedRGBA normalizedColors = colorSensor.getNormalizedColors();
-        double hue = rgbToHsv(normalizedColors.red, normalizedColors.green, normalizedColors.blue)[0];
-        return Math.abs(hueTarget - hue) <= threshold;
+        float[] hsv = new float[3];
+        Color.RGBToHSV((int) MathFunctions.clamp(colorSensor.red(), 0, 255), (int) MathFunctions.clamp(colorSensor.green(), 0, 255), (int) MathFunctions.clamp(colorSensor.blue(), 0, 255), hsv);
+        return Math.abs(hueTarget - hsv[0]) <= threshold;
     }
 
     /**
