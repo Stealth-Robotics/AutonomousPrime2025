@@ -17,24 +17,23 @@ import java.util.function.BooleanSupplier;
 
 public class ShootCommand extends SequentialCommandGroup {
     public ShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer, BooleanSupplier finalShot) {
-        addCommands(
-                new InstantCommand(() -> {
-                    addCommands(
-                            new InstantCommand(() -> shooter.setState(ShooterState.SHOOT)),
-                            new WaitUntilCommand(shooter::atVelocity),
-                            new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING)),
-                            new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER)),
-                            new WaitCommand(500),
-                            new InstantCommand(() -> intake.setState(IntakeState.OUTTAKE))
-                    );
-
-                    if (finalShot.getAsBoolean()) {
-                        addCommands(
-                                new InstantCommand(() -> shooter.setState(ShooterState.IDLE)),
-                                new InstantCommand(() -> intake.setState(IntakeState.IDLE))
-                        );
-                    }
-                })
+        SequentialCommandGroup shootCommand = new SequentialCommandGroup();
+        shootCommand.addCommands(
+                new InstantCommand(() -> shooter.setState(ShooterState.SHOOT)),
+                new WaitUntilCommand(shooter::atVelocity),
+                new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING)),
+                new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER)),
+                new WaitCommand(200), //Delay to wait for ball to shoot out
+                new InstantCommand(() -> intake.setState(IntakeState.OUTTAKE))
         );
+
+        if (finalShot.getAsBoolean()) {
+            shootCommand.addCommands(
+                    new InstantCommand(() -> shooter.setState(ShooterState.IDLE)),
+                    new InstantCommand(() -> intake.setState(IntakeState.IDLE))
+            );
+        }
+
+        addCommands(shootCommand);
     }
 }

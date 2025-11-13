@@ -1,7 +1,5 @@
 package org.stealthrobotics.library;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 public class HSVDetector {

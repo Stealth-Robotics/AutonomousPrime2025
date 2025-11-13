@@ -46,7 +46,7 @@ public class IntakeSubsystem extends StealthSubsystem {
     public static double LOADER_DEPLOYED_POSITION = 0.25;
     public static double LOADER_RETRACTED_POSITION = 0.04;
 
-    public static double OPERATING_SPEED = 0.5;
+    public static double OPERATING_SPEED = 1.0;
 
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");

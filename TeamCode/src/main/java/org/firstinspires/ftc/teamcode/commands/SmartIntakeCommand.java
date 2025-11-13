@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.Artifact;
@@ -18,21 +19,10 @@ public class SmartIntakeCommand extends SequentialCommandGroup {
      */
 
     public SmartIntakeCommand(IntakeSubsystem intake, SpindexerSubsystem spindexer, BooleanSupplier stop) {
-        int artifactCount = spindexer.size();
-        for (int i = 0; i < (3 - artifactCount); i++) {
-            addCommands(
-                    spindexer.rotateEmptyToIntake(),
-                    new InstantCommand(() -> intake.setState(IntakeState.INTAKE)),
-                    new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
-                    new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE))
-            );
-        }
-
-        //Stop intaking if done
-        addCommands(new InstantCommand(() -> intake.setState(IntakeState.IDLE)));
-
-        raceWith(
-                new WaitUntilCommand(stop).andThen(new InstantCommand(() -> intake.setState(IntakeState.IDLE)))
+        addCommands(
+                new InstantCommand(() -> intake.setState(IntakeState.INTAKE)),
+                new WaitUntilCommand(stop),
+                new InstantCommand(() -> intake.setState(IntakeState.IDLE))
         );
     }
 }

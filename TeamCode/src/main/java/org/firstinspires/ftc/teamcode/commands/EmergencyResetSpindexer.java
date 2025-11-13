@@ -13,14 +13,17 @@ public class EmergencyResetSpindexer extends SequentialCommandGroup {
 
     /** Sets all spindexer slots to Artifact.EMPTY and then spins to each, recalculating the artifact inside them **/
     public EmergencyResetSpindexer(SpindexerSubsystem spindexer, IntakeSubsystem intake) {
-        addCommands(new InstantCommand(() -> spindexer.setArtifactsInSpindexerManually(Artifact.EMPTY, Artifact.EMPTY, Artifact.EMPTY)));
+        SequentialCommandGroup emergencyResetSpindexer = new SequentialCommandGroup();
+        emergencyResetSpindexer.addCommands(new InstantCommand(() -> spindexer.setArtifactsInSpindexerManually(Artifact.EMPTY, Artifact.EMPTY, Artifact.EMPTY)));
 
         for (int i = 0; i < 3; i++) {
-            addCommands(
+            emergencyResetSpindexer.addCommands(
                     spindexer.rotateEmptyToIntake(),
                     new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
                     new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE))
             );
         }
+
+        addCommands(emergencyResetSpindexer);
     }
 }

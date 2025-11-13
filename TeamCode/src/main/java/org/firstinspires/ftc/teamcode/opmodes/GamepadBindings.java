@@ -6,6 +6,7 @@ public class GamepadBindings {
     public static class DriverBindings {
         // DRIVING
         public static Button RESET_HEADING = Button.RIGHT_STICK_BUTTON;
+        public static Button RESET_ROBOT_POSITION = Button.START;
 
         // INTAKE
         public static Trigger INTAKE = Trigger.RIGHT_TRIGGER;

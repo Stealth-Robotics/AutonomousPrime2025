@@ -37,7 +37,9 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private TurretState state = TurretState.SEARCH;
 
-    public static double tickP = 0.005;
+    private final double TURRET_TOLERANCE_TICKS = 5;
+
+    public static double tickP = 0.004;
     public static double tickI = 0.00;
     public static double tickD = 0.0;
 
@@ -62,6 +64,7 @@ public class TurretSubsystem extends StealthSubsystem {
         this.poseSupplier = poseSupplier;
 
         trackingPID = new PIDController(angleP, angleI, angleD);
+        trackingPID.setTolerance(TURRET_TOLERANCE_TICKS);
 
         if (Alliance.get() == Alliance.BLUE)
             goalPose = BLUE_GOAL_POSE;
@@ -105,6 +108,12 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double getCurrentDegrees() {
         return AngleUnit.normalizeDegrees((getCurrentTicks() / TICKS_PER_REVOLUTION) * 360);
+    }
+
+    public void setSearching() {
+        trackingPID.setPID(angleP, angleI, angleD);
+        trackingPID.reset();
+        setState(TurretState.SEARCH);
     }
 
     @Override
