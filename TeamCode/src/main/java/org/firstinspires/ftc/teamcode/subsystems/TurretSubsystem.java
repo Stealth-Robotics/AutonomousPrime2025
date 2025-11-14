@@ -35,7 +35,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double encoderOffset = 0.0;
 
-    private TurretState state = TurretState.SEARCH;
+    private TurretState state = TurretState.IDLE;
 
     private final double TURRET_TOLERANCE_TICKS = 5;
 
@@ -50,11 +50,17 @@ public class TurretSubsystem extends StealthSubsystem {
     private final double TICKS_PER_REVOLUTION = 1538; // (output ratio) * PPR = 4 * 384.5
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
 
-    private final double MAX_TICKS_RIGHT = 760;
-    private final double MAX_TICKS_LEFT = -760;
+//    private final double MAX_TICKS_RIGHT = 760;
+//    private final double MAX_TICKS_LEFT = -760;
+//
+//    private final double MAX_DEGREES_RIGHT = 170;
+//    private final double MAX_DEGREES_LEFT = -170;
 
-    private final double MAX_DEGREES_RIGHT = 170;
-    private final double MAX_DEGREES_LEFT = -170;
+    private final double MAX_TICKS_RIGHT = 200;
+    private final double MAX_TICKS_LEFT = -200;
+
+    private final double MAX_DEGREES_RIGHT = 90;
+    private final double MAX_DEGREES_LEFT = -90;
 
     private final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
     private final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);

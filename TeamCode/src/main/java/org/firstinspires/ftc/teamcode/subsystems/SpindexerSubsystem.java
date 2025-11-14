@@ -49,8 +49,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
      */
 
     private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
-    private final Slot slot2 = new Slot(Artifact.EMPTY, -120, -60, 2);
-    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, 60, 3);
+    private final Slot slot2 = new Slot(Artifact.EMPTY, -120, 60, 2);
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, -60, 3);
 
     //Variables to keep track of which slots are where
     private Slot intakeSlot = slot1;
@@ -250,10 +250,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     //Update the spindexer's slot states depending on whether we are intaking/shooting an artifact
     public void updateArtifactState(Artifact artifact, ArtifactSource source) {
-        if (source == ArtifactSource.INTAKE) {
+        if (source == ArtifactSource.INTAKE && intakeSlot != null) {
             intakeSlot.setArtifact(artifact);
         }
-        else {
+        else if (shooterSlot != null) {
             shooterSlot.setArtifact(artifact);
         }
     }
@@ -303,7 +303,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     private void setPower(double power) {
-        spindexerMotor.setPower(MathFunctions.clamp(power, -0.5, 0.5));
+        spindexerMotor.setPower(MathFunctions.clamp(power, -0.4, 0.4));
     }
 
     @Override
@@ -314,10 +314,12 @@ public class SpindexerSubsystem extends StealthSubsystem {
             rotateEmptyToIntake().schedule();
             if (atPosition() && intake.getSensedArtifact() != Artifact.EMPTY) {
                 updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE);
+                if (!isFull()) rotateEmptyToIntake().schedule();
             }
         }
 
         telemetry.addLine("----spindexer----");
+        telemetry.addData("size", size());
         telemetry.addData("ticks", getCurrentTicks());
         telemetry.addData("atPosition", atPosition());
         telemetry.addData("setpoint", pid.getSetPoint());

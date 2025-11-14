@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
 
 public class ShootPatternCommand extends CommandBase {
-    private final SequentialCommandGroup shootPatternSequence = new SequentialCommandGroup();
-
     private final ShooterSubsystem shooter;
     private final SpindexerSubsystem spindexer;
     private final IntakeSubsystem intake;
@@ -33,6 +31,8 @@ public class ShootPatternCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        SequentialCommandGroup shootPatternSequence = new SequentialCommandGroup();
+
         if (spindexer.hasMotifColors()) {
             Artifact[] pattern = Motif.getPattern();
             for (int i = 0; i < 3; i++) {
@@ -61,6 +61,6 @@ public class ShootPatternCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return shootPatternSequence.isFinished();
+        return false;
     }
 }

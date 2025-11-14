@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LatestGoalData;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -23,17 +25,17 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final PIDFController velocityPID;
 
-    public static double kP = 30.0;
-    public static double kI = 5.0;
+    public static double kP = 0.02;
+    public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.8;
+    public static double kF = 0.0;
 
-    public static double MAX_HOOD_ANGLE = 0.8;
-    public static double MIN_HOOD_ANGLE = 0;
+    private final double MAX_HOOD_ANGLE = 1;
+    private final double MIN_HOOD_ANGLE = 0.15;
 
-    public static double VELOCITY_TOLERANCE = 5.0;
+    public static double VELOCITY_TOLERANCE = 20.0; //In ticks per second
 
-    public static double INTAKE_VELOCITY = -1000;
+    public static double hoodAngle = 0.0;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -48,8 +50,8 @@ public class ShooterSubsystem extends StealthSubsystem {
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
 
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
         velocityPID = new PIDFController(kP, kI, kD, kF);
+
         generateInterpolationTables();
     }
 
@@ -66,8 +68,8 @@ public class ShooterSubsystem extends StealthSubsystem {
         hoodServo.setPosition(((MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * percentage) + MIN_HOOD_ANGLE);
     }
 
-    private void setVelocity(double targetVelocity) {
-        shooterMotor.setVelocity(targetVelocity);
+    private void setPower(double power) {
+        shooterMotor.setPower(power);
     }
 
     public boolean atVelocity() {
@@ -76,30 +78,29 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     //Returns the shooter velocity in ticks per second
     private double getVelocity() {
-        return shooterMotor.getVelocity();
+        return -shooterMotor.getVelocity();
     }
 
     @Override
     public void periodic() {
-        telemetry.addLine("----shooter----");
-        telemetry.addData("state", state);
-        telemetry.addData("velocity", getVelocity());
-
         //State-machine
         if (state == ShooterState.SHOOT) {
-            velocityPID.setSetPoint(speedTable.get(LatestGoalData.getDistanceFromGoal()));
-            setVelocity(velocityPID.calculate(getVelocity()));
-
-            setHoodPercentage(hoodTable.get(LatestGoalData.getDistanceFromGoal()));
-        }
-        else if (state == ShooterState.INTAKE) {
-            velocityPID.setSetPoint(INTAKE_VELOCITY);
-            setVelocity(velocityPID.calculate(getVelocity()));
-
-            setHoodPercentage(0.0); //Hood fully down to help balls intake
+//            velocityPID.setSetPoint(speedTable.get(LatestGoalData.getDistanceFromGoal()));
+//            setPower(velocityPID.calculate(getVelocity()));
+//
+//            setHoodPercentage(hoodTable.get(LatestGoalData.getDistanceFromGoal()));
+            velocityPID.setSetPoint(1000);
+            setPower(velocityPID.calculate(getVelocity()));
+            setHoodPercentage(0.5);
         }
         else {
-            setVelocity(0.0);
+            setHoodPercentage(0.0);
+            setPower(0.0);
         }
+
+        telemetry.addLine("----shooter----");
+        telemetry.addData("state", state);
+        telemetry.addData("hood pos", hoodServo.getPosition());
+        telemetry.addData("velocity", getVelocity());
     }
 }

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 public enum IntakeState {
     INTAKE,
     OUTTAKE,
-    TRANSFERRING,
+    TRANSFERRING_IDLE,
+    TRANSFERRING_UP,
     IDLE
 }

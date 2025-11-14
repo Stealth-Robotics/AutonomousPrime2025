@@ -9,11 +9,11 @@ import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 
 public class ShootRapidCommand extends CommandBase {
-    private final SequentialCommandGroup shootRapidSequence = new SequentialCommandGroup();
-
     private final ShooterSubsystem shooter;
     private final SpindexerSubsystem spindexer;
     private final IntakeSubsystem intake;
+
+    private boolean done = false;
 
     public ShootRapidCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer) {
         this.shooter = shooter;
@@ -23,20 +23,22 @@ public class ShootRapidCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        SequentialCommandGroup shootRapidSequence = new SequentialCommandGroup();
+
         int size = spindexer.size();
         for (int i = 0; i < size; i++) {
             boolean finalShot = (i == size - 1);
             shootRapidSequence.addCommands(
-                    spindexer.rotateClosestArtifactToShoot(),
+                    spindexer.rotateClosestArtifactToShoot().withTimeout(1500),
                     new ShootCommand(shooter, intake, spindexer, () -> finalShot)
             );
         }
 
-        shootRapidSequence.schedule();
+        shootRapidSequence.andThen(new InstantCommand(() -> done = true)).schedule();
     }
 
     @Override
     public boolean isFinished() {
-        return shootRapidSequence.isFinished();
+        return done;
     }
 }

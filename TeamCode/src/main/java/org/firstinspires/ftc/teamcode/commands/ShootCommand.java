@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -17,12 +18,12 @@ import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import java.util.function.BooleanSupplier;
 
 public class ShootCommand extends CommandBase {
-    private final SequentialCommandGroup shootSequence = new SequentialCommandGroup();
-
     private final ShooterSubsystem shooter;
     private final SpindexerSubsystem spindexer;
     private final IntakeSubsystem intake;
     private final BooleanSupplier finalShot;
+
+    private boolean done = false;
 
     public ShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer, BooleanSupplier finalShot) {
         this.shooter = shooter;
@@ -33,13 +34,16 @@ public class ShootCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        SequentialCommandGroup shootSequence = new SequentialCommandGroup();
+
         shootSequence.addCommands(
                 new InstantCommand(() -> shooter.setState(ShooterState.SHOOT)),
-                new WaitUntilCommand(shooter::atVelocity),
-                new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING)),
+                new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
+                new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_UP)),
+                new WaitCommand(1000),
                 new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER)),
-                new WaitCommand(200), //Delay to wait for ball to shoot out
-                new InstantCommand(() -> intake.setState(IntakeState.OUTTAKE))
+                new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_IDLE)),
+                new WaitCommand(500) //Wait for loader arm to get out of way of spindexer
         );
 
         if (finalShot.getAsBoolean()) {
@@ -49,11 +53,11 @@ public class ShootCommand extends CommandBase {
             );
         }
 
-        shootSequence.schedule();
+        shootSequence.andThen(new InstantCommand(() -> done = true)).schedule();
     }
 
     @Override
     public boolean isFinished() {
-        return shootSequence.isFinished();
+        return done;
     }
 }

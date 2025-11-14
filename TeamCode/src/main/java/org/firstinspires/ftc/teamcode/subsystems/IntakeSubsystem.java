@@ -40,7 +40,7 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     private Artifact sensedArtifact = Artifact.EMPTY;
 
-    public static double LOADER_DEPLOYED_POSITION = 0.25;
+    public static double LOADER_DEPLOYED_POSITION = 0.5;
     public static double LOADER_RETRACTED_POSITION = 0.04;
 
     public static double OPERATING_SPEED = 1.0;
@@ -93,9 +93,13 @@ public class IntakeSubsystem extends StealthSubsystem {
             setPower(-OPERATING_SPEED);
             loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
-        else if (state == IntakeState.TRANSFERRING) {
-            setPower(-OPERATING_SPEED);
+        else if (state == IntakeState.TRANSFERRING_UP) {
+            setPower(OPERATING_SPEED);
             loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
+        }
+        else if (state == IntakeState.TRANSFERRING_IDLE) {
+            setPower(OPERATING_SPEED);
+            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
         else {
             setPower(0.0);
