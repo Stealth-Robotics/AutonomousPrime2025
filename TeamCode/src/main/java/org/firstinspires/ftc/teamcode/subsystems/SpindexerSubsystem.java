@@ -33,7 +33,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final IntakeSubsystem intake;
 
     public static double kP = 0.0035;
-    public static double kI = 0.08;
+    public static double kI = 0.12;
     public static double kD = 0.0003;
 
     private double encoderOffset = 0.0;
@@ -139,7 +139,13 @@ public class SpindexerSubsystem extends StealthSubsystem {
     //Rotate the nearest empty slot to the intake
     public Command rotateEmptyToIntake() {
         return this.runOnce(() -> {
-            Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
+//            Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
+            int random = (int) ((Math.random() * 3) + 1);
+            Slot slot;
+            if (random == 1) slot = slot1;
+            else if (random == 2) slot = slot2;
+            else slot = slot3;
+
             if (slot != null) {
                 pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
                 intakeSlot = slot;
@@ -323,10 +329,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("size", size());
         telemetry.addData("ticks", getCurrentTicks());
         telemetry.addData("atPosition", atPosition());
         telemetry.addData("setpoint", pid.getSetPoint());
+        telemetry.addData("error", pid.getPositionError());
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());
         telemetry.addData("3", slot3.getArtifact());
