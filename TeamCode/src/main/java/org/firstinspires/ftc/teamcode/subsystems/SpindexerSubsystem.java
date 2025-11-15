@@ -136,15 +136,21 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return AngleUnit.normalizeDegrees((getCurrentTicks() / TICKS_PER_REVOLUTION) * 360);
     }
 
+    public Command rotateToSlotNumber(int slotNumber) {
+        return this.runOnce(() -> {
+            Slot slot = slot3;
+            if (slotNumber == 1) slot = slot1;
+            if (slotNumber == 2) slot = slot2;
+
+            pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
+            intakeSlot = slot;
+        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
+    }
+
     //Rotate the nearest empty slot to the intake
     public Command rotateEmptyToIntake() {
         return this.runOnce(() -> {
-//            Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
-            int random = (int) ((Math.random() * 3) + 1);
-            Slot slot;
-            if (random == 1) slot = slot1;
-            else if (random == 2) slot = slot2;
-            else slot = slot3;
+            Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
 
             if (slot != null) {
                 pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);

@@ -16,7 +16,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.PoseSupplier;
+import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.OuttakeCommand;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
@@ -96,6 +98,15 @@ public class Teleop extends StealthOpMode {
     }
 
     private void configureBindings() {
+        //Force all subsystems to go to IDLE states
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.FORCE_ROBOT_IDLE).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> turret.setState(TurretState.IDLE)),
+                        new InstantCommand(() -> intake.setState(IntakeState.IDLE)),
+                        new InstantCommand(() -> shooter.setState(ShooterState.IDLE))
+                )
+        );
+
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetToPosition(0, 0));
 
@@ -103,12 +114,12 @@ public class Teleop extends StealthOpMode {
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_GREEN).whenPressed(new SequentialCommandGroup(
                 spindexer.rotateArtifactToShoot(Artifact.GREEN),
-                new ShootCommand(shooter, intake, spindexer, () -> true)
+                new ShootCommand(shooter, intake, spindexer)
         ));
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PURPLE).whenPressed(new SequentialCommandGroup(
                 spindexer.rotateArtifactToShoot(Artifact.PURPLE),
-                new ShootCommand(shooter, intake, spindexer, () -> true)
+                new ShootCommand(shooter, intake, spindexer)
         ));
 
         Trigger intakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01);

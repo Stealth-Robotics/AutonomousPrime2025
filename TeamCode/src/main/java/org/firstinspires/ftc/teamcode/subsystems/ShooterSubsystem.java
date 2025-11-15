@@ -108,6 +108,7 @@ public class ShooterSubsystem extends StealthSubsystem {
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {
+            velocityPID.setSetPoint(0); //For atVelocity calls
             setPower(0.0);
         }
 

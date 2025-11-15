@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.drivebase.HDrive;
+import com.arcrobotics.ftclib.util.InterpLUT;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +14,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -35,7 +39,12 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double encoderOffset = 0.0;
 
+    public static double offsetChanger = 0.0;
+
     private TurretState state = TurretState.SEARCH;
+
+    //The amount to aim to the right/left of the target as you get farther away (scales linearly)
+    private final InterpLUT offsetTable = new InterpLUT();
 
     private final double TURRET_TOLERANCE_TICKS = 5;
 
@@ -72,7 +81,15 @@ public class TurretSubsystem extends StealthSubsystem {
         else
             goalPose = RED_GOAL_POSE;
 
+        setupLUT();
         resetEncoder();
+    }
+
+    //Setup turret offsets relative to goal distance
+    private void setupLUT() {
+        offsetTable.add(0, 0);
+        offsetTable.add(210, (Alliance.get() == Alliance.BLUE) ? -16 : 16);
+        offsetTable.createLUT();
     }
 
     public void setState(TurretState newState) {
@@ -113,38 +130,51 @@ public class TurretSubsystem extends StealthSubsystem {
 
     public void setSearching() {
         trackingPID.setPID(angleP, angleI, angleD);
-        trackingPID.reset();
         setState(TurretState.SEARCH);
     }
 
     @Override
     public void periodic() {
         if (state == TurretState.SEARCH) {
-            if (!LatestGoalData.canSeeTag()) {
-                Pose2D robotPose = poseSupplier.getAsPose();
-                Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
-                double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPosePedro.getY(), goalPose.getX() - robotPosePedro.getX()));
-                trackingPID.setSetPoint(MathFunctions.clamp(AngleUnit.normalizeDegrees(robotPosePedro.getHeading() - targetAngleDegrees), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
-                setPower(trackingPID.calculate(getCurrentDegrees()));
-            }
-            else {
-                trackingPID.setPID(tickP, tickI, tickD);
-                trackingPID.reset();
-                setState(TurretState.TARGET);
-            }
+//            if (!LatestGoalData.canSeeTag()) {
+//                Pose2D robotPose = poseSupplier.getAsPose();
+//                Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
+//                double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPosePedro.getY(), goalPose.getX() - robotPosePedro.getX()));
+//                trackingPID.setSetPoint(MathFunctions.clamp(AngleUnit.normalizeDegrees(robotPosePedro.getHeading() - targetAngleDegrees), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
+//                setPower(trackingPID.calculate(getCurrentDegrees()));
+//            }
+//            else {
+//                trackingPID.setPID(tickP, tickI, tickD);
+////                trackingPID.reset();
+//                setState(TurretState.TARGET);
+//            }
+
+            Pose2D robotPose = poseSupplier.getAsPose();
+            Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
+
+            double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPosePedro.getY(), goalPose.getX() - robotPosePedro.getX()));
+            double turretTarget = AngleUnit.normalizeDegrees(robotPosePedro.getHeading() - targetAngleDegrees);
+
+            double distanceFromGoal = sqrt(pow((robotPosePedro.getX() - goalPose.getX()), 2) + pow((robotPosePedro.getY() - goalPose.getY()), 2)) + offsetChanger;
+            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+
+            trackingPID.setSetPoint(MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
+            setPower(trackingPID.calculate(getCurrentDegrees()));
+
+            telemetry.addData("distance to goal", distanceFromGoal);
         }
         else if (state == TurretState.TARGET) {
-            if (LatestGoalData.canSeeTag()) {
-                double targetTicks = MathFunctions.clamp(getCurrentTicks() + (LatestGoalData.getHeadingOffsetFromGoal() * TICKS_PER_DEGREE), MAX_TICKS_LEFT, MAX_TICKS_RIGHT);
-                trackingPID.setSetPoint(targetTicks);
-                double sign = -Math.signum(LatestGoalData.getHeadingOffsetFromGoal());
-                setPower(trackingPID.calculate(getCurrentTicks()) + (sign * tickF));
-            }
-            else {
-                trackingPID.setPID(angleP, angleI, angleD);
-                trackingPID.reset();
-                setState(TurretState.SEARCH);
-            }
+//            if (LatestGoalData.canSeeTag()) {
+//                double targetTicks = MathFunctions.clamp(getCurrentTicks() + (LatestGoalData.getHeadingOffsetFromGoal() * TICKS_PER_DEGREE), MAX_TICKS_LEFT, MAX_TICKS_RIGHT);
+//                trackingPID.setSetPoint(targetTicks);
+//                double sign = -Math.signum(LatestGoalData.getHeadingOffsetFromGoal());
+//                setPower(trackingPID.calculate(getCurrentTicks()) + (sign * tickF));
+//            }
+//            else {
+//                trackingPID.setPID(angleP, angleI, angleD);
+////                trackingPID.reset();
+//                setState(TurretState.SEARCH);
+//            }
         }
         else {
             //Stop all turret movement

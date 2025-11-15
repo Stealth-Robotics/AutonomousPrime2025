@@ -21,6 +21,9 @@ public class GamepadBindings {
         // SHOOTING
         public static Button SHOOT_GREEN = Button.LEFT_BUMPER;
         public static Button SHOOT_PURPLE = Button.RIGHT_BUMPER;
+
+        // OTHER
+        public static Button FORCE_ROBOT_IDLE = Button.DPAD_DOWN;
     }
 
     public static class OperatorBindings {

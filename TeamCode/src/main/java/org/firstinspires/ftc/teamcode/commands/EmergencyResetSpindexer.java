@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.Artifact;
@@ -15,14 +16,14 @@ public class EmergencyResetSpindexer extends SequentialCommandGroup {
     public EmergencyResetSpindexer(SpindexerSubsystem spindexer, IntakeSubsystem intake) {
         addCommands(
                 new InstantCommand(() -> spindexer.setArtifactsInSpindexerManually(Artifact.EMPTY, Artifact.EMPTY, Artifact.EMPTY)),
-                spindexer.rotateEmptyToIntake(),
-                new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
+                spindexer.rotateToSlotNumber(1),
+                new WaitCommand(250),
                 new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE)),
-                spindexer.rotateEmptyToIntake(),
-                new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
+                spindexer.rotateToSlotNumber(2),
+                new WaitCommand(250),
                 new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE)),
-                spindexer.rotateEmptyToIntake(),
-                new WaitUntilCommand(() -> intake.getSensedArtifact() != Artifact.EMPTY),
+                spindexer.rotateToSlotNumber(3),
+                new WaitCommand(250),
                 new InstantCommand(() -> spindexer.updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE))
         );
     }
