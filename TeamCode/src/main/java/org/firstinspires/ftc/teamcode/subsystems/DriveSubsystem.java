@@ -47,7 +47,11 @@ public class DriveSubsystem extends StealthSubsystem {
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
-        pp.recalibrateIMU();
+        pp.resetPosAndIMU();
+    }
+
+    public boolean isPPReady() {
+        return pp.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY;
     }
 
     public void setPose(Pose2D newPose) {

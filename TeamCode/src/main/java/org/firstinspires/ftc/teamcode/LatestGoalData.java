@@ -13,10 +13,13 @@ public class LatestGoalData {
         seesTag = false;
     }
 
-    public static void updateGoalData(double newHeadingOffsetFromGoal, double newDistanceFromGoal) {
+    public static void updateGoalData(double newHeadingOffsetFromGoal) {
         seesTag = true;
         headingOffsetFromGoal = newHeadingOffsetFromGoal;
-        distanceFromGoal = newDistanceFromGoal;
+    }
+
+    public static void updateDistanceFromGoal(double distance) {
+        distanceFromGoal = distance;
     }
 
     public static double getHeadingOffsetFromGoal() {

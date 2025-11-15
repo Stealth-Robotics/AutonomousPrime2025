@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.PoseSupplier;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.TurretState;
@@ -94,7 +95,7 @@ public class Teleop extends StealthOpMode {
 
         //Transfer subsystem data from auto into teleop
         LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(drive, spindexer, turret);
-        loadAutoDataIntoTeleop.schedule();
+        loadAutoDataIntoTeleop.andThen(new InstantCommand(() -> turret.setSearching())).schedule();
     }
 
     private void configureBindings() {

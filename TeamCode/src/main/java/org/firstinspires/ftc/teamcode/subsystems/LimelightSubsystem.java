@@ -39,6 +39,7 @@ public class LimelightSubsystem extends StealthSubsystem {
         ALLIANCE_GOAL_ID = (Alliance.get() == Alliance.BLUE) ? GOAL_BLUE_ID : GOAL_RED_ID;
     }
 
+    //Unused as of the moment
     private double getDistanceToGoal() {
         double heightBetweenAprilTagAndLimelight = GOAL_TAG_HEIGHT_INCHES - LIMELIGHT_DISTANCE_OFF_FLOOR_INCHES;
         return heightBetweenAprilTagAndLimelight / Math.tan(Math.toRadians(LIMELIGHT_MOUNT_ANGLE_DEGREES + latestResult.getTy()));
@@ -57,7 +58,7 @@ public class LimelightSubsystem extends StealthSubsystem {
                 int tagID = tag.getFiducialId();
                 if (tagID == ALLIANCE_GOAL_ID) {
                     seesGoal = true;
-                    LatestGoalData.updateGoalData(latestResult.getTx(), getDistanceToGoal());
+                    LatestGoalData.updateGoalData(latestResult.getTx());
                 }
 
                 //Check for motif

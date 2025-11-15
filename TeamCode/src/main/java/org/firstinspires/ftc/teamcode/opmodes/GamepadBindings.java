@@ -24,6 +24,11 @@ public class GamepadBindings {
 
         // OTHER
         public static Button FORCE_ROBOT_IDLE = Button.DPAD_DOWN;
+
+        public static Button SET_MOTIF_GPP = Button.DPAD_LEFT;
+        public static Button SET_MOTIF_PGP = Button.DPAD_UP;
+        public static Button SET_MOTIF_PPG = Button.DPAD_RIGHT;
+
     }
 
     public static class OperatorBindings {

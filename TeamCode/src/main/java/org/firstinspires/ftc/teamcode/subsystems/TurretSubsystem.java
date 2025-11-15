@@ -41,7 +41,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
     public static double offsetChanger = 0.0;
 
-    private TurretState state = TurretState.SEARCH;
+    private TurretState state = TurretState.IDLE;
 
     //The amount to aim to the right/left of the target as you get farther away (scales linearly)
     private final InterpLUT offsetTable = new InterpLUT();
@@ -135,6 +135,12 @@ public class TurretSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        Pose2D robotPose = poseSupplier.getAsPose();
+        Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
+
+        double distanceFromGoal = sqrt(pow((robotPosePedro.getX() - goalPose.getX()), 2) + pow((robotPosePedro.getY() - goalPose.getY()), 2)) + offsetChanger;
+        LatestGoalData.updateDistanceFromGoal(distanceFromGoal);
+
         if (state == TurretState.SEARCH) {
 //            if (!LatestGoalData.canSeeTag()) {
 //                Pose2D robotPose = poseSupplier.getAsPose();
@@ -149,19 +155,13 @@ public class TurretSubsystem extends StealthSubsystem {
 //                setState(TurretState.TARGET);
 //            }
 
-            Pose2D robotPose = poseSupplier.getAsPose();
-            Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
-
             double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPosePedro.getY(), goalPose.getX() - robotPosePedro.getX()));
             double turretTarget = AngleUnit.normalizeDegrees(robotPosePedro.getHeading() - targetAngleDegrees);
 
-            double distanceFromGoal = sqrt(pow((robotPosePedro.getX() - goalPose.getX()), 2) + pow((robotPosePedro.getY() - goalPose.getY()), 2)) + offsetChanger;
             turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
 
             trackingPID.setSetPoint(MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
             setPower(trackingPID.calculate(getCurrentDegrees()));
-
-            telemetry.addData("distance to goal", distanceFromGoal);
         }
         else if (state == TurretState.TARGET) {
 //            if (LatestGoalData.canSeeTag()) {

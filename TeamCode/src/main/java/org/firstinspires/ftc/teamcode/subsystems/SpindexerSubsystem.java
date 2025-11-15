@@ -48,9 +48,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
                         1
      */
 
-    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
-    private final Slot slot2 = new Slot(Artifact.EMPTY, -120, 60, 2);
-    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, -60, 3);
+    //Autonomous preset artifact locations
+    private final Slot slot1 = new Slot(Artifact.GREEN, 0, 180, 1);
+    private final Slot slot2 = new Slot(Artifact.PURPLE, -120, 60, 2);
+    private final Slot slot3 = new Slot(Artifact.PURPLE, 120, -60, 3);
 
     //Variables to keep track of which slots are where
     private Slot intakeSlot = slot1;

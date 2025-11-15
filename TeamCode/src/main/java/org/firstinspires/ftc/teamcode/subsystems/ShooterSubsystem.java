@@ -47,7 +47,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         speedTable.add(39.6, 1200);
         speedTable.add(60, 1300);
         speedTable.add(93, 1600);
-        speedTable.add(100, 1600);
+        speedTable.add(210, 1600);
         speedTable.createLUT();
 
         hoodTable.add(0, 0.48);
@@ -57,7 +57,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         hoodTable.add(39.6, 0.73);
         hoodTable.add(60, 0.8);
         hoodTable.add(93, 1.0);
-        hoodTable.add(100, 1.0);
+        hoodTable.add(210, 1.0);
         hoodTable.createLUT();
     }
 
@@ -100,11 +100,11 @@ public class ShooterSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         //Update hood angle
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 21, 93)));
+        setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 21, 93)));
+            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {
