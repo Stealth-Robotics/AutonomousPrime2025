@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
-public class FarAuto extends StealthOpMode {
+public class CloseAuto extends StealthOpMode {
     private DriveSubsystem drive;
     private ShooterSubsystem shooter;
     private IntakeSubsystem intake;
@@ -33,8 +33,8 @@ public class FarAuto extends StealthOpMode {
     private SpindexerSubsystem spindexer;
     private LimelightSubsystem limelight;
 
-    //Align with outer edge of one of the two center tiles (turret faces forward)
-    private Pose2D startPose = new Pose2D(DistanceUnit.INCH, 56.287, 9.147, AngleUnit.DEGREES, 90);
+    //Align on alliance goal with right corner (if on blue) or left corner (if on red) of robot just touching the top field wall
+    private Pose2D startPose = new Pose2D(DistanceUnit.INCH, 27.909, 131.336, AngleUnit.DEGREES, 144);
 
     @Override
     public void initialize() {
@@ -65,12 +65,12 @@ public class FarAuto extends StealthOpMode {
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "RedFarAuto", group = "Red")
-    public static class RedFarAuto extends FarAuto {
+    @Autonomous(name = "RedCloseAuto", group = "Red")
+    public static class RedCloseAuto extends CloseAuto {
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "BlueFarAuto", group = "Blue")
-    public static class BlueFarAuto extends FarAuto {
+    @Autonomous(name = "BlueCloseAuto", group = "Blue")
+    public static class BlueCloseAuto extends CloseAuto {
     }
 }

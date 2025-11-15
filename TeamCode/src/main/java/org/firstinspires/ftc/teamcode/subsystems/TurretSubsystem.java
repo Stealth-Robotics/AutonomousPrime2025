@@ -39,8 +39,6 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double encoderOffset = 0.0;
 
-    public static double offsetChanger = 0.0;
-
     private TurretState state = TurretState.IDLE;
 
     //The amount to aim to the right/left of the target as you get farther away (scales linearly)
@@ -138,7 +136,7 @@ public class TurretSubsystem extends StealthSubsystem {
         Pose2D robotPose = poseSupplier.getAsPose();
         Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
 
-        double distanceFromGoal = sqrt(pow((robotPosePedro.getX() - goalPose.getX()), 2) + pow((robotPosePedro.getY() - goalPose.getY()), 2)) + offsetChanger;
+        double distanceFromGoal = sqrt(pow((robotPosePedro.getX() - goalPose.getX()), 2) + pow((robotPosePedro.getY() - goalPose.getY()), 2));
         LatestGoalData.updateDistanceFromGoal(distanceFromGoal);
 
         if (state == TurretState.SEARCH) {
