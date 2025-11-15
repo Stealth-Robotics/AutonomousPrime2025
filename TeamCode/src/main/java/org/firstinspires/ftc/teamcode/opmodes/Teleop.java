@@ -95,7 +95,7 @@ public class Teleop extends StealthOpMode {
 
         //Transfer subsystem data from auto into teleop
         LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(drive, spindexer, turret);
-        loadAutoDataIntoTeleop.andThen(new InstantCommand(() -> turret.setSearching())).schedule();
+        loadAutoDataIntoTeleop.andThen(new InstantCommand(() -> turret.setState(TurretState.GOAL))).schedule();
     }
 
     private void configureBindings() {
@@ -107,6 +107,9 @@ public class Teleop extends StealthOpMode {
                         new InstantCommand(() -> shooter.setState(ShooterState.IDLE))
                 )
         );
+
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.INCREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(5)));
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.DECREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(-5)));
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetToPosition(0, 0));
@@ -131,7 +134,7 @@ public class Teleop extends StealthOpMode {
 
         //Toggles turret between idle (locked in place) and searching for the goal
         Trigger idleTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.IDLE_TURRET_TOGGLE));
-        idleTurret.toggleWhenActive(new InstantCommand(() -> turret.setSearching()), new InstantCommand(() -> turret.setState(TurretState.IDLE)));
+        idleTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.GOAL)), new InstantCommand(() -> turret.setState(TurretState.IDLE)));
     }
 
     private void configureRumble() {

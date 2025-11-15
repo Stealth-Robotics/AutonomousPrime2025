@@ -98,6 +98,13 @@ public class DriveSubsystem extends StealthSubsystem {
         rightBack.setPower(rightBackPower);
     }
 
+    public void stop() {
+        leftBack.setPower(0.0);
+        leftFront.setPower(0.0);
+        rightFront.setPower(0.0);
+        rightBack.setPower(0.0);
+    }
+
     public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
         return this.run(() -> drive(x.getAsDouble(), y.getAsDouble(), rot.getAsDouble()));
     }

@@ -18,6 +18,9 @@ public class GamepadBindings {
         // SPINDEXER
         public static Button EMERGENCY_RESET_SPINDEXER = Button.BACK;
 
+        public static Button DECREASE_ENCODER_OFFSET = Button.B;
+        public static Button INCREASE_ENCODER_OFFSET = Button.X;
+
         // SHOOTING
         public static Button SHOOT_GREEN = Button.LEFT_BUMPER;
         public static Button SHOOT_PURPLE = Button.RIGHT_BUMPER;

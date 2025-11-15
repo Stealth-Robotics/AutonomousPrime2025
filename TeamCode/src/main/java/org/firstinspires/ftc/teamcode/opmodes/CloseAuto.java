@@ -56,10 +56,22 @@ public class CloseAuto extends StealthOpMode {
                 //Set pinpoint's position
                 new WaitUntilCommand(() -> drive.isPPReady()),
                 new InstantCommand(() -> drive.setPose(startPose)),
-                new InstantCommand(() -> turret.setState(TurretState.SEARCH)),
+
+                //Move away from start pose so can see obelisk and also shoot better
+                new InstantCommand(() -> drive.drive(0, -0.6, 0)).andThen(new WaitCommand(500).andThen(new InstantCommand(() -> drive.stop()))),
+
+                //Motif
+                new InstantCommand(() -> turret.setState(TurretState.OBELISK)),
+                new WaitCommand(500),
+                new InstantCommand(() -> turret.setState(TurretState.GOAL)),
 
                 //Do auto stuff here (shoot motif (if not null) and move from launch zone)
-                new WaitCommand(200),
+
+                //Leave launch zone for points
+                new InstantCommand(() -> drive.drive(-0.6, 0.0, 0)).andThen(new WaitCommand(600).andThen(new InstantCommand(() -> drive.stop()))),
+
+                //End auto (save states)
+                new WaitCommand(250),
                 new SaveSubsystemData(drive, spindexer, turret)
         );
     }

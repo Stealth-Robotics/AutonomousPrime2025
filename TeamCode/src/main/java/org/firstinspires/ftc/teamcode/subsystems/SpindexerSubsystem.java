@@ -137,6 +137,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return AngleUnit.normalizeDegrees((getCurrentTicks() / TICKS_PER_REVOLUTION) * 360);
     }
 
+    public void changeEncoderOffset(double amount) {
+        encoderOffset += amount;
+    }
+
     public Command rotateToSlotNumber(int slotNumber) {
         return this.runOnce(() -> {
             Slot slot = slot3;
