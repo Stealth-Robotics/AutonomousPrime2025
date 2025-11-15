@@ -40,7 +40,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
-    private final double POSITION_TOLERANCE_TICKS = 2;
+    private final double POSITION_TOLERANCE_TICKS = 10;
 
     /* Slot numbers increase going counter-clockwise
                     3-------2
@@ -144,7 +144,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
                 intakeSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
     }
 
     //Rotate the nearest empty slot to the shooter (only for intaking through shooter)
@@ -155,7 +155,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
     }
 
     // Rotate the nearest artifact of the specified color to the shooter position
@@ -166,7 +166,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
     }
 
     // Rotate the nearest artifact to the shooter position regardless of color
@@ -177,7 +177,11 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition));
+        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
+    }
+
+    public boolean outOfBalls(){
+        return size() == 0;
     }
 
     //Return the nearest empty slot to the desired position (intake/shooter)

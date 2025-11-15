@@ -20,12 +20,11 @@ public class ShootCommand extends SequentialCommandGroup {
         addCommands(
                 new InstantCommand(() -> shooter.setState(ShooterState.SHOOT)),
                 new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
-                new WaitCommand(200), //Make sure shooter is at velocity
                 new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_UP)),
                 new WaitCommand(500),
-                new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER)),
                 new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_IDLE)),
-                new WaitCommand(200) //Wait for loader arm to get out of way of spindexer
+                new WaitCommand(200), //Wait for loader arm to get out of way of spindexer
+                new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER))
         );
 
         if (finalShot.getAsBoolean()) {

@@ -55,8 +55,8 @@ public class DriveSubsystem extends StealthSubsystem {
     }
 
     public void resetPositionToCenter() {
-        pp.setPosX(72, DistanceUnit.INCH);
-        pp.setPosY(72, DistanceUnit.INCH);
+        pp.setPosX(9, DistanceUnit.INCH);
+        pp.setPosY(9, DistanceUnit.INCH);
     }
 
     public double getPoseX() {

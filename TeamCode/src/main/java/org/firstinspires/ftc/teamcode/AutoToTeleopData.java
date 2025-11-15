@@ -10,7 +10,7 @@ public class AutoToTeleopData {
         If auto isn't run they will act as the testing values for teleop
      */
 
-    public static Pose2D pinpointPose = new Pose2D(DistanceUnit.INCH, 72, 72, AngleUnit.DEGREES, 90);
+    public static Pose2D pinpointPose = new Pose2D(DistanceUnit.INCH, 9, 9, AngleUnit.DEGREES, 90);
     public static double spindexerTicks = 0.0;
     public static double turretTicks = 0.0;
 

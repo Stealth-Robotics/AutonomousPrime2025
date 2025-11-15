@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.PoseSupplier;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.OuttakeCommand;
@@ -29,6 +34,7 @@ import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
@@ -95,7 +101,15 @@ public class Teleop extends StealthOpMode {
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_RAPID).whenPressed(new ShootRapidCommand(shooter, intake, spindexer, () -> spindexer.size()));
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_GREEN).whenPressed(new SequentialCommandGroup(
+                spindexer.rotateArtifactToShoot(Artifact.GREEN),
+                new ShootCommand(shooter, intake, spindexer, () -> true)
+        ));
+
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PURPLE).whenPressed(new SequentialCommandGroup(
+                spindexer.rotateArtifactToShoot(Artifact.PURPLE),
+                new ShootCommand(shooter, intake, spindexer, () -> true)
+        ));
 
 //        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_RAPID).whenPressed(new ShootCommand(shooter, intake, spindexer, () -> true));
 //        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PATTERN).whenPressed(() -> new ShootPatternCommand(shooter, intake, spindexer));
