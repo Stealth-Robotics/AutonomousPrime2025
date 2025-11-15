@@ -139,6 +139,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     public void changeEncoderOffset(double amount) {
         encoderOffset += amount;
+        pid.reset();
     }
 
     public Command rotateToSlotNumber(int slotNumber) {

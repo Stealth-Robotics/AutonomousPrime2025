@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class Motif {
     private static MotifType motif = MotifType.NULL;
 
@@ -7,10 +10,25 @@ public class Motif {
         return motif;
     }
 
-    public static Artifact[] getPattern() {
-        if (motif == MotifType.PPG) return new Artifact[] {Artifact.PURPLE, Artifact.PURPLE, Artifact.GREEN};
-        if (motif == MotifType.PGP) return new Artifact[] {Artifact.PURPLE, Artifact.GREEN, Artifact.PURPLE};
-        return new Artifact[] {Artifact.GREEN, Artifact.PURPLE, Artifact.PURPLE};
+    public static Queue<Artifact> getPatternQueue() {
+        Queue<Artifact> queue = new LinkedList<>();
+        if (motif == MotifType.PPG) {
+            queue.add(Artifact.PURPLE);
+            queue.add(Artifact.PURPLE);
+            queue.add(Artifact.GREEN);
+        }
+        else if (motif == MotifType.PGP) {
+            queue.add(Artifact.PURPLE);
+            queue.add(Artifact.GREEN);
+            queue.add(Artifact.PURPLE);
+        }
+        else {
+            queue.add(Artifact.GREEN);
+            queue.add(Artifact.PURPLE);
+            queue.add(Artifact.PURPLE);
+        }
+
+        return queue;
     }
 
     public static void setMotif(MotifType detectedMotif) {

@@ -29,6 +29,9 @@ public class ShooterSubsystem extends StealthSubsystem {
     public static double kD = 0.0;
     public static double kF = 0.0;
 
+    public static double testVelo = 0.0;
+    public static double testAngle = 0.0;
+
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
 
@@ -40,23 +43,23 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
-        speedTable.add(0, 1100);
-        speedTable.add(21, 1100);
-        speedTable.add(27, 1100);
-        speedTable.add(31, 1200);
-        speedTable.add(39.6, 1200);
+        speedTable.add(0, 1000);
+        speedTable.add(15, 1100);
+        speedTable.add(25, 1100);
+        speedTable.add(30, 1200);
+        speedTable.add(40, 1200);
         speedTable.add(60, 1300);
-        speedTable.add(93, 1600);
+        speedTable.add(95, 1600);
         speedTable.add(210, 1600);
         speedTable.createLUT();
 
         hoodTable.add(0, 0.48);
-        hoodTable.add(21, 0.48);
-        hoodTable.add(27, 0.53);
-        hoodTable.add(31, 0.55);
-        hoodTable.add(39.6, 0.73);
+        hoodTable.add(15, 0.48);
+        hoodTable.add(25, 0.53);
+        hoodTable.add(30, 0.55);
+        hoodTable.add(40, 0.73);
         hoodTable.add(60, 0.8);
-        hoodTable.add(93, 1.0);
+        hoodTable.add(95, 1.0);
         hoodTable.add(210, 1.0);
         hoodTable.createLUT();
     }
@@ -100,11 +103,13 @@ public class ShooterSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         //Update hood angle
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
+        setHoodPercentage(testAngle);
+//        setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
+            velocityPID.setSetPoint(testVelo);
+//            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {

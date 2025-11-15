@@ -26,8 +26,6 @@ import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.ShootCommand;
-import org.firstinspires.ftc.teamcode.commands.ShootPatternCommand;
-import org.firstinspires.ftc.teamcode.commands.ShootRapidCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
@@ -108,11 +106,11 @@ public class Teleop extends StealthOpMode {
                 )
         );
 
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.INCREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(5)));
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.DECREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(-5)));
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.INCREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(10)));
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.DECREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(-10)));
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetToPosition(0, 0));
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetToPosition(72, 72));
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
