@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.ShootCommand;
+import org.firstinspires.ftc.teamcode.commands.TryShootCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
@@ -74,8 +76,8 @@ public class Teleop extends StealthOpMode {
 
         drive = new DriveSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap, intake);
         shooter = new ShooterSubsystem(hardwareMap);
+        spindexer = new SpindexerSubsystem(hardwareMap, intake, shooter);
         turret = new TurretSubsystem(hardwareMap, new PoseSupplier(() -> drive.getPoseX(), () -> drive.getPoseY(), () -> AngleUnit.RADIANS.toDegrees(drive.getHeading())));
         limelight = new LimelightSubsystem(hardwareMap);
 
@@ -106,6 +108,8 @@ public class Teleop extends StealthOpMode {
                 )
         );
 
+        driveGamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_UP)));
+
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.INCREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(10)));
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.DECREASE_ENCODER_OFFSET).whenPressed(new InstantCommand(() -> spindexer.changeEncoderOffset(-10)));
 
@@ -116,11 +120,23 @@ public class Teleop extends StealthOpMode {
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_GREEN).whenPressed(new SequentialCommandGroup(
                 spindexer.rotateArtifactToShoot(Artifact.GREEN),
+                new TryShootCommand(shooter, intake, spindexer),
                 new ShootCommand(shooter, intake, spindexer)
         ));
 
+        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new SequentialCommandGroup(
+                new InstantCommand(() -> shooter.setState(ShooterState.INTAKE))
+        ));
+
+        driveGamepad.getGamepadButton(GamepadKeys.Button.Y).whenReleased(new SequentialCommandGroup(
+                        new InstantCommand(() -> shooter.setState(ShooterState.IDLE)),
+                        new InstantCommand(() -> intake.setState(IntakeState.IDLE))
+        )
+        );
+
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PURPLE).whenPressed(new SequentialCommandGroup(
                 spindexer.rotateArtifactToShoot(Artifact.PURPLE),
+                new TryShootCommand(shooter, intake, spindexer),
                 new ShootCommand(shooter, intake, spindexer)
         ));
 

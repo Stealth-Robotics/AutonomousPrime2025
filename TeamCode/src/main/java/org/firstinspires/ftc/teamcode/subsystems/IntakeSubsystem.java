@@ -41,7 +41,7 @@ public class IntakeSubsystem extends StealthSubsystem {
     private Artifact sensedArtifact = Artifact.EMPTY;
 
     public static double LOADER_DEPLOYED_POSITION = 0.5;
-    public static double LOADER_RETRACTED_POSITION = 0.04;
+    public static double LOADER_RETRACTED_POSITION = 0.0;
 
     public static double OPERATING_SPEED = 1.0;
 
@@ -68,6 +68,10 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     public void setPower(double power) {
         intakeMotor.setPower(power);
+    }
+
+    public boolean loaderRetracted() {
+        return loaderServo.getPosition() == LOADER_RETRACTED_POSITION;
     }
 
     @Override

@@ -41,9 +41,11 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private final double TURRET_TOLERANCE_TICKS = 5;
 
-    public static double angleP = 0.03;
-    public static double angleI = 0.05;
-    public static double angleD = 0.0;
+    public static double fakeDistanceFromGoal = 0.0;
+
+    private final double angleP = 0.03;
+    private final double angleI = 0.05;
+    private final double angleD = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 1538; // (output ratio) * PPR = 4 * 384.5
 
@@ -73,8 +75,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
     //Setup turret offsets relative to goal distance
     private void setupLUT() {
-        offsetTable.add(0, 0);
-        offsetTable.add(210, (Alliance.get() == Alliance.BLUE) ? -16 : 16);
+        offsetTable.add(0, -8);
+        offsetTable.add(210, -12);
         offsetTable.createLUT();
     }
 
@@ -119,6 +121,8 @@ public class TurretSubsystem extends StealthSubsystem {
         Pose2D robotPose = poseSupplier.getAsPose();
         Pose robotPosePedro = new Pose(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH), robotPose.getHeading(AngleUnit.DEGREES));
 
+//        double distanceFromGoal = fakeDistanceFromGoal;
+//        telemetry.addData("LUTOutput", offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200)));
         double distanceFromGoal = sqrt(pow((robotPosePedro.getX() - goalPose.getX()), 2) + pow((robotPosePedro.getY() - goalPose.getY()), 2));
         LatestGoalData.updateDistanceFromGoal(distanceFromGoal);
 

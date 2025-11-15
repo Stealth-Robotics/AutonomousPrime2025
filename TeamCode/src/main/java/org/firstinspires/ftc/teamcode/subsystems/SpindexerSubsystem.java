@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.ArtifactSource;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -31,12 +32,14 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final PIDController pid;
 
     private final IntakeSubsystem intake;
+    private final ShooterSubsystem shooter;
 
     public static double kP = 0.0035;
     public static double kI = 0.12;
     public static double kD = 0.0003;
 
     private double encoderOffset = 0.0;
+    private double manualEncoderOffset = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
@@ -92,11 +95,12 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }
     }
 
-    public SpindexerSubsystem(HardwareMap hardwareMap, IntakeSubsystem intake) {
+    public SpindexerSubsystem(HardwareMap hardwareMap, IntakeSubsystem intake, ShooterSubsystem shooter) {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
         spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.intake = intake;
+        this.shooter = shooter;
 
         pid = new PIDController(kP, kI, kD);
         pid.setTolerance(POSITION_TOLERANCE_TICKS);
@@ -130,7 +134,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     public double getCurrentTicks() {
-        return spindexerMotor.getCurrentPosition() + encoderOffset;
+        return spindexerMotor.getCurrentPosition() + encoderOffset + manualEncoderOffset;
     }
 
     public double getAngleDegrees() {
@@ -138,7 +142,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     public void changeEncoderOffset(double amount) {
-        encoderOffset += amount;
+        manualEncoderOffset += amount;
         pid.reset();
     }
 
@@ -184,7 +188,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                 shooterSlot = slot;
             }
-        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
+        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(2000));
     }
 
     // Rotate the nearest artifact to the shooter position regardless of color
@@ -332,12 +336,16 @@ public class SpindexerSubsystem extends StealthSubsystem {
     public void periodic() {
         setPower(pid.calculate(getCurrentTicks()));
 
-        if (intake.getState() == IntakeState.INTAKE && !isFull()) {
+        if (intake != null && intake.getState() == IntakeState.INTAKE && !isFull()) {
             rotateEmptyToIntake().schedule();
             if (atPosition() && intake.getSensedArtifact() != Artifact.EMPTY) {
                 updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE);
                 if (!isFull()) rotateEmptyToIntake().schedule();
             }
+        }
+        else if (intake != null && shooter != null && shooter.getState() == ShooterState.INTAKE && !isFull()) {
+            rotateEmptyToShooter().schedule();
+            intake.setState(IntakeState.OUTTAKE);
         }
 
         telemetry.addLine("----spindexer----");

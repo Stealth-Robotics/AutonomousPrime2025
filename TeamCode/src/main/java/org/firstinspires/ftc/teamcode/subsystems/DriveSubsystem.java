@@ -98,6 +98,21 @@ public class DriveSubsystem extends StealthSubsystem {
         rightBack.setPower(rightBackPower);
     }
 
+    public void driveRobotCentric(double x, double y, double rot) {
+        x *= 1.1; // Counteract imperfect strafing
+
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rot), 1);
+        double frontLeftPower = (y + x + rot) / denominator;
+        double backLeftPower = (y - x + rot) / denominator;
+        double frontRightPower = (y - x - rot) / denominator;
+        double backRightPower = (y + x - rot) / denominator;
+
+        leftFront.setPower(frontLeftPower);
+        leftBack.setPower(backLeftPower);
+        rightFront.setPower(frontRightPower);
+        rightBack.setPower(backRightPower);
+    }
+
     public void stop() {
         leftBack.setPower(0.0);
         leftFront.setPower(0.0);

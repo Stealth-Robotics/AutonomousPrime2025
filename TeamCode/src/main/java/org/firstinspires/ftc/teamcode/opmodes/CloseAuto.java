@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.PoseSupplier;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
 import org.firstinspires.ftc.teamcode.commands.ShootCommand;
+import org.firstinspires.ftc.teamcode.commands.TryShootCommand;
 import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
+import java.util.LinkedList;
 import java.util.Queue;
 
 public class CloseAuto extends StealthOpMode {
@@ -38,10 +40,10 @@ public class CloseAuto extends StealthOpMode {
     private SpindexerSubsystem spindexer;
     private LimelightSubsystem limelight;
 
-    private Queue<Artifact> patternQueue;
+    private Queue<Artifact> patternQueue = new LinkedList<>();
 
     //Align on alliance goal with right corner (if on blue) or left corner (if on red) of robot just touching the top field wall
-    private Pose2D startPose = new Pose2D(DistanceUnit.INCH, 27.909, 131.336, AngleUnit.DEGREES, 144);
+    private Pose2D startPose = new Pose2D(DistanceUnit.INCH, 19.465, 121.95, AngleUnit.DEGREES, 144);
 
     @Override
     public void initialize() {
@@ -49,8 +51,12 @@ public class CloseAuto extends StealthOpMode {
         shooter = new ShooterSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap, new PoseSupplier(() -> drive.getPoseX(), () -> drive.getPoseY(), () -> AngleUnit.RADIANS.toDegrees(drive.getHeading())));
-        spindexer = new SpindexerSubsystem(hardwareMap, intake);
+        spindexer = new SpindexerSubsystem(hardwareMap, intake, shooter);
         limelight = new LimelightSubsystem(hardwareMap);
+
+        patternQueue.add(Artifact.PURPLE);
+        patternQueue.add(Artifact.PURPLE);
+        patternQueue.add(Artifact.GREEN);
 
         //Flip starting pose if on red alliance side of the field
         if (Alliance.get() == Alliance.RED)
@@ -65,31 +71,23 @@ public class CloseAuto extends StealthOpMode {
                 new InstantCommand(() -> drive.setPose(startPose)),
 
                 //Move away from start pose so can see obelisk and also shoot better
-                new InstantCommand(() -> drive.drive(0, (Alliance.get() == Alliance.BLUE) ? -0.6 : 0.6, 0)).andThen(new WaitCommand(500).andThen(new InstantCommand(() -> drive.stop()))),
+                new InstantCommand(() -> drive.driveRobotCentric(0, -0.6, 0)).andThen(new WaitCommand(1000).andThen(new InstantCommand(() -> drive.stop()))),
 
-                //Motif
-                new InstantCommand(() -> turret.setState(TurretState.OBELISK)),
-                new WaitCommand(500),
                 new InstantCommand(() -> turret.setState(TurretState.GOAL)),
 
-                //Setup pattern
-                new InstantCommand(() -> {
-                    if (Motif.getMotif() == Motif.MotifType.NULL)
-                        Motif.setMotif(Motif.MotifType.PPG); //Default
-
-                    patternQueue = Motif.getPatternQueue();
-                }),
-
                 //Do auto stuff here (shoot motif (if not null) and move from launch zone)
-                spindexer.rotateArtifactToShoot(patternQueue.remove()),
+                spindexer.rotateArtifactToShoot(patternQueue.poll()),
+                new TryShootCommand(shooter, intake, spindexer),
                 new ShootCommand(shooter, intake, spindexer),
-                spindexer.rotateArtifactToShoot(patternQueue.remove()),
+                spindexer.rotateArtifactToShoot(patternQueue.poll()),
+                new TryShootCommand(shooter, intake, spindexer),
                 new ShootCommand(shooter, intake, spindexer),
-                spindexer.rotateArtifactToShoot(patternQueue.remove()),
+                spindexer.rotateArtifactToShoot(patternQueue.poll()),
+                new TryShootCommand(shooter, intake, spindexer),
                 new ShootCommand(shooter, intake, spindexer),
 
                 //Leave launch zone for points
-                new InstantCommand(() -> drive.drive(0, (Alliance.get() == Alliance.BLUE) ? -0.6 : 0.6, 0)).andThen(new WaitCommand(600).andThen(new InstantCommand(() -> drive.stop()))),
+                new InstantCommand(() -> drive.drive((Alliance.get() == Alliance.BLUE) ? -0.6 : 0.6, 0, 0)).andThen(new WaitCommand(650).andThen(new InstantCommand(() -> drive.stop()))),
 
                 //End auto (save states)
                 new WaitCommand(250),

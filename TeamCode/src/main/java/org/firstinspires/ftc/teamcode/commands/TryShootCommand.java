@@ -15,18 +15,18 @@ import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 
 import java.util.function.BooleanSupplier;
 
-public class ShootCommand extends SequentialCommandGroup {
-    public ShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer) {
+//Only attempts to shoot it doesnt actually change states of spindexer
+public class TryShootCommand extends SequentialCommandGroup {
+    public TryShootCommand(ShooterSubsystem shooter, IntakeSubsystem intake, SpindexerSubsystem spindexer) {
         addCommands(
                 new InstantCommand(() -> shooter.setState(ShooterState.SHOOT)),
                 new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
                 new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_IDLE)),
-                new WaitCommand(500),
+                new WaitCommand(200),
                 new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_UP)),
                 new WaitCommand(700),
                 new InstantCommand(() -> intake.setState(IntakeState.TRANSFERRING_IDLE)),
-                new WaitCommand(300), //Wait for loader arm to get out of way of spindexer
-                new InstantCommand(() -> spindexer.updateArtifactState(Artifact.EMPTY, ArtifactSource.SHOOTER)),
+                new WaitCommand(500), //Wait for loader arm to get out of way of spindexer
                 new InstantCommand(() -> shooter.setState(ShooterState.IDLE)),
                 new InstantCommand(() -> intake.setState(IntakeState.IDLE))
         );
