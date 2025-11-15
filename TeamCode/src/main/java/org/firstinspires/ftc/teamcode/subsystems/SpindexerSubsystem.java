@@ -257,6 +257,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
             shooterSlot.setArtifact(artifact);
         }
     }
+    
+
 
     public boolean isFull() {
         return size() == 3;

@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.arcrobotics.ftclib.drivebase.HDrive;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
@@ -43,6 +44,15 @@ public class TurretSubsystem extends StealthSubsystem {
     public static double tickI = 0.00;
     public static double tickD = 0.0;
 
+    //velo pid constants
+    public static double kS = 0.0;
+    public static double kV = 0.0;
+    public static double kA = 0.0;
+
+    public static double vP = 0.0;
+    public static double vI = 0.0;
+    public static double vD = 0.0;
+
     public static double angleP = 0.02;
     public static double angleI = 0.0;
     public static double angleD = 0.0;
@@ -66,6 +76,8 @@ public class TurretSubsystem extends StealthSubsystem {
     private final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
 
     public TurretSubsystem(HardwareMap hardwareMap, PoseSupplier poseSupplier) {
+        SimpleMotorFeedforward turretController = new SimpleMotorFeedforward(kS, kV, kA);
+        PIDController velocityPIDController = new PIDController(vP, vI, vD);
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
         this.poseSupplier = poseSupplier;
 
@@ -122,6 +134,14 @@ public class TurretSubsystem extends StealthSubsystem {
         setState(TurretState.SEARCH);
     }
 
+    public double calculatePIDFVelocity(double tX){
+        double pidOutput = trackingPID.calculate(tX, 0);
+
+        double feedforwardOut = kS * Math.signum(pidOutput) + kV * pidOutput;
+
+        return  pidOutput + feedforwardOut;
+    }
+
     @Override
     public void periodic() {
         if (state == TurretState.SEARCH) {
@@ -142,6 +162,9 @@ public class TurretSubsystem extends StealthSubsystem {
             if (LatestGoalData.canSeeTag()) {
                 double targetTicks = MathFunctions.clamp(getCurrentTicks() + (LatestGoalData.getHeadingOffsetFromGoal() * TICKS_PER_DEGREE), MAX_TICKS_LEFT, MAX_TICKS_RIGHT);
                 trackingPID.setSetPoint(targetTicks);
+
+                double motorVeloOutput = calculatePIDFVelocity(LatestGoalData.getDistanceFromGoal());
+
                 setPower(trackingPID.calculate(getCurrentTicks()));
             }
             else {
