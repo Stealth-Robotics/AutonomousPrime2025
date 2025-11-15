@@ -97,7 +97,7 @@ public class Teleop extends StealthOpMode {
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetPositionToCenter());
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetToPosition(0, 0));
 
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
 
@@ -111,18 +111,15 @@ public class Teleop extends StealthOpMode {
                 new ShootCommand(shooter, intake, spindexer, () -> true)
         ));
 
-//        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_RAPID).whenPressed(new ShootCommand(shooter, intake, spindexer, () -> true));
-//        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PATTERN).whenPressed(() -> new ShootPatternCommand(shooter, intake, spindexer));
-
         Trigger intakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01);
         intakeTrigger.whenActive(new IntakeCommand(intake, spindexer, () -> intakeTrigger.negate().get()));
 
         Trigger outtakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01);
         outtakeTrigger.whenActive(new OuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
 
-        //Toggles turret between homing and searching for the goal
-        Trigger homeTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.HOME_AND_UNHOME_TURRET));
-        homeTurret.toggleWhenActive(new InstantCommand(() -> turret.setState(TurretState.HOME)), new InstantCommand(() -> turret.setSearching()));
+        //Toggles turret between idle (locked in place) and searching for the goal
+        Trigger idleTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.IDLE_TURRET_TOGGLE));
+        idleTurret.toggleWhenActive(new InstantCommand(() -> turret.setSearching()), new InstantCommand(() -> turret.setState(TurretState.IDLE)));
     }
 
     private void configureRumble() {

@@ -46,21 +46,19 @@ public class LimelightSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        for (int i = 0; i < 5; i++) {
-            latestResult = limelight.getLatestResult();
-            if (latestResult != null && latestResult.isValid()) {
-                break;
-            }
-            else latestResult = null;
+        latestResult = limelight.getLatestResult();
+        if (latestResult == null || !latestResult.isValid()) {
+            latestResult = null;
         }
 
+        boolean seesGoal = false;
         if (latestResult != null && latestResult.isValid()) {
             for (FiducialResult tag : latestResult.getFiducialResults()) {
                 int tagID = tag.getFiducialId();
                 if (tagID == ALLIANCE_GOAL_ID) {
+                    seesGoal = true;
                     LatestGoalData.updateGoalData(latestResult.getTx(), getDistanceToGoal());
                 }
-                else LatestGoalData.tagInvisible();
 
                 //Check for motif
                 if (Motif.getMotif() == Motif.MotifType.NULL) {
@@ -74,8 +72,12 @@ public class LimelightSubsystem extends StealthSubsystem {
             }
         }
 
+        if (!seesGoal) {
+            LatestGoalData.tagInvisible();
+        }
+
         telemetry.addLine("----vision----");
-        telemetry.addData("seesGoal", LatestGoalData.canSeeTag());
+        telemetry.addData("seesGoal", seesGoal);
         telemetry.addData("distanceToGoal", LatestGoalData.getDistanceFromGoal());
         telemetry.addData("motif", Motif.getMotif());
     }

@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.LatestGoalData;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -25,9 +22,6 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private ShooterState state = ShooterState.IDLE;
 
-    public static double veloSet = 0.0;
-    public static double hoodSet = 0.0;
-
     private final PIDFController velocityPID;
 
     public static double kP = 0.02;
@@ -39,8 +33,6 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final double MIN_HOOD_ANGLE = 0.15;
 
     public static double VELOCITY_TOLERANCE = 20.0; //In ticks per second
-
-    public static double hoodAngle = 0.0;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -107,17 +99,15 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        //State-machine
-        telemetry.addData("clamped distance", MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 21, 93));
-        if (state == ShooterState.SHOOT) {
+        //Update hood angle
+        setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 21, 93)));
 
+        //State-machine
+        if (state == ShooterState.SHOOT) {
             velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 21, 93)));
             setPower(velocityPID.calculate(getVelocity()));
-
-            setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 21, 93)));
         }
         else {
-            setHoodPercentage(0.0);
             setPower(0.0);
         }
 

@@ -13,7 +13,7 @@ public class GamepadBindings {
         public static Trigger OUTTAKE = Trigger.LEFT_TRIGGER;
 
         // TURRET
-        public static Button HOME_AND_UNHOME_TURRET = Button.A;
+        public static Button IDLE_TURRET_TOGGLE = Button.A;
 
         // SPINDEXER
         public static Button EMERGENCY_RESET_SPINDEXER = Button.BACK;
