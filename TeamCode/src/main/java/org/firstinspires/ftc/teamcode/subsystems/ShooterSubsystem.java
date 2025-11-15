@@ -89,7 +89,7 @@ public class ShooterSubsystem extends StealthSubsystem {
 //            setPower(velocityPID.calculate(getVelocity()));
 //
 //            setHoodPercentage(hoodTable.get(LatestGoalData.getDistanceFromGoal()));
-            velocityPID.setSetPoint(1000);
+            velocityPID.setSetPoint(1200);
             setPower(velocityPID.calculate(getVelocity()));
             setHoodPercentage(0.5);
         }
