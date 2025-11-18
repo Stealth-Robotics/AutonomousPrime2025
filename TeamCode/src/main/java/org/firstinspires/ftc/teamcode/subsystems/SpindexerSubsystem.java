@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.math.MathFunctions;
@@ -12,11 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.teamcode.ArtifactSource;
-import org.firstinspires.ftc.teamcode.IntakeState;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -41,7 +36,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final double POSITION_TOLERANCE_TICKS = 10;
 
     /* Slot numbers increase going counter-clockwise
-                    3-------2
+                    3_______2
                      \     /
                         1
      */
@@ -147,7 +142,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     //Rotate the nearest empty slot to the intake
     public Command rotateEmptyToIntake() {
         return this.runOnce(() -> {
-            Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
+            Slot slot = getNearestEmptySlot();
 
             assert slot != null;
 
@@ -168,20 +163,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         });
     }
 
-    // Rotate the nearest artifact to the shooter position regardless of color
-    public Command rotateClosestArtifactToShoot() {
-        return this.runOnce(() -> {
-            Slot slot = getNearestFilledSlotToShooter();
-
-            assert slot != null;
-
-            pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
-            shooterSlot = slot;
-        });
-    }
-
     //Return the nearest empty slot to the desired position (intake/shooter)
-    private Slot getNearestEmptySlot(ArtifactSource source) {
+    private Slot getNearestEmptySlot() {
         ArrayList<Slot> emptySlots = getSlotsWithArtifact(Artifact.EMPTY);
 
         Slot nearestSlot = null;
@@ -189,9 +172,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         for (Slot slot : emptySlots) {
             //Calculate the shortest arc between the slot's (intake/shoot) position and the current spindexer position
-            double distance = (source == ArtifactSource.SHOOTER) ?
-                    Math.min((slot.getShootPosition() - getAngleDegrees() + 360) % 360, (getAngleDegrees() - slot.getShootPosition() + 360) % 360) :
-                    Math.min((slot.getIntakePosition() - getAngleDegrees() + 360) % 360, (getAngleDegrees() - slot.getIntakePosition() + 360) % 360);
+            double distance = Math.abs(((slot.getIntakePosition() - getAngleDegrees() + 540) % 360) - 180);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -208,25 +189,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
         for (Slot slot : slots) {
             //Calculate the shortest arc between the slot shoot position and the current position
-            double distance = Math.min((slot.getShootPosition() - getAngleDegrees() + 360) % 360, (getAngleDegrees() - slot.getShootPosition() + 360) % 360);
-            if (distance < minDistance) {
-                nearestSlot = slot;
-                minDistance = distance;
-            }
-        }
-        return nearestSlot;
-    }
-
-    private Slot getNearestFilledSlotToShooter() {
-        ArrayList<Slot> slots = getSlotsWithArtifact(Artifact.GREEN);
-        slots.addAll(getSlotsWithArtifact(Artifact.PURPLE));
-
-        Slot nearestSlot = null;
-        double minDistance = Double.MAX_VALUE;
-
-        for (Slot slot : slots) {
-            //Calculate the shortest arc between the slot shoot position and the current position
-            double distance = Math.min((slot.getShootPosition() - getAngleDegrees() + 360) % 360, (getAngleDegrees() - slot.getShootPosition() + 360) % 360);
+            double distance = Math.abs(((slot.getShootPosition() - getAngleDegrees() + 540) % 360) - 180);
             if (distance < minDistance) {
                 nearestSlot = slot;
                 minDistance = distance;
@@ -345,10 +308,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
         setPower(pid.calculate(getCurrentTicks()));
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("ticks", getCurrentTicks());
         telemetry.addData("atPosition", atPosition());
-        telemetry.addData("setpoint", pid.getSetPoint());
-        telemetry.addData("error", pid.getPositionError());
+        telemetry.addData("currentTicks", getCurrentTicks());
+        telemetry.addData("targetTicks", pid.getSetPoint());
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());
         telemetry.addData("3", slot3.getArtifact());
