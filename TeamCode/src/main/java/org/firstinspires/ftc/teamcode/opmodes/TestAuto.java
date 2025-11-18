@@ -28,13 +28,7 @@ public class TestAuto extends StealthOpMode {
     @Override
     public void initialize() {
         follower = new FollowerSubsystem(hardwareMap);
-        robot = new RobotSystem(
-                hardwareMap,
-                new Trigger(),
-                new Trigger(),
-                new Trigger(),
-                new Trigger()
-        );
+        robot = new RobotSystem(hardwareMap);
 
         //Flip poses
         if (Alliance.isRed()) {
