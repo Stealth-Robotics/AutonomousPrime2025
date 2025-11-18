@@ -11,6 +11,7 @@ public class LEDSubsystem extends StealthSubsystem {
 
     public LEDSubsystem(HardwareMap hardwareMap) {
         led = hardwareMap.get(Servo.class, "led");
+        setState(LEDState.OFF); //Initially off
     }
 
     public void setState(LEDState state) {
