@@ -5,6 +5,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -186,10 +187,11 @@ public class RobotSystem extends StealthSubsystem {
                     .whenActive(turret.setState(TurretState.TARGET));
 
             isSHOOT
-                    .and(isTrue(spindexer.atPosition()))
+                    .and(isTrue(spindexer.atPosition() && !isShooting))
                     .whenActive(
-                            intake.setState(IntakeState.TRANSFER)
-                                    .andThen(new InstantCommand(() -> isShooting = true))
+                            new InstantCommand(() -> isShooting = true)
+                                    .andThen(new WaitUntilCommand(shooter::atVelocity)) //Wait for shooter to fully spin up to speed
+                                    .andThen(intake.setState(IntakeState.TRANSFER))
                                     .andThen(new WaitCommand(SHOOTING_WAIT_TIME_MS))
                                     .andThen(intake.setState(IntakeState.IDLE))
                                     .andThen(new WaitCommand(200)) //Extra wait time for loader to get out of way

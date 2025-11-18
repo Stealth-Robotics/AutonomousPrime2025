@@ -21,6 +21,8 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final DcMotorEx shooterMotor;
     private final Servo hoodServo;
 
+    private final PoseEstimator poseEstimator;
+
     private ShooterState state = ShooterState.IDLE;
 
     private final PIDFController velocityPID;
@@ -38,6 +40,18 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
+
+    public ShooterSubsystem(HardwareMap hardwareMap) {
+        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
+        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
+
+        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        velocityPID = new PIDFController(kP, kI, kD, kF);
+
+        poseEstimator = PoseEstimator.getInstance();
+
+        generateInterpolationTables();
+    }
 
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
@@ -60,16 +74,6 @@ public class ShooterSubsystem extends StealthSubsystem {
         hoodTable.add(120, 1.0);
         hoodTable.add(210, 1.0);
         hoodTable.createLUT();
-    }
-
-    public ShooterSubsystem(HardwareMap hardwareMap) {
-        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
-        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
-
-        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        velocityPID = new PIDFController(kP, kI, kD, kF);
-
-        generateInterpolationTables();
     }
 
     public Command setState(ShooterState newState) {
@@ -100,22 +104,24 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        //Update hood angle
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(PoseEstimator.getDistanceFromGoal(), 0.25, 200)));
+        double distanceFromGoal = poseEstimator.getDistanceFromGoal();
+
+        //Update hood angle based off of distance from the goal
+        setHoodPercentage(hoodTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200)));
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(PoseEstimator.getDistanceFromGoal(), 0.25, 200)));
+            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200)));
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {
-            velocityPID.setSetPoint(0); //For atVelocity calls
             setPower(0.0);
         }
 
         telemetry.addLine("----shooter----");
         telemetry.addData("state", state);
-        telemetry.addData("hood pos", hoodServo.getPosition());
+        telemetry.addData("hood position", hoodServo.getPosition());
         telemetry.addData("velocity", getVelocity());
+        telemetry.addData("at velocity", atVelocity());
     }
 }
