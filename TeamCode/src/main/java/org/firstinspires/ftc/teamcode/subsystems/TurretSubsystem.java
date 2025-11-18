@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.drivebase.HDrive;
@@ -67,9 +68,8 @@ public class TurretSubsystem extends StealthSubsystem {
     private final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
     private final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
 
-    public TurretSubsystem(HardwareMap hardwareMap, PoseSupplier poseSupplier) {
+    public TurretSubsystem(HardwareMap hardwareMap) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
-        this.poseSupplier = poseSupplier;
 
         trackingPID = new PIDController(angleP, angleI, angleD);
         trackingPID.setTolerance(TURRET_TOLERANCE_TICKS);
@@ -90,8 +90,8 @@ public class TurretSubsystem extends StealthSubsystem {
         offsetTable.createLUT();
     }
 
-    public void setState(TurretState newState) {
-        state = newState;
+    public Command setState(TurretState newState) {
+        return this.runOnce(() -> state = newState);
     }
 
     public TurretState getState() {

@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.commands.ShootRapidCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
@@ -41,17 +42,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
+    private GamepadEx operatorGamepad;
+
+    private RobotSystem robot;
 
     private int matchTime;
     private boolean doEndgameSignal = true;
     private boolean doReadyToShootRumble = true;
-
-    private DriveSubsystem drive;
-    private IntakeSubsystem intake;
-    private SpindexerSubsystem spindexer;
-    private TurretSubsystem turret;
-    private ShooterSubsystem shooter;
-    private LimelightSubsystem limelight;
 
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
@@ -73,16 +70,18 @@ public class Teleop extends StealthOpMode {
     @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
+        operatorGamepad = new GamepadEx(gamepad2);
 
-        drive = new DriveSubsystem(hardwareMap);
-        intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap, intake);
-        shooter = new ShooterSubsystem(hardwareMap);
-        turret = new TurretSubsystem(hardwareMap, new PoseSupplier(() -> drive.getPoseX(), () -> drive.getPoseY(), () -> AngleUnit.RADIANS.toDegrees(drive.getHeading())));
-        limelight = new LimelightSubsystem(hardwareMap);
+        robot = new RobotSystem(
+                hardwareMap,
+                new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01),
+                new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01),
+                operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SHOOT_PATTERN),
+                operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SHOOT_RAPID)
+        );
 
-        //Setup default commands
-        drive.setDefaultCommand(drive.driveTeleop(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX()));
+        //Setup driving suppliers
+        robot.setDriverControl(() -> driveGamepad.getLeftX(), () -> driveGamepad.getLeftY(), () -> driveGamepad.getRightX());
 
         //Configure gamepad bindings
         configureBindings();
@@ -94,44 +93,26 @@ public class Teleop extends StealthOpMode {
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
         //Transfer subsystem data from auto into teleop
-        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(drive, spindexer, turret);
-        loadAutoDataIntoTeleop.andThen(new InstantCommand(() -> turret.setSearching())).schedule();
+        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(robot.drive, robot.spindexer, robot.turret);
+        loadAutoDataIntoTeleop.schedule();
     }
 
     private void configureBindings() {
-        //Force all subsystems to go to IDLE states
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.FORCE_ROBOT_IDLE).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> turret.setState(TurretState.IDLE)),
-                        new InstantCommand(() -> intake.setState(IntakeState.IDLE)),
-                        new InstantCommand(() -> shooter.setState(ShooterState.IDLE))
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
+        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(0, 0));
+
+        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
+                new ConditionalCommand(
+                        new EmergencyResetSpindexer(robot.spindexer, robot.intake),
+                        new InstantCommand(),
+                        () -> robot.getState() == RobotSystem.RobotState.IDLE
                 )
         );
 
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> drive.resetToPosition(0, 0));
-
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(new EmergencyResetSpindexer(spindexer, intake));
-
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_GREEN).whenPressed(new SequentialCommandGroup(
-                spindexer.rotateArtifactToShoot(Artifact.GREEN),
-                new ShootCommand(shooter, intake, spindexer)
-        ));
-
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.SHOOT_PURPLE).whenPressed(new SequentialCommandGroup(
-                spindexer.rotateArtifactToShoot(Artifact.PURPLE),
-                new ShootCommand(shooter, intake, spindexer)
-        ));
-
-        Trigger intakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01);
-        intakeTrigger.whenActive(new IntakeCommand(intake, spindexer, () -> intakeTrigger.negate().get()));
-
-        Trigger outtakeTrigger = new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01);
-        outtakeTrigger.whenActive(new OuttakeCommand(intake, () -> outtakeTrigger.negate().get()));
-
-        //Toggles turret between idle (locked in place) and searching for the goal
-        Trigger idleTurret = new Trigger(() -> driveGamepad.getButton(GamepadBindings.DriverBindings.IDLE_TURRET_TOGGLE));
-        idleTurret.toggleWhenActive(new InstantCommand(() -> turret.setSearching()), new InstantCommand(() -> turret.setState(TurretState.IDLE)));
+        //Manual overrides for motif pattern
+        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SET_MOTIF_PPG).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PPG)));
+        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SET_MOTIF_PGP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PGP)));
+        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SET_MOTIF_GPP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.GPP)));
     }
 
     private void configureRumble() {
@@ -141,13 +122,13 @@ public class Teleop extends StealthOpMode {
                 new InstantCommand(() -> doEndgameSignal = false)
         ));
 
-        Trigger readyToShootRumbleTrigger = new Trigger(() -> spindexer.isFull() && doReadyToShootRumble);
+        Trigger readyToShootRumbleTrigger = new Trigger(() -> robot.spindexer.isFull() && doReadyToShootRumble);
         readyToShootRumbleTrigger.whenActive(new ParallelCommandGroup(
                 new InstantCommand(() -> gamepad1.runRumbleEffect(readyToShootRumble)),
                 new InstantCommand(() -> doReadyToShootRumble = false)
         ));
 
-        Trigger resetReadyToShootRumble = new Trigger(() -> !doReadyToShootRumble && !spindexer.isFull());
+        Trigger resetReadyToShootRumble = new Trigger(() -> !doReadyToShootRumble && !robot.spindexer.isFull());
         resetReadyToShootRumble.whenActive(new InstantCommand(() -> doReadyToShootRumble = true));
     }
 

@@ -30,8 +30,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
     private final PIDController pid;
 
-    private final IntakeSubsystem intake;
-
     public static double kP = 0.0035;
     public static double kI = 0.12;
     public static double kD = 0.0003;
@@ -92,11 +90,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }
     }
 
-    public SpindexerSubsystem(HardwareMap hardwareMap, IntakeSubsystem intake) {
+    public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
         spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        this.intake = intake;
 
         pid = new PIDController(kP, kI, kD);
         pid.setTolerance(POSITION_TOLERANCE_TICKS);
@@ -153,48 +149,35 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return this.runOnce(() -> {
             Slot slot = getNearestEmptySlot(ArtifactSource.INTAKE);
 
-            if (slot != null) {
-                pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
-                intakeSlot = slot;
-            }
-        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
-    }
+            assert slot != null;
 
-    //Rotate the nearest empty slot to the shooter (only for intaking through shooter)
-    public Command rotateEmptyToShooter() {
-        return this.runOnce(() -> {
-            Slot slot = getNearestEmptySlot(ArtifactSource.SHOOTER);
-            if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
-                shooterSlot = slot;
-            }
-        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
+            pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
+            intakeSlot = slot;
+        });
     }
 
     // Rotate the nearest artifact of the specified color to the shooter position
     public Command rotateArtifactToShoot(Artifact artifactColor) {
         return this.runOnce(() -> {
             Slot slot = getNearestFilledSlotToShooter(artifactColor);
-            if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
-                shooterSlot = slot;
-            }
-        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
+
+            assert slot != null;
+
+            pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
+            shooterSlot = slot;
+        });
     }
 
     // Rotate the nearest artifact to the shooter position regardless of color
     public Command rotateClosestArtifactToShoot() {
         return this.runOnce(() -> {
             Slot slot = getNearestFilledSlotToShooter();
-            if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
-                shooterSlot = slot;
-            }
-        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
-    }
 
-    public boolean outOfBalls(){
-        return size() == 0;
+            assert slot != null;
+
+            pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
+            shooterSlot = slot;
+        });
     }
 
     //Return the nearest empty slot to the desired position (intake/shooter)
@@ -252,6 +235,34 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return nearestSlot;
     }
 
+    /** @return A list of the fastest combination to shoot out all of the robot's artifacts **/
+    public ArrayList<Artifact> getRapidShootList() {
+        ArrayList<Artifact> shootList = new ArrayList<>();
+
+        ArrayList<Slot> filledSlots = getSlotsWithArtifact(Artifact.PURPLE);
+        filledSlots.addAll(getSlotsWithArtifact(Artifact.GREEN));
+
+        for (int i = 0; i < size(); i++) {
+            Slot nearestSlot = null;
+            double minDistance = Double.MAX_VALUE;
+
+            for (Slot slot : filledSlots) {
+                //Calculate the shortest arc between the slot shoot position and the current position
+                double distance = Math.min((slot.getShootPosition() - getAngleDegrees() + 360) % 360, (getAngleDegrees() - slot.getShootPosition() + 360) % 360);
+                if (distance < minDistance) {
+                    nearestSlot = slot;
+                    minDistance = distance;
+                }
+            }
+
+            assert nearestSlot != null;
+            shootList.add(nearestSlot.getArtifact());
+            filledSlots.remove(nearestSlot);
+        }
+
+        return shootList;
+    }
+
     //Return a list of all the slots with the desired artifact type
     private ArrayList<Slot> getSlotsWithArtifact(Artifact color) {
         ArrayList<Slot> slots = new ArrayList<>();
@@ -265,18 +276,24 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return slots;
     }
 
-    //Update the spindexer's slot states depending on whether we are intaking/shooting an artifact
-    public void updateArtifactState(Artifact artifact, ArtifactSource source) {
-        if (source == ArtifactSource.INTAKE && intakeSlot != null) {
+    public Command intakeArtifact(Artifact artifact) {
+        return this.runOnce(() -> {
             intakeSlot.setArtifact(artifact);
-        }
-        else if (shooterSlot != null) {
-            shooterSlot.setArtifact(artifact);
-        }
+        });
+    }
+
+    public Command shootArtifact() {
+        return this.runOnce(() -> {
+            shooterSlot.setArtifact(Artifact.EMPTY);
+        });
     }
 
     public boolean isFull() {
         return size() == 3;
+    }
+
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
     //Returns the number of artifacts in the spindexer
@@ -326,14 +343,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         setPower(pid.calculate(getCurrentTicks()));
-
-        if (intake.getState() == IntakeState.INTAKE && !isFull()) {
-            rotateEmptyToIntake().schedule();
-            if (atPosition() && intake.getSensedArtifact() != Artifact.EMPTY) {
-                updateArtifactState(intake.getSensedArtifact(), ArtifactSource.INTAKE);
-                if (!isFull()) rotateEmptyToIntake().schedule();
-            }
-        }
 
         telemetry.addLine("----spindexer----");
         telemetry.addData("ticks", getCurrentTicks());

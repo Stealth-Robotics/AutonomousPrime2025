@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.pedropathing.math.MathFunctions;
@@ -71,8 +72,8 @@ public class ShooterSubsystem extends StealthSubsystem {
         generateInterpolationTables();
     }
 
-    public void setState(ShooterState newState) {
-        state = newState;
+    public Command setState(ShooterState newState) {
+        return this.runOnce(() -> state = newState);
     }
 
     public ShooterState getState() {

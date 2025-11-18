@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.Command;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -54,8 +55,8 @@ public class IntakeSubsystem extends StealthSubsystem {
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void setState(IntakeState newState) {
-        state = newState;
+    public Command setState(IntakeState newState) {
+        return this.runOnce(() -> state = newState);
     }
 
     public IntakeState getState() {
@@ -93,13 +94,9 @@ public class IntakeSubsystem extends StealthSubsystem {
             setPower(-OPERATING_SPEED);
             loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
-        else if (state == IntakeState.TRANSFERRING_UP) {
+        else if (state == IntakeState.TRANSFER) {
             setPower(OPERATING_SPEED);
             loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
-        }
-        else if (state == IntakeState.TRANSFERRING_IDLE) {
-            setPower(OPERATING_SPEED);
-            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
         else {
             setPower(0.0);

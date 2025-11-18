@@ -11,26 +11,19 @@ public class GamepadBindings {
         // INTAKE
         public static Trigger INTAKE = Trigger.RIGHT_TRIGGER;
         public static Trigger OUTTAKE = Trigger.LEFT_TRIGGER;
+    }
 
-        // TURRET
-        public static Button IDLE_TURRET_TOGGLE = Button.A;
-
+    public static class OperatorBindings {
         // SPINDEXER
         public static Button EMERGENCY_RESET_SPINDEXER = Button.BACK;
 
         // SHOOTING
-        public static Button SHOOT_GREEN = Button.LEFT_BUMPER;
-        public static Button SHOOT_PURPLE = Button.RIGHT_BUMPER;
+        public static Button SHOOT_PATTERN = Button.LEFT_BUMPER;
+        public static Button SHOOT_RAPID = Button.RIGHT_BUMPER;
 
         // OTHER
-        public static Button FORCE_ROBOT_IDLE = Button.DPAD_DOWN;
-
         public static Button SET_MOTIF_GPP = Button.DPAD_LEFT;
         public static Button SET_MOTIF_PGP = Button.DPAD_UP;
         public static Button SET_MOTIF_PPG = Button.DPAD_RIGHT;
-
-    }
-
-    public static class OperatorBindings {
     }
 }
