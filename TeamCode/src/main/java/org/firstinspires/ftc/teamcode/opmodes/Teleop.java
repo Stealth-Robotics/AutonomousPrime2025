@@ -4,9 +4,6 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,31 +11,13 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.Motif;
-import org.firstinspires.ftc.teamcode.PoseSupplier;
-import org.firstinspires.ftc.teamcode.ShooterState;
-import org.firstinspires.ftc.teamcode.TurretState;
-import org.firstinspires.ftc.teamcode.commands.OuttakeCommand;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
-import org.firstinspires.ftc.teamcode.commands.IntakeCommand;
-import org.firstinspires.ftc.teamcode.commands.ShootCommand;
-import org.firstinspires.ftc.teamcode.commands.ShootPatternCommand;
-import org.firstinspires.ftc.teamcode.commands.ShootRapidCommand;
-import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.LimelightSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
@@ -93,7 +72,7 @@ public class Teleop extends StealthOpMode {
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
         //Transfer subsystem data from auto into teleop
-        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(robot.drive, robot.spindexer, robot.turret);
+        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(robot);
         loadAutoDataIntoTeleop.schedule();
     }
 

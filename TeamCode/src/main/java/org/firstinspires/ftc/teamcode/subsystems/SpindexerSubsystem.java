@@ -36,7 +36,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final double POSITION_TOLERANCE_TICKS = 10;
 
     /* Slot numbers increase going counter-clockwise
-                    3_______2
+                    3 ————— 2
                      \     /
                         1
      */

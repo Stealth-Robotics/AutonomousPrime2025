@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.function.DoubleSupplier;
@@ -23,6 +24,8 @@ public class DriveSubsystem extends StealthSubsystem {
     private final DcMotorEx leftBack;
     private final DcMotorEx rightFront;
     private final DcMotorEx rightBack;
+
+    private final PoseEstimator poseEstimator;
 
     private final GoBildaPinpointDriver pp;
 
@@ -42,6 +45,8 @@ public class DriveSubsystem extends StealthSubsystem {
         leftBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
+        poseEstimator = PoseEstimator.getInstance();
+
         pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pp.setOffsets(3.167, -7.456, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
@@ -50,25 +55,17 @@ public class DriveSubsystem extends StealthSubsystem {
         pp.resetPosAndIMU();
     }
 
-    public boolean isPPReady() {
-        return pp.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY;
+    public void setPose(Pose newPose) {
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
     }
 
-    public void setPose(Pose2D newPose) {
-        pp.setPosition(newPose);
+    public void setPoseIgnoreHeading(Pose newPose) {
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, getHeading()));
     }
 
     public void resetToPosition(int x, int y) {
         pp.setPosX(x, DistanceUnit.INCH);
         pp.setPosY(y, DistanceUnit.INCH);
-    }
-
-    public double getPoseX() {
-        return pp.getPosition().getX(DistanceUnit.INCH);
-    }
-
-    public double getPoseY() {
-        return pp.getPosition().getY(DistanceUnit.INCH);
     }
 
     public double getHeading() {
@@ -105,6 +102,17 @@ public class DriveSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         pp.update();
+
+        if (poseEstimator.hasLimelightPoseUpdate()) {
+            setPoseIgnoreHeading(poseEstimator.getLatestLimelightPose());
+        }
+
+        poseEstimator.updateRobotPose(new Pose(
+                pp.getPosX(DistanceUnit.INCH),
+                pp.getPosY(DistanceUnit.INCH),
+                getHeading()
+        ));
+
         telemetry.addLine("----drive----");
         telemetry.addData("x", pp.getPosX(DistanceUnit.INCH));
         telemetry.addData("y", pp.getPosY(DistanceUnit.INCH));

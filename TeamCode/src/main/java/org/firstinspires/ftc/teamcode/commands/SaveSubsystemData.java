@@ -9,17 +9,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 
 public class SaveSubsystemData extends SequentialCommandGroup {
-    public SaveSubsystemData(DriveSubsystem drive, SpindexerSubsystem spindexer, TurretSubsystem turret) {
+    public SaveSubsystemData(RobotSystem robot) {
         addCommands(
-                new InstantCommand(() -> AutoToTeleopData.pinpointPose = new Pose2D(DistanceUnit.INCH, drive.getPoseX(), drive.getPoseY(), AngleUnit.DEGREES, AngleUnit.RADIANS.toDegrees(drive.getHeading()))),
-                new InstantCommand(() -> AutoToTeleopData.spindexerTicks = spindexer.getTicks()),
-                new InstantCommand(() -> AutoToTeleopData.turretTicks = turret.getRawTicks()),
+                new InstantCommand(() -> AutoToTeleopData.spindexerTicks = robot.spindexer.getTicks()),
+                new InstantCommand(() -> AutoToTeleopData.turretTicks = robot.turret.getRawTicks()),
                 new InstantCommand(() -> {
-                    Artifact[] artifacts = spindexer.getCurrentArtifacts();
+                    Artifact[] artifacts = robot.spindexer.getCurrentArtifacts();
                     AutoToTeleopData.slot1Artifact = artifacts[0];
                     AutoToTeleopData.slot2Artifact = artifacts[1];
                     AutoToTeleopData.slot3Artifact = artifacts[2];

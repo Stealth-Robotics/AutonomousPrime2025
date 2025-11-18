@@ -10,7 +10,9 @@ import org.stealthrobotics.library.Alliance;
 
 public class PoseEstimator {
     private static PoseEstimator INSTANCE = null;
-    private Pose robotPose = new Pose(0, 0, 0);
+
+    private Pose robotPose = null;
+    private Pose latestLimelightPose = null;
 
     private static final Pose BLUE_GOAL_POSE = new Pose();
     private static final Pose RED_GOAL_POSE = new Pose();
@@ -33,12 +35,22 @@ public class PoseEstimator {
         return INSTANCE;
     }
 
-    public Pose getRobotPose() {
-        return robotPose;
-    }
-
     public void updateRobotPose(Pose newEstimation) {
         robotPose = newEstimation;
+    }
+
+    public void setLimelightPoseUpdate(Pose newPose) {
+        latestLimelightPose = newPose;
+    }
+
+    public boolean hasLimelightPoseUpdate() {
+        return latestLimelightPose != null;
+    }
+
+    public Pose getLatestLimelightPose() {
+        Pose updatedPose = latestLimelightPose;
+        latestLimelightPose = null;
+        return updatedPose;
     }
 
     public double getTurretTargetAngle() {

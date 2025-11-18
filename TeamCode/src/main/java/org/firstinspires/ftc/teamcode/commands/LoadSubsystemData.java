@@ -6,17 +6,16 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 
 public class LoadSubsystemData extends SequentialCommandGroup {
-    public LoadSubsystemData(DriveSubsystem drive, SpindexerSubsystem spindexer, TurretSubsystem turret) {
+    public LoadSubsystemData(RobotSystem robot) {
         addCommands(
-                new InstantCommand(() -> spindexer.setEncoderOffset(AutoToTeleopData.spindexerTicks)),
-                new InstantCommand(() -> turret.setEncoderOffset(AutoToTeleopData.turretTicks)),
-                new InstantCommand(() -> spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact)),
-                new WaitUntilCommand(drive::isPPReady),
-                new InstantCommand(() -> drive.setPose(AutoToTeleopData.pinpointPose))
+                new InstantCommand(() -> robot.spindexer.setEncoderOffset(AutoToTeleopData.spindexerTicks)),
+                new InstantCommand(() -> robot.turret.setEncoderOffset(AutoToTeleopData.turretTicks)),
+                new InstantCommand(() -> robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact))
         );
     }
 }

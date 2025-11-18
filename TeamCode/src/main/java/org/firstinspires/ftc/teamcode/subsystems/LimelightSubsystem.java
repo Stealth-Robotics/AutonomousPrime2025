@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.*;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.Motif;
 import org.stealthrobotics.library.Alliance;
@@ -18,14 +20,10 @@ import org.stealthrobotics.library.StealthSubsystem;
 public class LimelightSubsystem extends StealthSubsystem {
     private final Limelight3A limelight;
 
-    private final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 20.0;
-    private final double LIMELIGHT_DISTANCE_OFF_FLOOR_INCHES = 15.25;
-    private final double GOAL_TAG_HEIGHT_INCHES = 29.5;
+    private final PoseEstimator poseEstimator;
 
     private final int MOTIF_GPP_ID = 21, MOTIF_PGP_ID = 22, MOTIF_PPG_ID = 23;
     private final int GOAL_BLUE_ID = 20, GOAL_RED_ID = 24;
-
-    private final int ALLIANCE_GOAL_ID;
 
     private LLResult latestResult = null;
 
@@ -35,13 +33,7 @@ public class LimelightSubsystem extends StealthSubsystem {
         limelight.start();
         limelight.pipelineSwitch(0);
 
-        ALLIANCE_GOAL_ID = (Alliance.get() == Alliance.BLUE) ? GOAL_BLUE_ID : GOAL_RED_ID;
-    }
-
-    //Unused as of the moment
-    private double getDistanceToGoal() {
-        double heightBetweenAprilTagAndLimelight = GOAL_TAG_HEIGHT_INCHES - LIMELIGHT_DISTANCE_OFF_FLOOR_INCHES;
-        return heightBetweenAprilTagAndLimelight / Math.tan(Math.toRadians(LIMELIGHT_MOUNT_ANGLE_DEGREES + latestResult.getTy()));
+        poseEstimator = PoseEstimator.getInstance();
     }
 
     @Override
@@ -51,13 +43,19 @@ public class LimelightSubsystem extends StealthSubsystem {
             latestResult = null;
         }
 
-        boolean seesGoal = false;
         if (latestResult != null && latestResult.isValid()) {
             for (FiducialResult tag : latestResult.getFiducialResults()) {
                 int tagID = tag.getFiducialId();
-                if (tagID == ALLIANCE_GOAL_ID) {
-                    seesGoal = true;
-                    PoseEstimator.updateGoalData(latestResult.getTx());
+                if (tagID == GOAL_BLUE_ID || tagID == GOAL_RED_ID) {
+                    //Update poseEstimator with limelight robot pose estimation in field space
+                    //Ignore heading because pinpoint is accurate enough for that
+                    //TODO: Figure in what coordinates the limelight gives us and convert to Pedro Coordinates if needed
+                    poseEstimator.setLimelightPoseUpdate(
+                            new Pose(
+                                    tag.getRobotPoseFieldSpace().getPosition().x,
+                                    tag.getRobotPoseFieldSpace().getPosition().y
+                            )
+                    );
                 }
 
                 //Check for motif
@@ -72,13 +70,8 @@ public class LimelightSubsystem extends StealthSubsystem {
             }
         }
 
-        if (!seesGoal) {
-            PoseEstimator.tagInvisible();
-        }
-
         telemetry.addLine("----vision----");
-        telemetry.addData("seesGoal", seesGoal);
-        telemetry.addData("distanceToGoal", PoseEstimator.getDistanceFromGoal());
+        telemetry.addData("distanceToGoal", poseEstimator.getDistanceFromGoal());
         telemetry.addData("motif", Motif.getMotif());
     }
 }
