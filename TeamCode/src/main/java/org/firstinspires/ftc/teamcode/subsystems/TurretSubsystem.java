@@ -85,8 +85,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
     //Setup turret offsets relative to goal distance
     private void setupLUT() {
-        offsetTable.add(0, 0);
-        offsetTable.add(210, (Alliance.get() == Alliance.BLUE) ? -16 : 16);
+        offsetTable.add(0, -8);
+        offsetTable.add(210, -12);
         offsetTable.createLUT();
     }
 

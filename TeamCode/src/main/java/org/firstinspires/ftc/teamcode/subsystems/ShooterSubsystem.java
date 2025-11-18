@@ -40,23 +40,23 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
-        speedTable.add(0, 1100);
-        speedTable.add(21, 1100);
-        speedTable.add(27, 1100);
-        speedTable.add(31, 1200);
-        speedTable.add(39.6, 1200);
-        speedTable.add(60, 1300);
-        speedTable.add(93, 1600);
-        speedTable.add(210, 1600);
+        speedTable.add(0, 900);
+        speedTable.add(15, 1000);
+        speedTable.add(25, 1100);
+        speedTable.add(30, 1200);
+        speedTable.add(40, 1300);
+        speedTable.add(68, 1300);
+        speedTable.add(120, 1550);
+        speedTable.add(210, 2000);
         speedTable.createLUT();
 
-        hoodTable.add(0, 0.48);
-        hoodTable.add(21, 0.48);
-        hoodTable.add(27, 0.53);
-        hoodTable.add(31, 0.55);
-        hoodTable.add(39.6, 0.73);
-        hoodTable.add(60, 0.8);
-        hoodTable.add(93, 1.0);
+        hoodTable.add(0, 0.35);
+        hoodTable.add(15, 0.48);
+        hoodTable.add(25, 0.53);
+        hoodTable.add(30, 0.55);
+        hoodTable.add(40, 0.73);
+        hoodTable.add(68, 0.8);
+        hoodTable.add(120, 1.0);
         hoodTable.add(210, 1.0);
         hoodTable.createLUT();
     }
