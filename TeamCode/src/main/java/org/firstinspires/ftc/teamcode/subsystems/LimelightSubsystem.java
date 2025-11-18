@@ -8,9 +8,8 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes.*;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.LatestGoalData;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.Motif;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
 
@@ -58,7 +57,7 @@ public class LimelightSubsystem extends StealthSubsystem {
                 int tagID = tag.getFiducialId();
                 if (tagID == ALLIANCE_GOAL_ID) {
                     seesGoal = true;
-                    LatestGoalData.updateGoalData(latestResult.getTx());
+                    PoseEstimator.updateGoalData(latestResult.getTx());
                 }
 
                 //Check for motif
@@ -74,12 +73,12 @@ public class LimelightSubsystem extends StealthSubsystem {
         }
 
         if (!seesGoal) {
-            LatestGoalData.tagInvisible();
+            PoseEstimator.tagInvisible();
         }
 
         telemetry.addLine("----vision----");
         telemetry.addData("seesGoal", seesGoal);
-        telemetry.addData("distanceToGoal", LatestGoalData.getDistanceFromGoal());
+        telemetry.addData("distanceToGoal", PoseEstimator.getDistanceFromGoal());
         telemetry.addData("motif", Motif.getMotif());
     }
 }

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.LatestGoalData;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
@@ -101,11 +101,11 @@ public class ShooterSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         //Update hood angle
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
+        setHoodPercentage(hoodTable.get(MathFunctions.clamp(PoseEstimator.getDistanceFromGoal(), 0.25, 200)));
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(LatestGoalData.getDistanceFromGoal(), 0.25, 200)));
+            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(PoseEstimator.getDistanceFromGoal(), 0.25, 200)));
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {

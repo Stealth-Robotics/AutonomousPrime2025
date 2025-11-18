@@ -191,9 +191,11 @@ public class RobotSystem extends StealthSubsystem {
                             intake.setState(IntakeState.TRANSFER)
                                     .andThen(new InstantCommand(() -> isShooting = true))
                                     .andThen(new WaitCommand(SHOOTING_WAIT_TIME_MS))
-                                    .andThen(new InstantCommand(() -> isShooting = false))
+                                    .andThen(intake.setState(IntakeState.IDLE))
+                                    .andThen(new WaitCommand(200)) //Extra wait time for loader to get out of way
                                     .andThen(spindexer.shootArtifact())
                                     .andThen(new InstantCommand(shootingQueue::remove))
+                                    .andThen(new InstantCommand(() -> isShooting = false))
                     );
         }
     }
