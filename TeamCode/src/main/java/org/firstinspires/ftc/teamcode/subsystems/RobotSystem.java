@@ -77,26 +77,17 @@ public class RobotSystem extends StealthSubsystem {
         this.shootPatternTrigger = shootPatternTrigger;
         this.shootRapidTrigger = shootRapidTrigger;
 
-        configStateBehavior();
+        configureStateMachine(intakeTrigger == null);
         setupLEDTriggers();
     }
 
     public RobotSystem(HardwareMap hardwareMap) {
-        drive = new DriveSubsystem(hardwareMap);
-        intake = new IntakeSubsystem(hardwareMap);
-        spindexer = new SpindexerSubsystem(hardwareMap);
-        shooter = new ShooterSubsystem(hardwareMap);
-        turret = new TurretSubsystem(hardwareMap);
-        vision = new VisionSubsystem(hardwareMap);
-        led = new LEDSubsystem(hardwareMap);
+        this(hardwareMap, null, null, null, null);
+    }
 
-        this.intakeTrigger = new Trigger();
-        this.outtakeTrigger = new Trigger();
-        this.shootPatternTrigger = new Trigger();
-        this.shootRapidTrigger = new Trigger();
-
-        configAutonomousStateBehavior();
-        setupLEDTriggers();
+    private void configureStateMachine(boolean isAutonomous) {
+        if (isAutonomous) configAutonomousStateBehavior();
+        else configStateBehavior();
     }
 
     private void setupLEDTriggers() {
@@ -313,8 +304,8 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     private void printTelemetry() {
-        telemetry.addLine("----robot system----");
-        telemetry.addData("state", robotState);
+        telemetry.addLine("<h5>----robot system----</h5>");
+        telemetry.addData("<h5>state", robotState + "</h5>");
     }
 
     @Override
