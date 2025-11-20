@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -27,15 +28,16 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final PIDFController velocityPID;
 
-    public static double kP = 0.02;
+    public static double kP = 0.0;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.0;
+    public static double kV = 1 / 4200.0;
+    public static double kS = 0.0; //TODO: Tune to overcome static friction
 
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
 
-    public static double VELOCITY_TOLERANCE = 20.0; //In ticks per second
+    public static double VELOCITY_TOLERANCE = 10.0; //TODO: Tune to a reasonable value
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -46,7 +48,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
 
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        velocityPID = new PIDFController(kP, kI, kD, kF);
+        velocityPID = new PIDFController(kP, kI, kD, kV);
 
         poseEstimator = PoseEstimator.getInstance();
 
@@ -111,8 +113,9 @@ public class ShooterSubsystem extends StealthSubsystem {
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            velocityPID.setSetPoint(speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200)));
-            setPower(velocityPID.calculate(getVelocity()));
+            double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+            velocityPID.setSetPoint(velocitySetpoint);
+            setPower(velocityPID.calculate(getVelocity()) + (kS * Math.signum(velocitySetpoint)));
         }
         else {
             setPower(0.0);

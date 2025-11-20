@@ -11,8 +11,8 @@ import org.stealthrobotics.library.Alliance;
 public class PoseEstimator {
     private static PoseEstimator INSTANCE = null;
 
+    private Pose robotPoseNew = null;
     private Pose robotPose = null;
-    private Pose latestLimelightPose = null;
 
     private static final Pose BLUE_GOAL_POSE = new Pose();
     private static final Pose RED_GOAL_POSE = new Pose();
@@ -28,6 +28,10 @@ public class PoseEstimator {
         }
     }
 
+    public Pose getRobotPose() {
+        return robotPose;
+    }
+
     public static PoseEstimator getInstance() {
         if (INSTANCE == null) {
             return new PoseEstimator();
@@ -35,22 +39,20 @@ public class PoseEstimator {
         return INSTANCE;
     }
 
-    public void updateRobotPose(Pose newEstimation) {
-        robotPose = newEstimation;
+    //Update via camera with new apriltag data
+    public void updateWithNewPose(Pose newEstimation) {
+        robotPoseNew = newEstimation;
     }
 
-    public void setLimelightPoseUpdate(Pose newPose) {
-        latestLimelightPose = newPose;
-    }
-
-    public boolean hasLimelightPoseUpdate() {
-        return latestLimelightPose != null;
-    }
-
-    public Pose getLatestLimelightPose() {
-        Pose updatedPose = latestLimelightPose;
-        latestLimelightPose = null;
-        return updatedPose;
+    //Update via pinpoint based off of robot velocity
+    public boolean update(Pose updatedRobotPose) {
+        robotPose = updatedRobotPose;
+        if (robotPoseNew != null) {
+            robotPose = robotPoseNew;
+            robotPoseNew = null;
+            return true;
+        }
+        return false;
     }
 
     public double getTurretTargetAngle() {

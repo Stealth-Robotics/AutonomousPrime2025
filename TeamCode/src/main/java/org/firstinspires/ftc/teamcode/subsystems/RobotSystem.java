@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.LEDState;
 import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.TurretState;
@@ -28,7 +29,8 @@ public class RobotSystem extends StealthSubsystem {
     public final IntakeSubsystem intake;
     public final ShooterSubsystem shooter;
     public final SpindexerSubsystem spindexer;
-    public final LimelightSubsystem limelight;
+    public final VisionSubsystem vision;
+    public final LEDSubsystem led;
 
     private final Trigger intakeTrigger;
     private final Trigger outtakeTrigger;
@@ -65,7 +67,8 @@ public class RobotSystem extends StealthSubsystem {
         spindexer = new SpindexerSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
-        limelight = new LimelightSubsystem(hardwareMap);
+        vision = new VisionSubsystem(hardwareMap);
+        led = new LEDSubsystem(hardwareMap);
 
         this.intakeTrigger = intakeTrigger;
         this.outtakeTrigger = outtakeTrigger;
@@ -73,6 +76,7 @@ public class RobotSystem extends StealthSubsystem {
         this.shootRapidTrigger = shootRapidTrigger;
 
         configStateBehavior();
+        setupLEDTriggers();
     }
 
     public RobotSystem(HardwareMap hardwareMap) {
@@ -81,7 +85,8 @@ public class RobotSystem extends StealthSubsystem {
         spindexer = new SpindexerSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
-        limelight = new LimelightSubsystem(hardwareMap);
+        vision = new VisionSubsystem(hardwareMap);
+        led = new LEDSubsystem(hardwareMap);
 
         this.intakeTrigger = new Trigger();
         this.outtakeTrigger = new Trigger();
@@ -89,6 +94,17 @@ public class RobotSystem extends StealthSubsystem {
         this.shootRapidTrigger = new Trigger();
 
         configAutonomousStateBehavior();
+        setupLEDTriggers();
+    }
+
+    private void setupLEDTriggers() {
+        //Green when shooter is at velocity
+        Trigger shooterAtVelocity = new Trigger(shooter::atVelocity);
+        shooterAtVelocity.whenActive(new InstantCommand(() -> led.setState(LEDState.GREEN)));
+
+        //Red when shooter is not at velocity
+        Trigger shooterNotAtVelocity = new Trigger(shooter::atVelocity);
+        shooterNotAtVelocity.whenActive(new InstantCommand(() -> led.setState(LEDState.RED)));
     }
 
     public void setDriverControl(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation) {

@@ -40,6 +40,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private final double kP = 0.03;
     private final double kI = 0.05;
     private final double kD = 0.0;
+    private final double kS = 0.0; //TODO: tune
 
     private final double TICKS_PER_REVOLUTION = 1538; // (output ratio) * PPR = 4 * 384.5
 
@@ -106,9 +107,10 @@ public class TurretSubsystem extends StealthSubsystem {
             double turretTarget = poseEstimator.getTurretTargetAngle();
 
             turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+            turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
-            trackingPID.setSetPoint(MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
-            setPower(trackingPID.calculate(getCurrentDegrees()));
+            double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
+            setPower(pidOutput + (kS * Math.signum(pidOutput)));
         }
         else {
             //Stop all turret movement

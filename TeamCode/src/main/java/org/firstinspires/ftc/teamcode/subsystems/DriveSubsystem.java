@@ -59,10 +59,6 @@ public class DriveSubsystem extends StealthSubsystem {
         pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
     }
 
-    public void setPoseIgnoreHeading(Pose newPose) {
-        pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, getHeading()));
-    }
-
     public void resetToPosition(int x, int y) {
         pp.setPosX(x, DistanceUnit.INCH);
         pp.setPosY(y, DistanceUnit.INCH);
@@ -103,15 +99,15 @@ public class DriveSubsystem extends StealthSubsystem {
     public void periodic() {
         pp.update();
 
-        if (poseEstimator.hasLimelightPoseUpdate()) {
-            setPoseIgnoreHeading(poseEstimator.getLatestLimelightPose());
-        }
-
-        poseEstimator.updateRobotPose(new Pose(
+        boolean updatePinpointPose =
+                poseEstimator.update(new Pose(
                 pp.getPosX(DistanceUnit.INCH),
                 pp.getPosY(DistanceUnit.INCH),
                 getHeading()
         ));
+
+        if (updatePinpointPose)
+            setPose(poseEstimator.getRobotPose());
 
         telemetry.addLine("----drive----");
         telemetry.addData("x", pp.getPosX(DistanceUnit.INCH));
