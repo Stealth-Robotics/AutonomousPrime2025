@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.math.MathFunctions;
@@ -18,6 +19,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Queue;
 
 @Config
 @SuppressWarnings("FieldCanBeLocal")
@@ -141,7 +143,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     //Rotate the nearest empty slot to the intake
     public Command rotateEmptyToIntake() {
-        return this.runOnce(() -> {
+        return runOnce(() -> {
             Slot slot = getNearestEmptySlot();
 
             assert slot != null;
@@ -152,9 +154,9 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     // Rotate the nearest artifact of the specified color to the shooter position
-    public Command rotateArtifactToShoot(Artifact artifactColor) {
-        return this.runOnce(() -> {
-            Slot slot = getNearestFilledSlotToShooter(artifactColor);
+    public Command rotateArtifactToShoot(Queue<Artifact> shootingQueue) {
+        return runOnce(() -> {
+            Slot slot = getNearestFilledSlotToShooter(shootingQueue.remove());
 
             assert slot != null;
 
@@ -205,13 +207,15 @@ public class SpindexerSubsystem extends StealthSubsystem {
         ArrayList<Slot> filledSlots = getSlotsWithArtifact(Artifact.PURPLE);
         filledSlots.addAll(getSlotsWithArtifact(Artifact.GREEN));
 
+        double prevPos = getAngleDegrees();
+
         for (int i = 0; i < size(); i++) {
             Slot nearestSlot = null;
             double minDistance = Double.MAX_VALUE;
 
             for (Slot slot : filledSlots) {
                 //Calculate the shortest arc between the slot shoot position and the current position
-                double distance = Math.min((slot.getShootPosition() - getAngleDegrees() + 360) % 360, (getAngleDegrees() - slot.getShootPosition() + 360) % 360);
+                double distance = Math.abs(((slot.getShootPosition() - prevPos + 540) % 360) - 180);
                 if (distance < minDistance) {
                     nearestSlot = slot;
                     minDistance = distance;
@@ -219,8 +223,11 @@ public class SpindexerSubsystem extends StealthSubsystem {
             }
 
             assert nearestSlot != null;
+
             shootList.add(nearestSlot.getArtifact());
             filledSlots.remove(nearestSlot);
+
+            prevPos = nearestSlot.getShootPosition();
         }
 
         return shootList;
@@ -229,26 +236,22 @@ public class SpindexerSubsystem extends StealthSubsystem {
     //Return a list of all the slots with the desired artifact type
     private ArrayList<Slot> getSlotsWithArtifact(Artifact color) {
         ArrayList<Slot> slots = new ArrayList<>();
-        if (slot1.getArtifact() == color)
+        if (slot1.getArtifact().equals(color))
             slots.add(slot1);
-        if (slot2.getArtifact() == color)
+        if (slot2.getArtifact().equals(color))
             slots.add(slot2);
-        if (slot3.getArtifact() == color)
+        if (slot3.getArtifact().equals(color))
             slots.add(slot3);
 
         return slots;
     }
 
-    public Command intakeArtifact(Artifact artifact) {
-        return this.runOnce(() -> {
-            intakeSlot.setArtifact(artifact);
-        });
+    public void intakeArtifact(Artifact artifact) {
+       intakeSlot.setArtifact(artifact);
     }
 
     public Command shootArtifact() {
-        return this.runOnce(() -> {
-            shooterSlot.setArtifact(Artifact.EMPTY);
-        });
+        return new InstantCommand(() -> shooterSlot.setArtifact(Artifact.EMPTY));
     }
 
     public boolean isFull() {

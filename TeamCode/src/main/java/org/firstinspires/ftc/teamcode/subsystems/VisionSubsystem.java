@@ -55,6 +55,7 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setDrawTagOutline(true)
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
+                .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) //From FTC discord (veer)
                 .build();
 
         visionPortal = new VisionPortal.Builder()
