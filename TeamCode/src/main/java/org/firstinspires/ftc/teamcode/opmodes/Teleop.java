@@ -7,7 +7,6 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -32,21 +31,6 @@ public class Teleop extends StealthOpMode {
 
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
-    private final Gamepad.RumbleEffect readyToShootRumble = new Gamepad.RumbleEffect.Builder()
-            .addStep(1.0, 1.0, 500)
-            .build();
-
-    private final Gamepad.RumbleEffect endgameRumble = new Gamepad.RumbleEffect.Builder()
-            .addStep(1.0, 0.0, 400)
-            .addStep(0.0, 1.0, 400)
-            .addStep(1.0, 0.0, 400)
-            .addStep(0.0, 1.0, 400)
-            .addStep(1.0, 0.0, 400)
-            .addStep(0.0, 1.0, 400)
-            .addStep(1.0, 0.0, 400)
-            .addStep(0.0, 1.0, 400)
-            .build();
-
     @Override
     public void initialize() {
         driveGamepad = new GamepadEx(gamepad1);
@@ -54,10 +38,10 @@ public class Teleop extends StealthOpMode {
 
         robot = new RobotSystem(
                 hardwareMap,
-                new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.INTAKE) > 0.01),
-                new Trigger(() -> driveGamepad.getTrigger(GamepadBindings.DriverBindings.OUTTAKE) > 0.01),
-                operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SHOOT_PATTERN),
-                operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SHOOT_RAPID)
+                new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.INTAKE) > 0.01),
+                new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.OUTTAKE) > 0.01),
+                operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_PATTERN),
+                operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_RAPID)
         );
 
         //Setup driving suppliers
@@ -72,21 +56,21 @@ public class Teleop extends StealthOpMode {
         //Set DS telemetry to allow rich text formatting
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
-        //Transfer subsystem data from auto into teleop
+        //Transfer necessary subsystem data from auto into teleop
         LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(robot);
         loadAutoDataIntoTeleop.schedule();
     }
 
     private void configureBindings() {
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
-        driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(0, 0));
+        driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
+        driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(0, 0));
 
-        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.TOGGLE_PRE_SHOOTER_SPIN_UP).toggleWhenActive(
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.TOGGLE_PRE_SHOOTER_SPIN_UP).toggleWhenActive(
                 new InstantCommand(() -> robot.shooter.setState(ShooterState.SHOOT)),
                 new InstantCommand(() -> robot.shooter.setState(ShooterState.IDLE))
         );
 
-        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(
                         new EmergencyResetSpindexer(robot.spindexer, robot.intake),
                         new InstantCommand(),
@@ -95,21 +79,21 @@ public class Teleop extends StealthOpMode {
         );
 
         //Manual overrides for motif pattern
-        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SET_MOTIF_PPG).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PPG)));
-        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SET_MOTIF_PGP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PGP)));
-        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.SET_MOTIF_GPP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.GPP)));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_PPG).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PPG)));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_PGP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PGP)));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_GPP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.GPP)));
     }
 
     private void configureRumble() {
         Trigger endGameBuzz = new Trigger(() -> doEndgameSignal && matchTime <= 20);
         endGameBuzz.whenActive(new ParallelCommandGroup(
-                new InstantCommand(() -> gamepad1.runRumbleEffect(endgameRumble)),
+                new InstantCommand(() -> gamepad1.runRumbleEffect(GamepadConstants.Rumble.ENDGAME)),
                 new InstantCommand(() -> doEndgameSignal = false)
         ));
 
         Trigger readyToShootRumbleTrigger = new Trigger(() -> robot.spindexer.isFull() && doReadyToShootRumble);
         readyToShootRumbleTrigger.whenActive(new ParallelCommandGroup(
-                new InstantCommand(() -> gamepad1.runRumbleEffect(readyToShootRumble)),
+                new InstantCommand(() -> gamepad1.runRumbleEffect(GamepadConstants.Rumble.READY_SHOOT)),
                 new InstantCommand(() -> doReadyToShootRumble = false)
         ));
 
