@@ -33,11 +33,13 @@ public class RobotSystem extends StealthSubsystem {
     public final VisionSubsystem vision;
     public final LEDSubsystem led;
 
+    //Human controller inputs to alter the state machine (teleop only)
     private final Trigger intakeTrigger;
     private final Trigger outtakeTrigger;
     private final Trigger shootPatternTrigger;
     private final Trigger shootRapidTrigger;
 
+    //State triggers that become true when the robotState becomes their state
     private final Trigger isIDLE = new Trigger(() -> robotState == RobotState.IDLE);
     private final Trigger isINTAKE = new Trigger(() -> robotState == RobotState.INTAKE);
     private final Trigger isOUTTAKE = new Trigger(() -> robotState == RobotState.OUTTAKE);
@@ -54,6 +56,7 @@ public class RobotSystem extends StealthSubsystem {
     //Time in between shots (essentially the time for the loader to reach its position plus some extra tolerance)
     private final int LOADER_TRAVEL_TIME_MS = 500;
 
+    //It is in fact, not an infinite state machine
     public enum RobotState {
         IDLE,
         INTAKE,
@@ -91,11 +94,11 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     private void setupLEDTriggers() {
-        //Green when shooter is at velocity
+        //Green LED when shooter is at velocity
         Trigger shooterAtVelocity = new Trigger(shooter::atVelocity);
         shooterAtVelocity.whenActive(new InstantCommand(() -> led.setState(LEDState.GREEN)));
 
-        //Red when shooter is not at velocity
+        //Red LED when shooter is idle or hasn't reached target velocity
         Trigger shooterNotAtVelocity = new Trigger(() -> !shooter.atVelocity());
         shooterNotAtVelocity.whenActive(new InstantCommand(() -> led.setState(LEDState.RED)));
     }
@@ -219,6 +222,7 @@ public class RobotSystem extends StealthSubsystem {
         }
     }
 
+    //Essentially the same as teleop but with the triggers removed (must manually call to change states in a command group)
     private void configAutonomousStateBehavior() {
         // IDLE TRANSITIONS
         {
