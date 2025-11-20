@@ -29,17 +29,17 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final Servo loaderServo;
     private final RevColorSensorV3 colorSensor;
 
-    private final Debouncer purpleColorDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
-    private final Debouncer greenColorDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+    private IntakeState state = IntakeState.IDLE;
+
+    private Artifact sensedArtifact = Artifact.EMPTY;
+
+    private final Debouncer purpleColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
+    private final Debouncer greenColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
 
     private final double DISTANCE_THRESHOLD_MM = 100.0;
 
     private final double GREEN_HUE = 120, PURPLE_HUE = 250;
     private final double GREEN_HUE_THRESHOLD = 50, PURPLE_HUE_THRESHOLD = 50;
-
-    private IntakeState state = IntakeState.IDLE;
-
-    private Artifact sensedArtifact = Artifact.EMPTY;
 
     private final double LOADER_DEPLOYED_POSITION = 0.5;
     private final double LOADER_RETRACTED_POSITION = 0.0;
@@ -75,13 +75,16 @@ public class IntakeSubsystem extends StealthSubsystem {
     public void periodic() {
         //Only look for artifacts if something is in front of color sensor
         if (colorSensor.getDistance(DistanceUnit.MM) < DISTANCE_THRESHOLD_MM) {
-            //Debounce color sensor for artifact colors
+            //Debounce color sensor for artifact colors (helps to remove false positives caused by lighting conditions and interference)
             boolean isPurple = purpleColorDebouncer.calculate(HSVDetector.hueInProximity(colorSensor, PURPLE_HUE, PURPLE_HUE_THRESHOLD));
             boolean isGreen = greenColorDebouncer.calculate(HSVDetector.hueInProximity(colorSensor, GREEN_HUE, GREEN_HUE_THRESHOLD));
 
-            if (isPurple) sensedArtifact = Artifact.PURPLE;
-            else if (isGreen) sensedArtifact = Artifact.GREEN;
-            else sensedArtifact = Artifact.EMPTY;
+            if (isPurple)
+                sensedArtifact = Artifact.PURPLE;
+            else if (isGreen)
+                sensedArtifact = Artifact.GREEN;
+            else
+                sensedArtifact = Artifact.EMPTY;
         }
         else sensedArtifact = Artifact.EMPTY;
 
@@ -99,7 +102,7 @@ public class IntakeSubsystem extends StealthSubsystem {
             loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
         }
         else {
-            setPower(0.0);
+            setPower(0);
             loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
 

@@ -27,9 +27,11 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
     private final PIDController pid;
 
+    //TODO: Retune spindexer using
     public static double kP = 0.0035;
     public static double kI = 0.12;
     public static double kD = 0.0003;
+    public static double kS = 0.0; //TODO: Tune static friction feedforward component
 
     private double encoderOffset = 0.0;
 
@@ -43,10 +45,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
                         1
      */
 
-    //Autonomous preset artifact locations
-    private final Slot slot1 = new Slot(Artifact.GREEN, 0, 180, 1);
-    private final Slot slot2 = new Slot(Artifact.PURPLE, -120, 60, 2);
-    private final Slot slot3 = new Slot(Artifact.PURPLE, 120, -60, 3);
+    // Slot containers which track proper intaking/shooting angles and what type of artifacts are where
+    private final Slot slot1 = new Slot(Artifact.EMPTY, 0, 180, 1);
+    private final Slot slot2 = new Slot(Artifact.EMPTY, -120, 60, 2);
+    private final Slot slot3 = new Slot(Artifact.EMPTY, 120, -60, 3);
 
     //Variables to keep track of which slots are where
     private Slot intakeSlot = slot1;
@@ -138,7 +140,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
             pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
             intakeSlot = slot;
-        }).andThen(new WaitUntilCommand(this::atPosition).withTimeout(1000));
+        });
     }
 
     //Rotate the nearest empty slot to the intake
@@ -298,7 +300,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.GREEN;
     }
 
-    public boolean atPosition() {
+    public boolean atSetpoint() {
         return pid.atSetPoint();
     }
 
@@ -308,12 +310,11 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        setPower(pid.calculate(getCurrentTicks()));
+        double pidOutput = pid.calculate(getCurrentTicks());
+        setPower(pidOutput + (kS * Math.signum(pidOutput)));
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("atPosition", atPosition());
-        telemetry.addData("currentTicks", getCurrentTicks());
-        telemetry.addData("targetTicks", pid.getSetPoint());
+        telemetry.addData("setpoint reached", atSetpoint());
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());
         telemetry.addData("3", slot3.getArtifact());

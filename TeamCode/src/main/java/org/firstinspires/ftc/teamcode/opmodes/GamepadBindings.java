@@ -21,7 +21,9 @@ public class GamepadBindings {
         public static Button SHOOT_PATTERN = Button.LEFT_BUMPER;
         public static Button SHOOT_RAPID = Button.RIGHT_BUMPER;
 
-        // OTHER
+        public static Button TOGGLE_PRE_SHOOTER_SPIN_UP = Button.Y;
+
+        // MOTIF
         public static Button SET_MOTIF_GPP = Button.DPAD_LEFT;
         public static Button SET_MOTIF_PGP = Button.DPAD_UP;
         public static Button SET_MOTIF_PPG = Button.DPAD_RIGHT;

@@ -31,11 +31,18 @@ public class DriveSubsystem extends StealthSubsystem {
 
     private double headingOffset = 0.0;
 
+    //Stores the latest call to set the pinpoint's pose, stored in case the pinpoint is busy when the method is called
+    private Pose latestPoseSetCall = null;
+
     public DriveSubsystem(HardwareMap hardwareMap) {
+        pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+
         rightBack = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "rightFront");
         rightFront = hardwareMap.get(DcMotorEx.class, "leftBack");
         leftFront = hardwareMap.get(DcMotorEx.class, "rightBack");
+
+        poseEstimator = PoseEstimator.getInstance();
 
         rightBack.setDirection(DcMotorEx.Direction.REVERSE);
         rightFront.setDirection(DcMotorEx.Direction.REVERSE);
@@ -45,18 +52,23 @@ public class DriveSubsystem extends StealthSubsystem {
         leftBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        poseEstimator = PoseEstimator.getInstance();
-
-        pp = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pp.setOffsets(3.167, -7.456, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+    }
 
+    public void resetPosAndIMU() {
         pp.resetPosAndIMU();
     }
 
     public void setPose(Pose newPose) {
-        pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
+        if (pp.getDeviceStatus() != GoBildaPinpointDriver.DeviceStatus.READY) {
+            latestPoseSetCall = newPose;
+        }
+        else {
+            pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
+            latestPoseSetCall = null;
+        }
     }
 
     public void resetToPosition(int x, int y) {
@@ -98,6 +110,10 @@ public class DriveSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         pp.update();
+
+        // Update pose if there is a pose queued from a previous setPose method call
+        if (pp.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY && latestPoseSetCall != null)
+            setPose(latestPoseSetCall);
 
         boolean updatePinpointPose =
                 poseEstimator.update(new Pose(

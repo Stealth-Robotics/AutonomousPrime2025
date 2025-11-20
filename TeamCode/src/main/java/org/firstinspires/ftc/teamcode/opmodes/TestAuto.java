@@ -28,6 +28,8 @@ public class TestAuto extends StealthOpMode {
             startPose = AlliancePoseFlipper.flip(startPose);
         }
 
+        robot.drive.resetPosAndIMU(); // ! Reset pinpoint IMU & recalibrate (takes 0.25 seconds)
+
         //For localization
         robot.drive.setPose(startPose);
         follower.setStartingPose(startPose);

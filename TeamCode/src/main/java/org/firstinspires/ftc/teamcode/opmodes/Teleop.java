@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
@@ -79,6 +80,11 @@ public class Teleop extends StealthOpMode {
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadBindings.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(0, 0));
+
+        operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.TOGGLE_PRE_SHOOTER_SPIN_UP).toggleWhenActive(
+                new InstantCommand(() -> robot.shooter.setState(ShooterState.SHOOT)),
+                new InstantCommand(() -> robot.shooter.setState(ShooterState.IDLE))
+        );
 
         operatorGamepad.getGamepadButton(GamepadBindings.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(

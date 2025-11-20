@@ -30,11 +30,10 @@ import java.util.ArrayList;
 @Config
 @SuppressWarnings("FieldCanBeLocal")
 public class VisionSubsystem extends StealthSubsystem {
-//    private final Limelight3A limelight;
-
     private final VisionPortal visionPortal;
     private final AprilTagProcessor aprilTagProcessor;
 
+    //Position and rotation of the camera relative to the robot's origin (in inches)
     private final Position cameraPosition = new Position(DistanceUnit.INCH, -4.97790, -7.87748, -9.53956, 0);
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
 
@@ -43,11 +42,7 @@ public class VisionSubsystem extends StealthSubsystem {
     private final int MOTIF_GPP_ID = 21, MOTIF_PGP_ID = 22, MOTIF_PPG_ID = 23;
     private final int GOAL_BLUE_ID = 20, GOAL_RED_ID = 24;
 
-//    private LLResult latestResult = null;
-
     public VisionSubsystem(HardwareMap hardwareMap) {
-//        limelight = hardwareMap.get(Limelight3A.class,"limelight");
-
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
@@ -66,17 +61,15 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setAutoStopLiveView(true)
                 .build();
 
-        if (FtcDashboard.getInstance().isEnabled())
-            FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
-
-//        limelight.start();
-//        limelight.pipelineSwitch(0);
-
         poseEstimator = PoseEstimator.getInstance();
+
+        // ! Disable once actually playing matches (as it will increase the chub's loop times)
+        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
     }
 
-    private Pose ftcToPedroCoordinates(Pose oldPose) {
-        return new Pose(72 + oldPose.getY(), 72 - oldPose.getX(), oldPose.getHeading() - (Math.PI / 2));
+    // Takes a pose in FTC Coordinates (origin (0, 0)) to Pedro Coordinates (origin (72, 72))
+    private Pose ftcToPedroCoordinates(Pose ftcPose) {
+        return new Pose(72 + ftcPose.getY(), 72 - ftcPose.getX(), ftcPose.getHeading() - (Math.PI / 2));
     }
 
     @Override

@@ -28,7 +28,7 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final PIDFController velocityPID;
 
-    public static double kP = 0.1;
+    public static double kP = 0.0;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kV = 0.0;

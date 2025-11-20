@@ -45,13 +45,14 @@ public class RobotSystem extends StealthSubsystem {
     private final Trigger isPRE_RAPID = new Trigger(() -> robotState == RobotState.PRE_RAPID);
     private final Trigger isSHOOT = new Trigger(() -> robotState == RobotState.SHOOT);
 
+    //Queue that keeps track of the artifacts we want to shoot and what order to shoot them in
     private final Queue<Artifact> shootingQueue = new LinkedList<>();
 
     //Boolean to keep track of when to process shooting state transitions or not
     private boolean isShooting = false;
 
-    //Time in between shots
-    private final int SHOOTING_WAIT_TIME_MS = 500;
+    //Time in between shots (essentially the time for the loader to reach its position plus some extra tolerance)
+    private final int LOADER_TRAVEL_TIME_MS = 500;
 
     public enum RobotState {
         IDLE,
@@ -116,7 +117,6 @@ public class RobotSystem extends StealthSubsystem {
         return robotState;
     }
 
-
     private Command setRobotState(RobotState newState) {
         return runOnce(() -> robotState = newState);
     }
@@ -164,7 +164,7 @@ public class RobotSystem extends StealthSubsystem {
 
             //If we have an empty slot ready, continually check for artifacts
             isINTAKE
-                    .and(new Trigger(spindexer::atPosition))
+                    .and(new Trigger(spindexer::atSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
                     .whenActive(new ConditionalCommand(spindexer.rotateEmptyToIntake(), new InstantCommand(), () -> !spindexer.isFull()));
@@ -210,21 +210,20 @@ public class RobotSystem extends StealthSubsystem {
             isSHOOT
                     .and(new Trigger(() -> !isShooting))
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
-                    .whenActive(shooter.setState(ShooterState.SHOOT))
-                    .whenActive(turret.setState(TurretState.TARGET));
+                    .whenActive(shooter.setState(ShooterState.SHOOT));
 
             isSHOOT
-                    .and(new Trigger(() -> spindexer.atPosition() && !isShooting))
+                    .and(new Trigger(() -> spindexer.atSetpoint() && !isShooting))
                     .whenActive(
                             new InstantCommand(() -> isShooting = true)
                                     .andThen(new WaitUntilCommand(shooter::atVelocity)) //Wait for shooter to fully spin up to speed
                                     .andThen(intake.setState(IntakeState.TRANSFER))
-                                    .andThen(new WaitCommand(SHOOTING_WAIT_TIME_MS))
+                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(intake.setState(IntakeState.IDLE))
-                                    .andThen(new WaitCommand(200)) //Extra wait time for loader to get out of way
+                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(spindexer.shootArtifact())
                                     .andThen(new InstantCommand(() -> isShooting = false))
-                                    .andThen(spindexer.rotateArtifactToShoot(shootingQueue))
+                                    .andThen(new ConditionalCommand(spindexer.rotateArtifactToShoot(shootingQueue), new InstantCommand(), () -> !spindexer.isEmpty()))
                     );
         }
     }
@@ -253,7 +252,7 @@ public class RobotSystem extends StealthSubsystem {
 
             //If we have an empty slot ready, continually check for artifacts
             isINTAKE
-                    .and(new Trigger(spindexer::atPosition))
+                    .and(new Trigger(spindexer::atSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
                     .whenActive(new ConditionalCommand(spindexer.rotateEmptyToIntake(), new InstantCommand(), () -> !spindexer.isFull()));
@@ -298,17 +297,17 @@ public class RobotSystem extends StealthSubsystem {
                     .whenActive(turret.setState(TurretState.TARGET));
 
             isSHOOT
-                    .and(new Trigger(() -> spindexer.atPosition() && !isShooting))
+                    .and(new Trigger(() -> spindexer.atSetpoint() && !isShooting))
                     .whenActive(
                             new InstantCommand(() -> isShooting = true)
                                     .andThen(new WaitUntilCommand(shooter::atVelocity)) //Wait for shooter to fully spin up to speed
                                     .andThen(intake.setState(IntakeState.TRANSFER))
-                                    .andThen(new WaitCommand(SHOOTING_WAIT_TIME_MS))
+                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(intake.setState(IntakeState.IDLE))
-                                    .andThen(new WaitCommand(200)) //Extra wait time for loader to get out of way
+                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(spindexer.shootArtifact())
                                     .andThen(new InstantCommand(() -> isShooting = false))
-                                    .andThen(spindexer.rotateArtifactToShoot(shootingQueue))
+                                    .andThen(new ConditionalCommand(spindexer.rotateArtifactToShoot(shootingQueue), new InstantCommand(), () -> !spindexer.isEmpty()))
                     );
         }
     }
