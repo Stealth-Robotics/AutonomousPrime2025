@@ -1,7 +1,7 @@
 # <span>**The Best Programming Team In Existence**</span>
 
 ### Code for team #7759 Autonomous Prime's robot in the 2025-2026 First Tech Challenge season
-## This repository contains all the necessary logic to control all the robots subsystems
+## This season's robot consists of many subsystems
 - **Driving**
 - **Spindexer**
 - **Turret**
@@ -10,5 +10,9 @@
 - **Shooter**
 
 ### <ins>Members</ins>
-- **Marco The Goat**
-- **Ian The Goat**
+- **Richard**
+- **Ian**
+- **Marco**
+- **Wes**
+- **Amelia**
+- **Matthew**
