@@ -12,7 +12,7 @@ public class PoseEstimator {
     private static PoseEstimator INSTANCE = null;
 
     private Pose robotPoseNew = null;
-    private Pose robotPose = null;
+    private Pose robotPose = new Pose();
 
     private static final Pose BLUE_GOAL_POSE = new Pose();
     private static final Pose RED_GOAL_POSE = new Pose();
@@ -34,7 +34,8 @@ public class PoseEstimator {
 
     public static PoseEstimator getInstance() {
         if (INSTANCE == null) {
-            return new PoseEstimator();
+            INSTANCE = new PoseEstimator();
+            return INSTANCE;
         }
         return INSTANCE;
     }
@@ -61,6 +62,8 @@ public class PoseEstimator {
     }
 
     public double getDistanceFromGoal() {
+        if (robotPose == null || goalPose == null)
+            return 0;
         return sqrt(pow((robotPose.getX() - goalPose.getX()), 2) + pow((robotPose.getY() - goalPose.getY()), 2));
     }
 }

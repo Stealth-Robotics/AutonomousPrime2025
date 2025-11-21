@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -119,14 +120,6 @@ public class RobotSystem extends StealthSubsystem {
         return runOnce(() -> robotState = newState);
     }
 
-    private Trigger isTrue(boolean condition) {
-        return new Trigger(() -> condition);
-    }
-
-    private Trigger isFalse(boolean condition) {
-        return new Trigger(() -> !condition);
-    }
-
     private void configStateBehavior() {
         // IDLE TRANSITIONS
         {
@@ -214,7 +207,7 @@ public class RobotSystem extends StealthSubsystem {
 //                    .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT
-                    .and(isFalse(isShooting))
+                    .and(new Trigger(()->!isShooting))
 //                    .whenActive(spindexer.rotateArtifactToShoot(shootingQueue.peek()))
                     .whenActive(shooter.setState(ShooterState.SHOOT))
                     .whenActive(turret.setState(TurretState.TARGET));
@@ -239,95 +232,6 @@ public class RobotSystem extends StealthSubsystem {
         telemetry.addLine("----robot system----");
         telemetry.addData("state", robotState);
     }
-
-//    private void configAutonomousStateBehavior() {
-//        // IDLE TRANSITIONS
-//        {
-//            //Set subsystems to their idle states
-//            isIDLE
-//                    .whenActive(intake.setState(IntakeState.IDLE))
-//                    .whenActive(shooter.setState(ShooterState.IDLE))
-//                    .whenActive(turret.setState(TurretState.IDLE));
-//        }
-//
-//        // INTAKE STATE LOGIC
-//        {
-//            //Exit conditions for intake state
-//            isINTAKE
-//                    .and(isTrue(spindexer.isFull()))
-//                    .whenActive(setRobotState(RobotState.IDLE));
-//
-//            //When we enter intake state, make sure we rotate an empty slot to the intake and start the intake spinning
-//            isINTAKE
-//                    .whenActive(spindexer.rotateEmptyToIntake())
-//                    .whenActive(intake.setState(IntakeState.INTAKE));
-//
-//            //If we have an empty slot ready, continually check for artifacts
-//            isINTAKE
-//                    .and(isTrue(spindexer.atPosition()))
-//                    .and(isTrue(intake.getSensedArtifact() != Artifact.EMPTY))
-//                    .whenActive(spindexer.intakeArtifact(intake.getSensedArtifact()));
-//        }
-//
-//        // OUTTAKE STATE LOGIC
-//        {
-//            isOUTTAKE
-//                    .whenActive(intake.setState(IntakeState.OUTTAKE));
-//        }
-//
-//        // PRE_RAPID STATE LOGIC
-//        {
-//            isPRE_RAPID.and(isTrue(spindexer.isEmpty()))
-//                    .whenActive(setRobotState(RobotState.IDLE));
-//
-//            isPRE_RAPID.whenActive(
-//                    new InstantCommand(() -> shootingQueue.addAll(spindexer.getRapidShootList()))
-//                            .andThen(setRobotState(RobotState.SHOOT)));
-//        }
-//
-//        // PRE_PATTERN STATE LOGIC
-//        {
-//            isPRE_PATTERN.and(isTrue(spindexer.isEmpty()))
-//                    .whenActive(setRobotState(RobotState.IDLE));
-//
-//            isPRE_PATTERN.whenActive(
-//                    new InstantCommand(() -> {
-//                        if (spindexer.hasMotifColors())
-//                            shootingQueue.addAll(Motif.getPatternList());
-//                        else
-//                            shootingQueue.addAll(spindexer.getExtraArtifacts());
-//                    }).andThen(setRobotState(RobotState.SHOOT))
-//            );
-//        }
-//
-//        // SHOOT STATE LOGIC
-//        {
-//            //Exit conditions for shoot state
-//            isSHOOT
-//                    .and(isTrue(spindexer.isEmpty() || shootingQueue.isEmpty()))
-//                    .whenActive(setRobotState(RobotState.IDLE));
-//
-//            isSHOOT
-//                    .and(isFalse(isShooting))
-//                    .whenActive(spindexer.rotateArtifactToShoot(shootingQueue.peek()))
-//                    .whenActive(shooter.setState(ShooterState.SHOOT))
-//                    .whenActive(turret.setState(TurretState.TARGET));
-//
-//            isSHOOT
-//                    .and(isTrue(spindexer.atPosition() && !isShooting))
-//                    .whenActive(
-//                            new InstantCommand(() -> isShooting = true)
-//                                    .andThen(new WaitUntilCommand(shooter::atVelocity)) //Wait for shooter to fully spin up to speed
-//                                    .andThen(intake.setState(IntakeState.TRANSFER))
-//                                    .andThen(new WaitCommand(SHOOTING_WAIT_TIME_MS))
-//                                    .andThen(intake.setState(IntakeState.IDLE))
-//                                    .andThen(new WaitCommand(200)) //Extra wait time for loader to get out of way
-//                                    .andThen(spindexer.shootArtifact())
-//                                    .andThen(new InstantCommand(shootingQueue::remove))
-//                                    .andThen(new InstantCommand(() -> isShooting = false))
-//                    );
-//        }
-//    }
 
     @Override
     public void periodic() {
