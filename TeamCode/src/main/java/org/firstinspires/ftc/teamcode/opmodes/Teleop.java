@@ -7,12 +7,14 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
@@ -97,6 +99,9 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(robot.setRobotState(RobotSystem.RobotState.SHOOT));
         driveGamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(robot.setRobotState(RobotSystem.RobotState.IDLE));
         driveGamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(robot.setRobotState(RobotSystem.RobotState.PRE_RAPID));
+
+        driveGamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(()-> PoseEstimator.getInstance().update(new Pose(72,72,150)));
+        driveGamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(()-> PoseEstimator.getInstance().update(new Pose(72,72,240)));
     }
 
     private void configureRumble() {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDFController;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -106,6 +108,7 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         double distanceFromGoal = poseEstimator.getDistanceFromGoal();
 
         //Update hood angle based off of distance from the goal
@@ -114,8 +117,10 @@ public class ShooterSubsystem extends StealthSubsystem {
         //State-machine
         if (state == ShooterState.SHOOT) {
             double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+            dashboardTelemetry.addData("setpoint", velocitySetpoint);
             velocityPID.setSetPoint(velocitySetpoint);
             setPower(velocityPID.calculate(getVelocity()) + (kS * Math.signum(velocitySetpoint)));
+//            setPower(0.0);
         }
         else {
             setPower(0.0);
@@ -126,5 +131,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("hood position", hoodServo.getPosition());
         telemetry.addData("velocity", getVelocity());
         telemetry.addData("at velocity", atVelocity());
+        dashboardTelemetry.addData("setpoint", getVelocity());
+        dashboardTelemetry.update();
     }
 }

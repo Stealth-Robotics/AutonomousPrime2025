@@ -8,12 +8,14 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.LEDState;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -63,6 +65,7 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     public RobotSystem(HardwareMap hardwareMap, Trigger intakeTrigger, Trigger outtakeTrigger, Trigger shootPatternTrigger, Trigger shootRapidTrigger) {
+        PoseEstimator.getInstance().update(new Pose(72,72,150));
 //        drive = new DriveSubsystem(hardwareMap);
 //        intake = new IntakeSubsystem(hardwareMap);
 //        spindexer = new SpindexerSubsystem(hardwareMap);
@@ -223,7 +226,7 @@ public class RobotSystem extends StealthSubsystem {
                                     .andThen(new WaitCommand(200)) //Extra wait time for loader to get out of way
 //                                    .andThen(spindexer.shootArtifact())
 //                                    .andThen(new InstantCommand(shootingQueue::remove))
-//                                    .andThen(new InstantCommand(() -> isShooting = false))
+                                    .andThen(new InstantCommand(() -> isShooting = false))
                     );
         }
     }
@@ -231,6 +234,9 @@ public class RobotSystem extends StealthSubsystem {
     private void printTelemetry() {
         telemetry.addLine("----robot system----");
         telemetry.addData("state", robotState);
+        telemetry.addData("poseX", PoseEstimator.getInstance().getRobotPose().getX());
+        telemetry.addData("poseY", PoseEstimator.getInstance().getRobotPose().getY());
+        telemetry.addData("poseHeading", PoseEstimator.getInstance().getRobotPose().getHeading());
     }
 
     @Override
