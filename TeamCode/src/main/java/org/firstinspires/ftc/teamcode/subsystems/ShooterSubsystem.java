@@ -30,16 +30,15 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final PIDFController velocityPID;
 
-    public static double kP = 0.0;
-    public static double kI = 0.0;
+    public static double kP = 0.003;
+    public static double kI = 0.3;
     public static double kD = 0.0;
-    public static double kV = 0.0;
-    public static double kS = 0.73;
+    public static double kV = 0.0008;
 
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
 
-    public static double VELOCITY_TOLERANCE = 10.0;
+    public static double VELOCITY_TOLERANCE = 50.0;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -117,20 +116,12 @@ public class ShooterSubsystem extends StealthSubsystem {
         if (state == ShooterState.SHOOT) {
             double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
             velocityPID.setSetPoint(velocitySetpoint);
-            setPower(velocityPID.calculate(getVelocity()) + (kS * Math.signum(velocitySetpoint)));
+            setPower(velocityPID.calculate(getVelocity()));
         }
         else {
             velocityPID.setSetPoint(0);
             setPower(0.0);
         }
-
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-        dashboardTelemetry.addData("velocity", getVelocity());
-        dashboardTelemetry.addData("target", velocityPID.getSetPoint());
-        dashboardTelemetry.update();
-
 
         telemetry.addLine("----shooter----");
         telemetry.addData("state", state);
@@ -138,7 +129,5 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("target", velocityPID.getSetPoint());
         telemetry.addData("at velocity", atVelocity());
         telemetry.addData("hood position", hoodServo.getPosition());
-
-        velocityPID.setPIDF(kP, kI, kD, kV);
     }
 }

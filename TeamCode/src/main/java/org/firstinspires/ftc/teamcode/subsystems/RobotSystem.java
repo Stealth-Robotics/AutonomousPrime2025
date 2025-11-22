@@ -80,8 +80,6 @@ public class RobotSystem extends StealthSubsystem {
         this.shootPatternTrigger = shootPatternTrigger;
         this.shootRapidTrigger = shootRapidTrigger;
 
-        turret.setState(TurretState.TARGET); //Always target throughout the match
-
         configureStateMachine(intakeTrigger == null);
     }
 
@@ -112,7 +110,8 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE));
+                    .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(turret.setState(TurretState.TARGET));
 
             isIDLE
                     .and(intakeTrigger)
@@ -218,7 +217,8 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE));
+                    .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(turret.setState(TurretState.TARGET));
         }
 
         // INTAKE STATE LOGIC
@@ -296,7 +296,6 @@ public class RobotSystem extends StealthSubsystem {
     private void printTelemetry() {
         telemetry.addLine("<h5>----robot system----</h5>");
         telemetry.addData("<h5>state", robotState + "</h5>");
-        telemetry.addData("<h2>shooting", isShooting + "</h2>");
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -15,6 +16,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -32,15 +34,17 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double encoderOffset = 0.0;
 
-    private TurretState state = TurretState.IDLE;
+    private TurretState state = TurretState.TARGET;
 
     //The amount to aim to the right/left of the goal as you get farther away (scales linearly)
     private final InterpLUT offsetTable = new InterpLUT();
 
-    private final double kP = 0.0;
-    private final double kI = 0.0;
-    private final double kD = 0.0;
-    private final double kS = 0.0; //TODO: tune
+    public static double kP = 0.014;
+    public static double kI = 0.0;
+    public static double kD = 0.00001;
+    public static double kS = 0.2;
+
+    private final double ANGLE_TOLERANCE = 0.25;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
@@ -50,6 +54,7 @@ public class TurretSubsystem extends StealthSubsystem {
     public TurretSubsystem(HardwareMap hardwareMap) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
         trackingPID = new PIDController(kP, kI, kD);
+        trackingPID.setTolerance(ANGLE_TOLERANCE);
 
         poseEstimator = PoseEstimator.getInstance();
 
@@ -103,14 +108,19 @@ public class TurretSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         if (state == TurretState.TARGET) {
-//            double distanceFromGoal = poseEstimator.getDistanceFromGoal();
-//            double turretTarget = poseEstimator.getTurretTargetAngle();
-//
-//            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
-//            turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
-//
-//            double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
-//            setPower(pidOutput + (kS * Math.signum(trackingPID.getPositionError())));
+            double distanceFromGoal = poseEstimator.getDistanceFromGoal();
+            double turretTarget = poseEstimator.getTurretTargetAngle();
+
+            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+            turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
+
+            trackingPID.setSetPoint(turretTarget);
+
+            if (!trackingPID.atSetPoint()) {
+                double pidOutput = trackingPID.calculate(getCurrentDegrees());
+                setPower(pidOutput + (kS * Math.signum(trackingPID.getPositionError())));
+            }
+            else setPower(0);
         }
         else {
             //Stop all turret movement
@@ -120,6 +130,7 @@ public class TurretSubsystem extends StealthSubsystem {
         telemetry.addLine("----turret----");
         telemetry.addData("state", state);
         telemetry.addData("ticks", getCurrentTicks());
+        telemetry.addData("atSetpoint", trackingPID.atSetPoint());
         telemetry.addData("degrees", getCurrentDegrees());
     }
 }
