@@ -65,8 +65,8 @@ public class VisionSubsystem extends StealthSubsystem {
 
         poseEstimator = PoseEstimator.getInstance();
 
-        // ! Disable once actually playing matches (as it will increase the chub's loop times)
-        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
+        // For seeing the live camera stream on the dashboard
+//        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
     }
 
     // Takes a pose in FTC Coordinates (origin (0, 0)) to Pedro Coordinates (origin (72, 72))

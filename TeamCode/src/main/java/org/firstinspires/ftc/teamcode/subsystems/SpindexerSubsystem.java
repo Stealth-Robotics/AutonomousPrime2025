@@ -27,17 +27,16 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
     private final PIDController pid;
 
-    //TODO: Retune spindexer using
-    public static double kP = 0.0035;
-    public static double kI = 0.1;
+    public static double kP = 0.0038;
+    public static double kI = 0;
     public static double kD = 0.0003;
-    public static double kS = 0.0; //TODO: Tune static friction feedforward component
+    public static double kS = 0.08;
 
     private double encoderOffset = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
-    private final double POSITION_TOLERANCE_TICKS = 10;
+    private final double POSITION_TOLERANCE_TICKS = 0.5;
 
     /* Slot numbers increase going counter-clockwise
                     3 ————— 2
@@ -310,8 +309,11 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        double pidOutput = pid.calculate(getCurrentTicks());
-        setPower(pidOutput + (kS * Math.signum(pid.getPositionError())));
+        if (!atSetpoint()) {
+            double pidOutput = pid.calculate(getCurrentTicks());
+            setPower(pidOutput + (kS * Math.signum(pid.getPositionError())));
+        }
+        else setPower(0);
 
         telemetry.addLine("----spindexer----");
         telemetry.addData("setpoint reached", atSetpoint());

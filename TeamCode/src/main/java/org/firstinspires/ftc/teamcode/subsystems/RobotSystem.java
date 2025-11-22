@@ -54,7 +54,7 @@ public class RobotSystem extends StealthSubsystem {
     private boolean isShooting = false;
 
     //Time in between shots (essentially the time for the loader to reach its position plus some extra tolerance)
-    private final int LOADER_TRAVEL_TIME_MS = 500;
+    private final int LOADER_TRAVEL_TIME_MS = 700;
 
     //It is in fact, not an infinite state machine
     public enum RobotState {
@@ -188,11 +188,10 @@ public class RobotSystem extends StealthSubsystem {
         {
             //Exit conditions for shoot state
             isSHOOT
-                    .and(new Trigger(() -> spindexer.isEmpty() || shootingQueue.isEmpty()))
+                    .and(new Trigger(() -> spindexer.isEmpty() && !isShooting))
                     .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT
-                    .and(new Trigger(() -> !isShooting))
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
                     .whenActive(shooter.setState(ShooterState.SHOOT));
 
@@ -200,14 +199,14 @@ public class RobotSystem extends StealthSubsystem {
                     .and(new Trigger(() -> spindexer.atSetpoint() && !isShooting))
                     .whenActive(
                             new InstantCommand(() -> isShooting = true)
-                                    .andThen(new WaitUntilCommand(shooter::atVelocity)) //Wait for shooter to fully spin up to speed
+                                    .andThen(new WaitUntilCommand(shooter::atVelocity).withTimeout(5000)) //Wait for shooter to fully spin up to speed
                                     .andThen(intake.setState(IntakeState.TRANSFER))
                                     .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(intake.setState(IntakeState.IDLE))
                                     .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(spindexer.shootArtifact())
+                                    .andThen(new ConditionalCommand(spindexer.rotateArtifactToShoot(shootingQueue), shooter.setState(ShooterState.IDLE), () -> !spindexer.isEmpty()))
                                     .andThen(new InstantCommand(() -> isShooting = false))
-                                    .andThen(new ConditionalCommand(spindexer.rotateArtifactToShoot(shootingQueue), new InstantCommand(), () -> !spindexer.isEmpty()))
                     );
         }
     }
@@ -271,11 +270,10 @@ public class RobotSystem extends StealthSubsystem {
         {
             //Exit conditions for shoot state
             isSHOOT
-                    .and(new Trigger(() -> spindexer.isEmpty() || shootingQueue.isEmpty()))
+                    .and(new Trigger(() -> spindexer.isEmpty() && !isShooting))
                     .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT
-                    .and(new Trigger(() -> !isShooting))
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
                     .whenActive(shooter.setState(ShooterState.SHOOT));
 
@@ -289,8 +287,8 @@ public class RobotSystem extends StealthSubsystem {
                                     .andThen(intake.setState(IntakeState.IDLE))
                                     .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                     .andThen(spindexer.shootArtifact())
-                                    .andThen(new InstantCommand(() -> isShooting = false))
                                     .andThen(new ConditionalCommand(spindexer.rotateArtifactToShoot(shootingQueue), new InstantCommand(), () -> !spindexer.isEmpty()))
+                                    .andThen(new InstantCommand(() -> isShooting = false))
                     );
         }
     }
@@ -298,6 +296,7 @@ public class RobotSystem extends StealthSubsystem {
     private void printTelemetry() {
         telemetry.addLine("<h5>----robot system----</h5>");
         telemetry.addData("<h5>state", robotState + "</h5>");
+        telemetry.addData("<h2>shooting", isShooting + "</h2>");
     }
 
     @Override

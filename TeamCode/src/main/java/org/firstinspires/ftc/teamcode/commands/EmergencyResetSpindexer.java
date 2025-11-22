@@ -15,13 +15,13 @@ public class EmergencyResetSpindexer extends SequentialCommandGroup {
         addCommands(
                 new InstantCommand(() -> spindexer.setArtifactsInSpindexerManually(Artifact.EMPTY, Artifact.EMPTY, Artifact.EMPTY)),
                 spindexer.rotateToSlotNumber(1),
-                new WaitCommand(300),
+                new WaitCommand(500),
                 new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())),
                 spindexer.rotateToSlotNumber(2),
-                new WaitCommand(300),
+                new WaitCommand(500),
                 new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())),
                 spindexer.rotateToSlotNumber(3),
-                new WaitCommand(300),
+                new WaitCommand(500),
                 new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact()))
         );
     }
