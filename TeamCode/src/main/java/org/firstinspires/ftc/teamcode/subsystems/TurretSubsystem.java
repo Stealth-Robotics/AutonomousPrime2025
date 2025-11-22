@@ -37,12 +37,12 @@ public class TurretSubsystem extends StealthSubsystem {
     //The amount to aim to the right/left of the goal as you get farther away (scales linearly)
     private final InterpLUT offsetTable = new InterpLUT();
 
-    private final double kP = 0.03;
-    private final double kI = 0.05;
+    private final double kP = 0.0;
+    private final double kI = 0.0;
     private final double kD = 0.0;
     private final double kS = 0.0; //TODO: tune
 
-    private final double TICKS_PER_REVOLUTION = 1538; // (output ratio) * PPR = 4 * 384.5
+    private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
     private final double MAX_DEGREES_RIGHT = 160;
     private final double MAX_DEGREES_LEFT = -160;
@@ -103,14 +103,14 @@ public class TurretSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         if (state == TurretState.TARGET) {
-            double distanceFromGoal = poseEstimator.getDistanceFromGoal();
-            double turretTarget = poseEstimator.getTurretTargetAngle();
-
-            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
-            turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
-
-            double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
-            setPower(pidOutput + (kS * Math.signum(pidOutput)));
+//            double distanceFromGoal = poseEstimator.getDistanceFromGoal();
+//            double turretTarget = poseEstimator.getTurretTargetAngle();
+//
+//            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+//            turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
+//
+//            double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
+//            setPower(pidOutput + (kS * Math.signum(trackingPID.getPositionError())));
         }
         else {
             //Stop all turret movement

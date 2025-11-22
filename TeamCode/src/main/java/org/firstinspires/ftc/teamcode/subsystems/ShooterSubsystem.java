@@ -28,11 +28,11 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final PIDFController velocityPID;
 
-    public static double kP = 0.0;
+    public static double kP = 0.02;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kV = 0.0;
-    public static double kS = 0.0; //TODO: Tune to overcome static friction
+    public static double kS = 0.74;
 
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
