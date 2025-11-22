@@ -39,22 +39,19 @@ public class TurretSubsystem extends StealthSubsystem {
     //The amount to aim to the right/left of the goal as you get farther away (scales linearly)
     private final InterpLUT offsetTable = new InterpLUT();
 
-    public static double kP = 0.014;
-    public static double kI = 0.0;
-    public static double kD = 0.00001;
-    public static double kS = 0.2;
-
-    private final double ANGLE_TOLERANCE = 0.25;
+    public static double kP = 0.02;
+    public static double kI = 0.2;
+    public static double kD = 0.0;
+    public static double kS = 0.18;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
-    private final double MAX_DEGREES_RIGHT = 160;
-    private final double MAX_DEGREES_LEFT = -160;
+    private final double MAX_DEGREES_RIGHT = 170;
+    private final double MAX_DEGREES_LEFT = -170;
 
     public TurretSubsystem(HardwareMap hardwareMap) {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
         trackingPID = new PIDController(kP, kI, kD);
-        trackingPID.setTolerance(ANGLE_TOLERANCE);
 
         poseEstimator = PoseEstimator.getInstance();
 
@@ -64,8 +61,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
     //Setup turret offsets relative to goal distance
     private void setupLUT() {
-        offsetTable.add(0, -8);
-        offsetTable.add(210, -12);
+        offsetTable.add(0, 10);
+        offsetTable.add(210, 10);
         offsetTable.createLUT();
     }
 
@@ -110,17 +107,17 @@ public class TurretSubsystem extends StealthSubsystem {
         if (state == TurretState.TARGET) {
             double distanceFromGoal = poseEstimator.getDistanceFromGoal();
             double turretTarget = poseEstimator.getTurretTargetAngle();
-
+            telemetry.addData("target", turretTarget);
             turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
-            trackingPID.setSetPoint(turretTarget);
+            double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
+            double staticFrictionCompensation = 0;
 
-            if (!trackingPID.atSetPoint()) {
-                double pidOutput = trackingPID.calculate(getCurrentDegrees());
-                setPower(pidOutput + (kS * Math.signum(trackingPID.getPositionError())));
-            }
-            else setPower(0);
+            if (Math.abs(trackingPID.getPositionError()) > 0.5)
+                staticFrictionCompensation =  kS * Math.signum(trackingPID.getPositionError());
+
+            setPower(pidOutput + staticFrictionCompensation);
         }
         else {
             //Stop all turret movement
@@ -129,8 +126,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----turret----");
         telemetry.addData("state", state);
-        telemetry.addData("ticks", getCurrentTicks());
-        telemetry.addData("atSetpoint", trackingPID.atSetPoint());
-        telemetry.addData("degrees", getCurrentDegrees());
+        telemetry.addData("at setpoint", trackingPID.atSetPoint());
+
+        trackingPID.setPID(kP, kI, kD);
     }
 }

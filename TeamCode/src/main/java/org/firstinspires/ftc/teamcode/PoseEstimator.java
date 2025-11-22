@@ -14,8 +14,8 @@ public class PoseEstimator {
     private Pose robotPoseNew = null;
     private Pose robotPose = new Pose();
 
-    private static final Pose BLUE_GOAL_POSE = new Pose();
-    private static final Pose RED_GOAL_POSE = new Pose();
+    private static final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
+    private static final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
 
     private static Pose goalPose = null;
 
@@ -58,12 +58,10 @@ public class PoseEstimator {
 
     public double getTurretTargetAngle() {
         double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPose.getY(), goalPose.getX() - robotPose.getX()));
-        return AngleUnit.normalizeDegrees(robotPose.getHeading() - targetAngleDegrees);
+        return AngleUnit.normalizeDegrees(AngleUnit.RADIANS.toDegrees(robotPose.getHeading()) - targetAngleDegrees);
     }
 
     public double getDistanceFromGoal() {
-        if (robotPose == null || goalPose == null)
-            return 0;
         return sqrt(pow((robotPose.getX() - goalPose.getX()), 2) + pow((robotPose.getY() - goalPose.getY()), 2));
     }
 }

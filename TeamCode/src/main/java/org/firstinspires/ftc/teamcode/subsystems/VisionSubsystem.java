@@ -37,7 +37,7 @@ public class VisionSubsystem extends StealthSubsystem {
 
     //Position and rotation of the camera relative to the robot's origin (in inches)
     private final Position cameraPosition = new Position(DistanceUnit.INCH, 4.97790, 7.87748, 9.53956, 0);
-    private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, 90, 0, 0);
+    private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0,-90, 0, 0);
 
     private final PoseEstimator poseEstimator;
 
@@ -66,7 +66,7 @@ public class VisionSubsystem extends StealthSubsystem {
         poseEstimator = PoseEstimator.getInstance();
 
         // For seeing the live camera stream on the dashboard
-//        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
+        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
     }
 
     // Takes a pose in FTC Coordinates (origin (0, 0)) to Pedro Coordinates (origin (72, 72))
@@ -99,6 +99,7 @@ public class VisionSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----vision----");
         telemetry.addData("distanceToGoal", poseEstimator.getDistanceFromGoal());
+        telemetry.addData("tag ids", detections);
         telemetry.addData("motif", Motif.getMotif());
     }
 }
