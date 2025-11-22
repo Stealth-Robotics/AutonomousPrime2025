@@ -80,8 +80,9 @@ public class RobotSystem extends StealthSubsystem {
         this.shootPatternTrigger = shootPatternTrigger;
         this.shootRapidTrigger = shootRapidTrigger;
 
+        turret.setState(TurretState.TARGET); //Always target throughout the match
+
         configureStateMachine(intakeTrigger == null);
-        setupLEDTriggers();
     }
 
     public RobotSystem(HardwareMap hardwareMap) {
@@ -91,16 +92,6 @@ public class RobotSystem extends StealthSubsystem {
     private void configureStateMachine(boolean isAutonomous) {
         if (isAutonomous) configAutonomousStateBehavior();
         else configStateBehavior();
-    }
-
-    private void setupLEDTriggers() {
-        //Green LED when shooter is at velocity
-        Trigger shooterAtVelocity = new Trigger(shooter::atVelocity);
-        shooterAtVelocity.whenActive(new InstantCommand(() -> led.setState(LEDState.GREEN)));
-
-        //Red LED when shooter is idle or hasn't reached target velocity
-        Trigger shooterNotAtVelocity = new Trigger(() -> !shooter.atVelocity());
-        shooterNotAtVelocity.whenActive(new InstantCommand(() -> led.setState(LEDState.RED)));
     }
 
     public void setDriverControl(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation) {
@@ -121,8 +112,7 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
-                    .whenActive(turret.setState(TurretState.IDLE));
+                    .whenActive(shooter.setState(ShooterState.IDLE));
 
             isIDLE
                     .and(intakeTrigger)
@@ -229,8 +219,7 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
-                    .whenActive(turret.setState(TurretState.IDLE));
+                    .whenActive(shooter.setState(ShooterState.IDLE));
         }
 
         // INTAKE STATE LOGIC
@@ -288,8 +277,7 @@ public class RobotSystem extends StealthSubsystem {
             isSHOOT
                     .and(new Trigger(() -> !isShooting))
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
-                    .whenActive(shooter.setState(ShooterState.SHOOT))
-                    .whenActive(turret.setState(TurretState.TARGET));
+                    .whenActive(shooter.setState(ShooterState.SHOOT));
 
             isSHOOT
                     .and(new Trigger(() -> spindexer.atSetpoint() && !isShooting))
@@ -314,6 +302,12 @@ public class RobotSystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        //Led color logic
+        if (shooter.atVelocity())
+            led.setState(LEDState.GREEN);
+        else
+            led.setState(LEDState.RED);
+
         printTelemetry();
     }
 }

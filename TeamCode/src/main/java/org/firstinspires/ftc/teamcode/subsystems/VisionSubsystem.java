@@ -6,6 +6,8 @@ import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.*;
@@ -34,8 +36,8 @@ public class VisionSubsystem extends StealthSubsystem {
     private final AprilTagProcessor aprilTagProcessor;
 
     //Position and rotation of the camera relative to the robot's origin (in inches)
-    private final Position cameraPosition = new Position(DistanceUnit.INCH, -4.97790, -7.87748, -9.53956, 0);
-    private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
+    private final Position cameraPosition = new Position(DistanceUnit.INCH, 4.97790, 7.87748, 9.53956, 0);
+    private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, 90, 0, 0);
 
     private final PoseEstimator poseEstimator;
 
@@ -69,7 +71,7 @@ public class VisionSubsystem extends StealthSubsystem {
 
     // Takes a pose in FTC Coordinates (origin (0, 0)) to Pedro Coordinates (origin (72, 72))
     private Pose ftcToPedroCoordinates(Pose ftcPose) {
-        return new Pose(72 + ftcPose.getY(), 72 - ftcPose.getX(), ftcPose.getHeading() - (Math.PI / 2));
+        return new Pose(72 + ftcPose.getY(), 72 - ftcPose.getX(), ftcPose.getHeading() + Math.PI);
     }
 
     @Override

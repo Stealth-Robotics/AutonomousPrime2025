@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDFController;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -28,16 +30,16 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     private final PIDFController velocityPID;
 
-    public static double kP = 0.02;
+    public static double kP = 0.0;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kV = 0.0;
-    public static double kS = 0.74;
+    public static double kS = 0.73;
 
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
 
-    public static double VELOCITY_TOLERANCE = 10.0; //TODO: Tune to a reasonable value
+    public static double VELOCITY_TOLERANCE = 10.0;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -118,13 +120,25 @@ public class ShooterSubsystem extends StealthSubsystem {
             setPower(velocityPID.calculate(getVelocity()) + (kS * Math.signum(velocitySetpoint)));
         }
         else {
+            velocityPID.setSetPoint(0);
             setPower(0.0);
         }
 
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+        dashboardTelemetry.addData("velocity", getVelocity());
+        dashboardTelemetry.addData("target", velocityPID.getSetPoint());
+        dashboardTelemetry.update();
+
+
         telemetry.addLine("----shooter----");
         telemetry.addData("state", state);
-        telemetry.addData("hood position", hoodServo.getPosition());
         telemetry.addData("velocity", getVelocity());
+        telemetry.addData("target", velocityPID.getSetPoint());
         telemetry.addData("at velocity", atVelocity());
+        telemetry.addData("hood position", hoodServo.getPosition());
+
+        velocityPID.setPIDF(kP, kI, kD, kV);
     }
 }

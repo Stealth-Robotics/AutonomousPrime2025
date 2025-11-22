@@ -29,7 +29,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     //TODO: Retune spindexer using
     public static double kP = 0.0035;
-    public static double kI = 0.12;
+    public static double kI = 0.1;
     public static double kD = 0.0003;
     public static double kS = 0.0; //TODO: Tune static friction feedforward component
 
@@ -311,7 +311,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         double pidOutput = pid.calculate(getCurrentTicks());
-        setPower(pidOutput + (kS * Math.signum(pidOutput)));
+        setPower(pidOutput + (kS * Math.signum(pid.getPositionError())));
 
         telemetry.addLine("----spindexer----");
         telemetry.addData("setpoint reached", atSetpoint());

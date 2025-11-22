@@ -9,7 +9,7 @@ public class AutoToTeleopData {
     public static double spindexerTicks = 0.0;
     public static double turretTicks = 0.0;
 
-    public static Artifact slot1Artifact = Artifact.EMPTY;
+    public static Artifact slot1Artifact = Artifact.GREEN;
     public static Artifact slot2Artifact = Artifact.EMPTY;
     public static Artifact slot3Artifact = Artifact.EMPTY;
 }
