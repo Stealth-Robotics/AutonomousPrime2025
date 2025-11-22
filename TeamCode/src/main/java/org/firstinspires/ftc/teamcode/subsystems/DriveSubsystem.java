@@ -71,9 +71,8 @@ public class DriveSubsystem extends StealthSubsystem {
         }
     }
 
-    public void resetToPosition(int x, int y) {
-        pp.setPosX(x, DistanceUnit.INCH);
-        pp.setPosY(y, DistanceUnit.INCH);
+    public void resetToPosition(int x, int y, int theta) {
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, theta));
     }
 
     public double getHeading() {

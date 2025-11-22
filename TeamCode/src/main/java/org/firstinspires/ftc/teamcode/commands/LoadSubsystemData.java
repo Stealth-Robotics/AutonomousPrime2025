@@ -16,8 +16,7 @@ public class LoadSubsystemData extends SequentialCommandGroup {
         addCommands(
                 new InstantCommand(() -> robot.spindexer.setEncoderOffset(AutoToTeleopData.spindexerTicks)),
                 new InstantCommand(() -> robot.turret.setEncoderOffset(AutoToTeleopData.turretTicks)),
-                new InstantCommand(() -> robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact)),
-                new InstantCommand(() -> robot.drive.setPose(new Pose(72, 72, Math.toRadians(90))))
+                new InstantCommand(() -> robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact))
         );
     }
 }
