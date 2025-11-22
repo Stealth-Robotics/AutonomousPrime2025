@@ -34,7 +34,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double encoderOffset = 0.0;
 
-    private TurretState state = TurretState.TARGET;
+    private TurretState state = TurretState.IDLE;
 
     //The amount to aim to the right/left of the goal as you get farther away (scales linearly)
     private final InterpLUT offsetTable = new InterpLUT();

@@ -52,9 +52,9 @@ public class DriveSubsystem extends StealthSubsystem {
         leftBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        pp.setOffsets(3.167, -7.456, DistanceUnit.INCH);
+        pp.setOffsets(3.375, 8.125, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
     }
 
     public void resetPosAndIMU() {
