@@ -112,7 +112,6 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
                     .whenActive(turret.setState(TurretState.TARGET));
 
             isIDLE
@@ -152,6 +151,7 @@ public class RobotSystem extends StealthSubsystem {
                     .and(new Trigger(spindexer::atSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
+                    .whenActive(new ConditionalCommand(shooter.setState(ShooterState.SHOOT), new InstantCommand(), () -> spindexer.size() > 2))
                     .whenActive(new ConditionalCommand(new WaitCommand(200).andThen(spindexer.rotateEmptyToIntake()), new InstantCommand(), () -> !spindexer.isFull()));
         }
 
@@ -190,6 +190,7 @@ public class RobotSystem extends StealthSubsystem {
             //Exit conditions for shoot state
             isSHOOT
                     .and(new Trigger(() -> spindexer.isEmpty() && !isShooting))
+                    .whenActive(shooter.setState(ShooterState.IDLE))
                     .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT
@@ -241,6 +242,7 @@ public class RobotSystem extends StealthSubsystem {
                     .and(new Trigger(spindexer::atSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
+                    .whenActive(new ConditionalCommand(shooter.setState(ShooterState.SHOOT), new InstantCommand(), () -> spindexer.size() > 2))
                     .whenActive(new ConditionalCommand(spindexer.rotateEmptyToIntake(), new InstantCommand(), () -> !spindexer.isFull()));
         }
 
@@ -274,6 +276,7 @@ public class RobotSystem extends StealthSubsystem {
             //Exit conditions for shoot state
             isSHOOT
                     .and(new Trigger(() -> spindexer.isEmpty() && !isShooting))
+                    .whenActive(shooter.setState(ShooterState.IDLE))
                     .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT

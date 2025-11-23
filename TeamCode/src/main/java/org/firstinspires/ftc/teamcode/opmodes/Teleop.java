@@ -68,11 +68,6 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(6));
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-6));
 
-        driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.TOGGLE_PRE_SHOOTER_SPIN_UP).toggleWhenActive(
-                robot.shooter.setState(ShooterState.SHOOT),
-                robot.shooter.setState(ShooterState.IDLE)
-        );
-
         driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(
                         new EmergencyResetSpindexer(robot.spindexer, robot.intake),

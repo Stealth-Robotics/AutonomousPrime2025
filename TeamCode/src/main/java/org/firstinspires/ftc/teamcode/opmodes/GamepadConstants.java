@@ -43,8 +43,6 @@ public class GamepadConstants {
         public static final Button SHOOT_PATTERN = Button.LEFT_BUMPER;
         public static final Button SHOOT_RAPID = Button.RIGHT_BUMPER;
 
-        public static final Button TOGGLE_PRE_SHOOTER_SPIN_UP = Button.Y;
-
         // MOTIF
         public static final Button SET_MOTIF_GPP = Button.DPAD_LEFT;
         public static final Button SET_MOTIF_PGP = Button.DPAD_UP;
