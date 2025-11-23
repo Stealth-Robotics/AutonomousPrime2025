@@ -22,6 +22,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.TurretState;
+import org.stealthrobotics.library.Alliance;
+import org.stealthrobotics.library.CoordinateInterpolationTable;
 import org.stealthrobotics.library.StealthSubsystem;
 
 @Config
@@ -36,8 +38,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private TurretState state = TurretState.IDLE;
 
-    //The amount to aim to the right/left of the goal as you get farther away (scales linearly)
-    private final InterpLUT offsetTable = new InterpLUT();
+    //The amount to aim to the right/left of the goal depending on where you are on the field
+    private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(1.0);
 
     public static double kP = 0.01;
     public static double kI = 0.01;
@@ -61,11 +63,12 @@ public class TurretSubsystem extends StealthSubsystem {
 
     //Turret offsets based on distance from goal
     private void setupLUT() {
-        offsetTable.add(0, 0);
-        offsetTable.add(40, -12);
-        offsetTable.add(78, -6);
-        offsetTable.add(128, -30);
-        offsetTable.createLUT();
+        if (Alliance.isBlue()) {
+            offsetTable.addPoint(0, 0, 0);
+        }
+        else {
+            offsetTable.addPoint(0, 0, 0);
+        }
     }
 
     public Command setState(TurretState newState) {
@@ -110,7 +113,7 @@ public class TurretSubsystem extends StealthSubsystem {
             double distanceFromGoal = poseEstimator.getDistanceFromGoal();
             double turretTarget = poseEstimator.getTurretTargetAngle();
 
-            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 127.5));
+            turretTarget += offsetTable.get(poseEstimator.getRobotPose().getX(), poseEstimator.getRobotPose().getY());
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
             double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
