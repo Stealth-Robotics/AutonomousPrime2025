@@ -48,10 +48,6 @@ public class VisionSubsystem extends StealthSubsystem {
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-//                .setDrawTagID(true)
-//                .setDrawTagOutline(true)
-//                .setDrawAxes(true)
-//                .setDrawCubeProjection(true)
                 .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) //From FTC discord (veer)
                 .build();
 
