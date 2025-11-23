@@ -2,16 +2,12 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
-import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import android.graphics.Color;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
@@ -101,7 +97,8 @@ public class IntakeSubsystem extends StealthSubsystem {
             setPower(OPERATING_SPEED);
             loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
         }
-        else if (state == IntakeState.TRANSFER_UP) {
+        else if (state == IntakeState.TRANSFER_DOWN) {
+            //Transfer but loader arm retracted
             setPower(OPERATING_SPEED);
             loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
