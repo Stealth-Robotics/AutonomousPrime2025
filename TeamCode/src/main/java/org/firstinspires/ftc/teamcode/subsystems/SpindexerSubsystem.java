@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
@@ -28,7 +29,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final PIDController pid;
 
     public static double kP = 0.0038;
-    public static double kI = 0;
+    public static double kI = 0.0005;
     public static double kD = 0.0003;
     public static double kS = 0.08;
 
@@ -36,7 +37,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     private final double TICKS_PER_REVOLUTION = 537.7; //Gobilda 312 RPM Yellow Jacket
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
-    private final double POSITION_TOLERANCE_TICKS = 0.5;
+
+    private final double POSITION_TOLERANCE_TICKS = 3;
 
     /* Slot numbers increase going counter-clockwise
                     3 ————— 2
@@ -117,6 +119,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
     //Essentially re-zeros the motor encoder without homing
     public void setEncoderOffset(double encoderOffset) {
         this.encoderOffset = encoderOffset;
+    }
+
+    public void moveSpindexerManually(double amount) {
+        encoderOffset += amount;
     }
 
     public double getTicks() {
@@ -281,8 +287,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
         else if (slot1.getArtifact() == Artifact.PURPLE) p++;
         if (slot2.getArtifact() == Artifact.GREEN) g++;
         else if (slot2.getArtifact() == Artifact.PURPLE) p++;
-        if (slot2.getArtifact() == Artifact.GREEN) g++;
-        else if (slot2.getArtifact() == Artifact.PURPLE) p++;
+        if (slot3.getArtifact() == Artifact.GREEN) g++;
+        else if (slot3.getArtifact() == Artifact.PURPLE) p++;
 
         while (g --> 1) extra.add(Artifact.GREEN);
         if (p > 2) extra.add(Artifact.PURPLE);
@@ -309,14 +315,17 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        if (!atSetpoint()) {
-            double pidOutput = pid.calculate(getCurrentTicks());
-            setPower(pidOutput + (kS * Math.signum(pid.getPositionError())));
+        double pidOutput = pid.calculate(getCurrentTicks());
+        double kSFeedforward = 0;
+        if (Math.abs(pid.getPositionError()) > 1) {
+            kSFeedforward = kS * Math.signum(pid.getPositionError());
         }
-        else setPower(0);
+        setPower(pidOutput + kSFeedforward);
 
         telemetry.addLine("----spindexer----");
+        telemetry.addData("ticks", getCurrentTicks());
         telemetry.addData("setpoint reached", atSetpoint());
+        telemetry.addData("current draw (amps)", spindexerMotor.getCurrent(CurrentUnit.AMPS));
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());
         telemetry.addData("3", slot3.getArtifact());

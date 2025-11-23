@@ -41,8 +41,8 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final double GREEN_HUE = 120, PURPLE_HUE = 250;
     private final double GREEN_HUE_THRESHOLD = 50, PURPLE_HUE_THRESHOLD = 50;
 
-    private final double LOADER_DEPLOYED_POSITION = 0.5;
-    private final double LOADER_RETRACTED_POSITION = 0.0;
+    private final double LOADER_DEPLOYED_POSITION = 0.55;
+    private final double LOADER_RETRACTED_POSITION = 0.01;
 
     private final double OPERATING_SPEED = 1.0;
 
@@ -100,6 +100,10 @@ public class IntakeSubsystem extends StealthSubsystem {
         else if (state == IntakeState.TRANSFER) {
             setPower(OPERATING_SPEED);
             loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
+        }
+        else if (state == IntakeState.TRANSFER_UP) {
+            setPower(OPERATING_SPEED);
+            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
         else {
             setPower(0);

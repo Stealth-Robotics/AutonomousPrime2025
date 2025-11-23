@@ -62,6 +62,6 @@ public class PoseEstimator {
     }
 
     public double getDistanceFromGoal() {
-        return sqrt(pow((robotPose.getX() - goalPose.getX()), 2) + pow((robotPose.getY() - goalPose.getY()), 2));
+        return sqrt(pow((robotPose.getY() - goalPose.getX()), 2) + pow((robotPose.getX() - goalPose.getY()), 2));
     }
 }

@@ -39,8 +39,8 @@ public class TurretSubsystem extends StealthSubsystem {
     //The amount to aim to the right/left of the goal as you get farther away (scales linearly)
     private final InterpLUT offsetTable = new InterpLUT();
 
-    public static double kP = 0.02;
-    public static double kI = 0.2;
+    public static double kP = 0.01;
+    public static double kI = 0.01;
     public static double kD = 0.0;
     public static double kS = 0.18;
 
@@ -62,7 +62,9 @@ public class TurretSubsystem extends StealthSubsystem {
     //Turret offsets based on distance from goal
     private void setupLUT() {
         offsetTable.add(0, 0);
-        offsetTable.add(210, 0);
+        offsetTable.add(40, -12);
+        offsetTable.add(78, -6);
+        offsetTable.add(128, -30);
         offsetTable.createLUT();
     }
 
@@ -108,13 +110,13 @@ public class TurretSubsystem extends StealthSubsystem {
             double distanceFromGoal = poseEstimator.getDistanceFromGoal();
             double turretTarget = poseEstimator.getTurretTargetAngle();
 
-            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+            turretTarget += offsetTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 127.5));
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
             double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
             double staticFrictionCompensation = 0;
 
-            if (Math.abs(trackingPID.getPositionError()) > 1)
+            if (Math.abs(trackingPID.getPositionError()) > 3)
                 staticFrictionCompensation =  kS * Math.signum(trackingPID.getPositionError());
 
             setPower(pidOutput + staticFrictionCompensation);
@@ -126,6 +128,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----turret----");
         telemetry.addData("state", state);
+        telemetry.addData("error", trackingPID.getPositionError());
         telemetry.addData("at setpoint", trackingPID.atSetPoint());
     }
 }

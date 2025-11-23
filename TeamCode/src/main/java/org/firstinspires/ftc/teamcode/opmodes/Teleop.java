@@ -40,8 +40,8 @@ public class Teleop extends StealthOpMode {
                 hardwareMap,
                 new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.INTAKE) > 0.01),
                 new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.OUTTAKE) > 0.01),
-                operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_PATTERN),
-                operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_RAPID)
+                driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_PATTERN),
+                driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_RAPID)
         );
 
         //Setup driving suppliers
@@ -65,12 +65,15 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(72, 72, 90));
 
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.TOGGLE_PRE_SHOOTER_SPIN_UP).toggleWhenActive(
+        driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(6));
+        driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-6));
+
+        driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.TOGGLE_PRE_SHOOTER_SPIN_UP).toggleWhenActive(
                 robot.shooter.setState(ShooterState.SHOOT),
                 robot.shooter.setState(ShooterState.IDLE)
         );
 
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
+        driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(
                         new EmergencyResetSpindexer(robot.spindexer, robot.intake),
                         new InstantCommand(),

@@ -14,9 +14,11 @@ import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 public class LoadSubsystemData extends SequentialCommandGroup {
     public LoadSubsystemData(RobotSystem robot) {
         addCommands(
+                new InstantCommand(() -> robot.drive.resetPosAndIMU()),
                 new InstantCommand(() -> robot.spindexer.setEncoderOffset(AutoToTeleopData.spindexerTicks)),
                 new InstantCommand(() -> robot.turret.setEncoderOffset(AutoToTeleopData.turretTicks)),
-                new InstantCommand(() -> robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact))
+                new InstantCommand(() -> robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact)),
+                new InstantCommand(() -> robot.drive.setPose(AutoToTeleopData.endOfAutoPose))
         );
     }
 }

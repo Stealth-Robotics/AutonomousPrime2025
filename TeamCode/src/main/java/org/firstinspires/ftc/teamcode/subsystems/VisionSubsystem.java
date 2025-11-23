@@ -48,10 +48,10 @@ public class VisionSubsystem extends StealthSubsystem {
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-                .setDrawTagID(true)
-                .setDrawTagOutline(true)
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
+//                .setDrawTagID(true)
+//                .setDrawTagOutline(true)
+//                .setDrawAxes(true)
+//                .setDrawCubeProjection(true)
                 .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) //From FTC discord (veer)
                 .build();
 
@@ -81,11 +81,11 @@ public class VisionSubsystem extends StealthSubsystem {
         if (!detections.isEmpty()) {
             for (AprilTagDetection detection : detections) {
                 if (detection.id == GOAL_BLUE_ID || detection.id == GOAL_RED_ID) {
-                    poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
-                            detection.robotPose.getPosition().x,
-                            detection.robotPose.getPosition().y,
-                            detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
-                    )));
+//                    poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
+//                            detection.robotPose.getPosition().x,
+//                            detection.robotPose.getPosition().y,
+//                            detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
+//                    )));
                 }
 
                 if (detection.id == MOTIF_GPP_ID)

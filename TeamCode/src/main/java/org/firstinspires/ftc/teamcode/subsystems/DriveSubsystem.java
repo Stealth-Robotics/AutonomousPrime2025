@@ -54,7 +54,7 @@ public class DriveSubsystem extends StealthSubsystem {
 
         pp.setOffsets(3.375, 8.125, DistanceUnit.INCH);
         pp.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pp.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
     }
 
     public void resetPosAndIMU() {
@@ -66,13 +66,13 @@ public class DriveSubsystem extends StealthSubsystem {
             latestPoseSetCall = newPose;
         }
         else {
-            pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
+            pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getY(), newPose.getX(), AngleUnit.RADIANS, newPose.getHeading()));
             latestPoseSetCall = null;
         }
     }
 
     public void resetToPosition(int x, int y, int theta) {
-        pp.setPosition(new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, theta));
+        pp.setPosition(new Pose2D(DistanceUnit.INCH, y, x, AngleUnit.DEGREES, theta));
     }
 
     public double getHeading() {
@@ -116,8 +116,8 @@ public class DriveSubsystem extends StealthSubsystem {
 
         boolean updatePinpointPose =
                 poseEstimator.update(new Pose(
-                pp.getPosX(DistanceUnit.INCH),
                 pp.getPosY(DistanceUnit.INCH),
+                pp.getPosX(DistanceUnit.INCH),
                 getHeading()
         ));
 
@@ -125,8 +125,8 @@ public class DriveSubsystem extends StealthSubsystem {
             setPose(poseEstimator.getRobotPose());
 
         telemetry.addLine("----drive----");
-        telemetry.addData("x", pp.getPosX(DistanceUnit.INCH));
         telemetry.addData("y", pp.getPosY(DistanceUnit.INCH));
+        telemetry.addData("x", pp.getPosX(DistanceUnit.INCH));
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }

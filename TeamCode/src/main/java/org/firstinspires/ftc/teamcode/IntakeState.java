@@ -4,5 +4,6 @@ public enum IntakeState {
     INTAKE,
     OUTTAKE,
     TRANSFER,
+    TRANSFER_UP,
     IDLE
 }

@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.AutoToTeleopData;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
@@ -23,7 +24,8 @@ public class SaveSubsystemData extends SequentialCommandGroup {
                     AutoToTeleopData.slot1Artifact = artifacts[0];
                     AutoToTeleopData.slot2Artifact = artifacts[1];
                     AutoToTeleopData.slot3Artifact = artifacts[2];
-                })
+                }),
+                new InstantCommand(() -> AutoToTeleopData.endOfAutoPose = PoseEstimator.getInstance().getRobotPose())
         );
     }
 }

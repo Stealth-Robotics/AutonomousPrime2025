@@ -29,6 +29,10 @@ public class GamepadConstants {
         // INTAKE
         public static final Trigger INTAKE = Trigger.RIGHT_TRIGGER;
         public static final Trigger OUTTAKE = Trigger.LEFT_TRIGGER;
+
+        //SPINDEXER
+        public static final Button BUDGE_SPINDEXER_LEFT = Button.X;
+        public static final Button BUDGE_SPINDEXER_RIGHT = Button.B;
     }
 
     public static class OperatorBindings {

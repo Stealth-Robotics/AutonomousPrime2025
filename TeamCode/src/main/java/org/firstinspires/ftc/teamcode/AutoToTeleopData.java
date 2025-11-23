@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.Pose;
+
 public class AutoToTeleopData {
     /*
         Set any desired teleop subsystem setpoints here and they will be overwritten if auto is run
@@ -9,7 +11,9 @@ public class AutoToTeleopData {
     public static double spindexerTicks = 0.0;
     public static double turretTicks = 0.0;
 
-    public static Artifact slot1Artifact = Artifact.PURPLE;
+    public static Artifact slot1Artifact = Artifact.EMPTY;
     public static Artifact slot2Artifact = Artifact.EMPTY;
     public static Artifact slot3Artifact = Artifact.EMPTY;
+
+    public static Pose endOfAutoPose = new Pose(0, 0, Math.toRadians(0));
 }
