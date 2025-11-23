@@ -53,6 +53,9 @@ public class RobotSystem extends StealthSubsystem {
     //Boolean to keep track of when to process shooting state transitions or not
     private boolean isShooting = false;
 
+    //Keep track of whether we have intaked a new artifact (for rumble)
+    public boolean justIntaked = false;
+
     //Time in between shots (essentially the time for the loader to reach its position plus some extra tolerance)
     private final int LOADER_TRAVEL_TIME_MS = 500;
 
@@ -150,6 +153,7 @@ public class RobotSystem extends StealthSubsystem {
             isINTAKE
                     .and(new Trigger(spindexer::atSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
+                    .whenActive(new InstantCommand(() -> justIntaked = true))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
                     .whenActive(new ConditionalCommand(shooter.setState(ShooterState.SHOOT), new InstantCommand(), () -> spindexer.size() > 2))
                     .whenActive(new ConditionalCommand(new WaitCommand(200).andThen(spindexer.rotateEmptyToIntake()), new InstantCommand(), () -> !spindexer.isFull()));

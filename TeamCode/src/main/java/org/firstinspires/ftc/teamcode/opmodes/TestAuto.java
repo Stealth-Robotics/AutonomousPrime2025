@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.stealthrobotics.library.Alliance;
+import org.stealthrobotics.library.commands.EndOpModeCommand;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class TestAuto extends StealthOpMode {
@@ -39,7 +40,8 @@ public class TestAuto extends StealthOpMode {
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
                 // PUT AUTONOMOUS SEQUENCE HERE
-                new SaveSubsystemData(robot)
+                new SaveSubsystemData(robot),
+                new EndOpModeCommand(this)
         );
     }
 

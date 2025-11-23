@@ -27,7 +27,6 @@ public class Teleop extends StealthOpMode {
 
     private int matchTime;
     private boolean doEndgameSignal = true;
-    private boolean doReadyToShootRumble = true;
 
     private final ElapsedTime matchTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
@@ -65,10 +64,10 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(72, 72, 90));
 
-        driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(6));
-        driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-6));
+        operatorGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(6));
+        operatorGamepad.getGamepadButton(GamepadConstants.DriverBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-6));
 
-        driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(
                         new EmergencyResetSpindexer(robot.spindexer, robot.intake),
                         new InstantCommand(),
@@ -89,14 +88,11 @@ public class Teleop extends StealthOpMode {
                 new InstantCommand(() -> doEndgameSignal = false)
         ));
 
-        Trigger readyToShootRumbleTrigger = new Trigger(() -> robot.spindexer.isFull() && doReadyToShootRumble);
-        readyToShootRumbleTrigger.whenActive(new ParallelCommandGroup(
-                new InstantCommand(() -> gamepad1.runRumbleEffect(GamepadConstants.Rumble.READY_SHOOT)),
-                new InstantCommand(() -> doReadyToShootRumble = false)
+        Trigger intakedArtifactTrigger = new Trigger(() -> robot.justIntaked);
+        intakedArtifactTrigger.whenActive(new ParallelCommandGroup(
+                new InstantCommand(() -> gamepad1.runRumbleEffect(GamepadConstants.Rumble.INTAKED)),
+                new InstantCommand(() -> robot.justIntaked = false)
         ));
-
-        Trigger resetReadyToShootRumble = new Trigger(() -> !doReadyToShootRumble && !robot.spindexer.isFull());
-        resetReadyToShootRumble.whenActive(new InstantCommand(() -> doReadyToShootRumble = true));
     }
 
     @Override

@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 public class GamepadConstants {
     public static class Rumble {
-        public static final Gamepad.RumbleEffect READY_SHOOT = new Gamepad.RumbleEffect.Builder()
+        public static final Gamepad.RumbleEffect INTAKED = new Gamepad.RumbleEffect.Builder()
                 .addStep(1.0, 1.0, 500)
                 .build();
 
@@ -29,15 +29,14 @@ public class GamepadConstants {
         // INTAKE
         public static final Trigger INTAKE = Trigger.RIGHT_TRIGGER;
         public static final Trigger OUTTAKE = Trigger.LEFT_TRIGGER;
-
-        //SPINDEXER
-        public static final Button BUDGE_SPINDEXER_LEFT = Button.X;
-        public static final Button BUDGE_SPINDEXER_RIGHT = Button.B;
     }
 
     public static class OperatorBindings {
         // SPINDEXER
         public static final Button EMERGENCY_RESET_SPINDEXER = Button.BACK;
+
+        public static final Button BUDGE_SPINDEXER_LEFT = Button.X;
+        public static final Button BUDGE_SPINDEXER_RIGHT = Button.B;
 
         // SHOOTING
         public static final Button SHOOT_PATTERN = Button.LEFT_BUMPER;
