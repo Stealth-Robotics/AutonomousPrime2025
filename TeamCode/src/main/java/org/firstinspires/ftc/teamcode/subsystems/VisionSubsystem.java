@@ -4,14 +4,9 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import android.util.Size;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.*;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -21,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.enums.MotifType;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -85,11 +81,11 @@ public class VisionSubsystem extends StealthSubsystem {
                 }
 
                 if (detection.id == MOTIF_GPP_ID)
-                    Motif.setMotif(Motif.MotifType.GPP);
+                    Motif.setMotif(MotifType.GPP);
                 else if (detection.id == MOTIF_PGP_ID)
-                    Motif.setMotif(Motif.MotifType.PGP);
+                    Motif.setMotif(MotifType.PGP);
                 else if (detection.id == MOTIF_PPG_ID)
-                    Motif.setMotif(Motif.MotifType.PPG);
+                    Motif.setMotif(MotifType.PPG);
             }
         }
 

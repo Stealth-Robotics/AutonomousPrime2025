@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.teamcode.IntakeState;
+import org.firstinspires.ftc.teamcode.enums.Artifact;
+import org.firstinspires.ftc.teamcode.enums.IntakeState;
 import org.stealthrobotics.library.HSVDetector;
 import org.stealthrobotics.library.StealthSubsystem;
 import org.stealthrobotics.library.math.filter.Debouncer;

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.teamcode.enums.Artifact;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;

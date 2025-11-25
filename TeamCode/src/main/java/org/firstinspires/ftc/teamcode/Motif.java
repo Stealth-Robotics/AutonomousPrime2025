@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import java.lang.reflect.Array;
+import org.firstinspires.ftc.teamcode.enums.Artifact;
+import org.firstinspires.ftc.teamcode.enums.MotifType;
+
 import java.util.ArrayList;
 
 public class Motif {
@@ -34,11 +36,5 @@ public class Motif {
 
     public static void setMotif(MotifType detectedMotif) {
         motif = detectedMotif;
-    }
-
-    public enum MotifType {
-        PPG,
-        PGP,
-        GPP
     }
 }

@@ -5,11 +5,11 @@
 //import com.arcrobotics.ftclib.command.WaitUntilCommand;
 //import com.arcrobotics.ftclib.command.button.Trigger;
 //
-//import org.firstinspires.ftc.teamcode.Artifact;
+//import org.firstinspires.ftc.teamcode.enums.Artifact;
 //import org.firstinspires.ftc.teamcode.ArtifactSource;
-//import org.firstinspires.ftc.teamcode.IntakeState;
-//import org.firstinspires.ftc.teamcode.ShooterState;
-//import org.firstinspires.ftc.teamcode.TurretState;
+//import org.firstinspires.ftc.teamcode.enums.IntakeState;
+//import org.firstinspires.ftc.teamcode.enums.ShooterState;
+//import org.firstinspires.ftc.teamcode.enums.TurretState;
 //import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 //import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 //import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;

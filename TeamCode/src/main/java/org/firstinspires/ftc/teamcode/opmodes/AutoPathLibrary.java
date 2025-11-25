@@ -1,13 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import com.pedropathing.geometry.BezierCurve;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathConstraints;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
+import org.firstinspires.ftc.teamcode.AlliancePoseFlipper;
 import org.stealthrobotics.library.Alliance;
 
 public class AutoPathLibrary {

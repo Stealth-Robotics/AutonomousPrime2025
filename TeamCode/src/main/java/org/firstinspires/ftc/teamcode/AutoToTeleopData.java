@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.enums.Artifact;
+
 public class AutoToTeleopData {
     /*
         Set any desired teleop subsystem setpoints here and they will be overwritten if auto is run

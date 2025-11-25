@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -12,13 +11,12 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Artifact;
-import org.firstinspires.ftc.teamcode.IntakeState;
-import org.firstinspires.ftc.teamcode.LEDState;
-import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.enums.Artifact;
+import org.firstinspires.ftc.teamcode.enums.IntakeState;
+import org.firstinspires.ftc.teamcode.enums.LEDState;
 import org.firstinspires.ftc.teamcode.PatternMode;
-import org.firstinspires.ftc.teamcode.ShooterState;
-import org.firstinspires.ftc.teamcode.TurretState;
+import org.firstinspires.ftc.teamcode.enums.ShooterState;
+import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.LinkedList;

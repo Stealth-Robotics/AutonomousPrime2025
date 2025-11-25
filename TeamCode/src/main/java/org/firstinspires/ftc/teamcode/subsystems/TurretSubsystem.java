@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.util.InterpLUT;
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,15 +10,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
-import org.firstinspires.ftc.teamcode.TurretState;
+import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.CoordinateInterpolationTable;
 import org.stealthrobotics.library.StealthSubsystem;

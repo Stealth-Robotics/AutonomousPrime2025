@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.LEDState;
+import org.firstinspires.ftc.teamcode.enums.LEDState;
 import org.stealthrobotics.library.StealthSubsystem;
 
 public class LEDSubsystem extends StealthSubsystem {

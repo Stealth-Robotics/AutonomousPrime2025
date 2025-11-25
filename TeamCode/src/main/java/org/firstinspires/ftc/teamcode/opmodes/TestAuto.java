@@ -7,10 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
-import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
-import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.commands.EndOpModeCommand;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
