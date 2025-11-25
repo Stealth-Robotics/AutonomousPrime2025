@@ -22,6 +22,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 @Config
@@ -281,12 +282,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     //Has all the needed artifact colors to make a motif
-    public boolean hasMotifColors() {
-        if (slot1.getArtifact() == Artifact.GREEN && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.PURPLE)
-            return true;
-        if (slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.GREEN && slot3.getArtifact() == Artifact.PURPLE)
-            return true;
-        return slot1.getArtifact() == Artifact.PURPLE && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.GREEN;
+    public ArrayList<Artifact> getAvailableArtifacts() {
+        return new ArrayList<>(List.of(slot1.getArtifact(), slot2.getArtifact(), slot3.getArtifact()));
     }
 
     public boolean atSetpoint() {
