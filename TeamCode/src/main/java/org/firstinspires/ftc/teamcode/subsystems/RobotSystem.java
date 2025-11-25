@@ -115,7 +115,7 @@ public class RobotSystem extends StealthSubsystem {
         return robotState;
     }
 
-    private Command setRobotState(RobotState newState) {
+    public Command setRobotState(RobotState newState) {
         return runOnce(() -> robotState = newState);
     }
 

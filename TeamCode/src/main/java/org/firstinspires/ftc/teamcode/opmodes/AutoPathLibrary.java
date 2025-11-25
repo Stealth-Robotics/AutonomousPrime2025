@@ -72,7 +72,7 @@ public class AutoPathLibrary {
     }
 
     private void buildPaths() {
-        
+
     }
 
     private void flipPoses() {

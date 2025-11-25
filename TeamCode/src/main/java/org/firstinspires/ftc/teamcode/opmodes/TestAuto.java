@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
 import org.firstinspires.ftc.teamcode.pedroPathing.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
@@ -14,22 +15,22 @@ import org.stealthrobotics.library.commands.EndOpModeCommand;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class TestAuto extends StealthOpMode {
+    private AutoPathLibrary pathLibrary;
     private FollowerSubsystem follower;
     private RobotSystem robot;
 
-    private Pose startPose = new Pose(0, 0, Math.toRadians(0));
+    private Pose startPose;
 
     @Override
     public void initialize() {
         follower = new FollowerSubsystem(hardwareMap);
         robot = new RobotSystem(hardwareMap);
 
-        //Flip poses
-        if (Alliance.isRed()) {
-            startPose = AlliancePoseFlipper.flip(startPose);
-        }
+        pathLibrary = new AutoPathLibrary();
+        startPose = pathLibrary.FAR_START_POSE;
 
-        robot.drive.resetPosAndIMU(); // ! Reset pinpoint IMU & recalibrate (takes 0.25 seconds)
+        //Reset pinpoint
+        robot.drive.resetPosAndIMU();
 
         //For localization
         robot.drive.setPose(startPose);
@@ -40,6 +41,7 @@ public class TestAuto extends StealthOpMode {
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
                 // PUT AUTONOMOUS SEQUENCE HERE
+                new AutonomousShootCommand(robot),
                 new SaveSubsystemData(robot),
                 new EndOpModeCommand(this)
         );
