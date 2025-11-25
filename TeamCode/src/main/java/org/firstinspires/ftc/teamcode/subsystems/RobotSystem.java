@@ -5,6 +5,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.LEDState;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.PatternMode;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.TurretState;
 import org.stealthrobotics.library.StealthSubsystem;
@@ -49,6 +51,9 @@ public class RobotSystem extends StealthSubsystem {
 
     //Queue that keeps track of the artifacts we want to shoot and what order to shoot them in
     private final Queue<Artifact> shootingQueue = new LinkedList<>();
+
+    //Operator dictates where we are in the motif
+    private PatternMode startingBall = PatternMode.START_BALL_1;
 
     //Boolean to keep track of when to process shooting state transitions or not
     private boolean isShooting = false;
@@ -99,6 +104,10 @@ public class RobotSystem extends StealthSubsystem {
 
     public void setDriverControl(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation) {
         drive.setDefaultCommand(drive.driveTeleop(x, y, rotation));
+    }
+
+    public Command setPatternMode(PatternMode pm){
+        return new InstantCommand(() -> startingBall = pm);
     }
 
     public RobotState getState() {
@@ -302,6 +311,15 @@ public class RobotSystem extends StealthSubsystem {
                                     .andThen(new InstantCommand(() -> isShooting = false))
                     );
         }
+    }
+
+    public Command forceIdle(){
+        return new SequentialCommandGroup(
+                setRobotState(RobotState.IDLE),
+                new InstantCommand(() -> isShooting = false),
+                new InstantCommand(shootingQueue::clear),
+                new InstantCommand(()->shooter.setState(ShooterState.IDLE))
+        );
     }
 
     private void printTelemetry() {

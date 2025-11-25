@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -74,6 +75,7 @@ public class Teleop extends StealthOpMode {
                         () -> robot.getState() == RobotSystem.RobotState.IDLE
                 )
         );
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.RESET_STATE_MACHINE).whenPressed(robot.forceIdle());
 
         //Manual overrides for motif pattern
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_PPG).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PPG)));

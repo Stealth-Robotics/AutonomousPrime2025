@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Motif {
@@ -10,14 +11,18 @@ public class Motif {
     }
 
     public static ArrayList<Artifact> getPatternList() {
+        return getPatternList(motif);
+    }
+
+    public static ArrayList<Artifact> getPatternList(MotifType motifType) {
         ArrayList<Artifact> patternList = new ArrayList<>();
-        if (motif == MotifType.PPG) {
+        if (motifType == MotifType.PPG) {
             patternList.add(Artifact.PURPLE);
             patternList.add(Artifact.PURPLE);
             patternList.add(Artifact.GREEN);
             return patternList;
         }
-        else if (motif == MotifType.PGP) {
+        else if (motifType == MotifType.PGP) {
             patternList.add(Artifact.PURPLE);
             patternList.add(Artifact.GREEN);
             patternList.add(Artifact.PURPLE);
