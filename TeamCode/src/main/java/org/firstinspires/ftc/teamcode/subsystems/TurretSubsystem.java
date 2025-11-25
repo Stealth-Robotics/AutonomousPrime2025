@@ -113,7 +113,7 @@ public class TurretSubsystem extends StealthSubsystem {
             double distanceFromGoal = poseEstimator.getDistanceFromGoal();
             double turretTarget = poseEstimator.getTurretTargetAngle();
 
-            turretTarget += offsetTable.get(poseEstimator.getRobotPose().getX(), poseEstimator.getRobotPose().getY());
+//            turretTarget += offsetTable.get(poseEstimator.getRobotPose().getX(), poseEstimator.getRobotPose().getY());
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
             double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);

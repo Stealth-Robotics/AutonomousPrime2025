@@ -4,26 +4,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public enum PatternMode {
-    START_BALL_1,
-    START_BALL_2,
-    START_BALL_3;
+public class PatternMode {
+    public static Queue<Artifact> getPatternSequence(int patternStartOffset, int availableBalls) {
+        ArrayList<Artifact> patternList = Motif.getPatternList();
+        Queue<Artifact> patternSequence = new LinkedList<>();
 
-
-    public static Queue<Artifact> getPatternList(Motif.MotifType motif, PatternMode patternMode, int numBalls){
-        //Assigns an integer value to the patternMode
-        int offset = (patternMode == START_BALL_1 ? 0 : (patternMode == START_BALL_2 ? 1 : 2));
-        //Generates a list of Artifacts according to the motif
-        ArrayList<Artifact>  patternList = Motif.getPatternList(motif);
-        Queue<Artifact> output = new LinkedList<>();
-        //Only adds the needed number of balls
-        for(int i = 0; i < numBalls; i++) {
-            //Adds the artifacts from the ArrayList to the Queue
-            output.add(patternList.get((i - offset + 3) % 3));
-            // i - offset is the index of the Artifact
-            // + 3 % 3 represents wraparound within the motif
+        //Works with the number balls available to shoot
+        for (int i = 0; i < availableBalls; i++) {
+            //Essentially wraps around the pattern based on the desired starting index (to complete partially completed patterns)
+            patternSequence.add(patternList.get((i - patternStartOffset + 3) % 3));
         }
-        return output;
+        return patternSequence;
     }
 }
 

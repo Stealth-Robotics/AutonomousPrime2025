@@ -11,14 +11,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Artifact;
+import org.firstinspires.ftc.teamcode.IntakeState;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.PatternMode;
 import org.firstinspires.ftc.teamcode.ShooterState;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
+import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Queue;
 
 public class Teleop extends StealthOpMode {
     private GamepadEx driveGamepad;
@@ -75,12 +80,13 @@ public class Teleop extends StealthOpMode {
                         () -> robot.getState() == RobotSystem.RobotState.IDLE
                 )
         );
+
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.RESET_STATE_MACHINE).whenPressed(robot.forceIdle());
 
-        //Manual overrides for motif pattern
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_PPG).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PPG)));
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_PGP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.PGP)));
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_MOTIF_GPP).whenPressed(new InstantCommand(() -> Motif.setMotif(Motif.MotifType.GPP)));
+        //Sets the starting artifact for the motif (because sometimes we only need 1 or 2 to complete)
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_PATTERN_MODE_1).whenPressed(robot.setPatternOffset(0));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_PATTERN_MODE_2).whenPressed(robot.setPatternOffset(1));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SET_PATTERN_MODE_3).whenPressed(robot.setPatternOffset(2));
     }
 
     private void configureRumble() {

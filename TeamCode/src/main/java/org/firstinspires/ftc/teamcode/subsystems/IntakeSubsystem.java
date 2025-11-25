@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Artifact;
 import org.firstinspires.ftc.teamcode.IntakeState;
@@ -37,8 +38,10 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final double GREEN_HUE = 120, PURPLE_HUE = 250;
     private final double GREEN_HUE_THRESHOLD = 50, PURPLE_HUE_THRESHOLD = 50;
 
-    private final double LOADER_DEPLOYED_POSITION = 0.55;
-    private final double LOADER_RETRACTED_POSITION = 0.01;
+    private final double STALL_THRESHOLD = 3.8;
+
+    private final double LOADER_DEPLOYED_POSITION = 0.5;
+    private final double LOADER_RETRACTED_POSITION = 0.015;
 
     private final double OPERATING_SPEED = 1.0;
 
@@ -49,6 +52,10 @@ public class IntakeSubsystem extends StealthSubsystem {
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public boolean isStalled() {
+        return intakeMotor.getCurrent(CurrentUnit.AMPS) >= STALL_THRESHOLD;
     }
 
     public Command setState(IntakeState newState) {
@@ -109,6 +116,7 @@ public class IntakeSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----intake----");
         telemetry.addData("state", state);
+        telemetry.addData("current (amps)", intakeMotor.getCurrent(CurrentUnit.AMPS));
         telemetry.addData("detected artifact", getSensedArtifact());
     }
 }

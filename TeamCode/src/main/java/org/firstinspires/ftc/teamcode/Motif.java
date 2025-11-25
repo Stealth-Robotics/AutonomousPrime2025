@@ -11,18 +11,14 @@ public class Motif {
     }
 
     public static ArrayList<Artifact> getPatternList() {
-        return getPatternList(motif);
-    }
-
-    public static ArrayList<Artifact> getPatternList(MotifType motifType) {
         ArrayList<Artifact> patternList = new ArrayList<>();
-        if (motifType == MotifType.PPG) {
+        if (motif == MotifType.PPG) {
             patternList.add(Artifact.PURPLE);
             patternList.add(Artifact.PURPLE);
             patternList.add(Artifact.GREEN);
             return patternList;
         }
-        else if (motifType == MotifType.PGP) {
+        else if (motif == MotifType.PGP) {
             patternList.add(Artifact.PURPLE);
             patternList.add(Artifact.GREEN);
             patternList.add(Artifact.PURPLE);
