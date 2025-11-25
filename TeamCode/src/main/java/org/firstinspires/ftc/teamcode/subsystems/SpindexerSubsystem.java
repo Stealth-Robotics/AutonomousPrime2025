@@ -155,10 +155,10 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return runOnce(() -> {
             Slot slot = getNearestEmptySlot();
 
-            assert slot != null;
-
-            pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
-            intakeSlot = slot;
+            if (slot != null) {
+                pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
+                intakeSlot = slot;
+            }
         });
     }
 
@@ -167,14 +167,14 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return runOnce(() -> {
             Slot slot = getNearestFilledSlotToShooter(shootingQueue.remove());
 
-            assert slot != null;
-
-            pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
-            shooterSlot = slot;
+            if (slot != null) {
+                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
+                shooterSlot = slot;
+            }
         });
     }
 
-    //Return the nearest empty slot to the desired position (intake/shooter)
+    //Return the nearest empty slot to the intake
     private Slot getNearestEmptySlot() {
         ArrayList<Slot> emptySlots = getSlotsWithArtifact(Artifact.EMPTY);
 
@@ -182,7 +182,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         double minDistance = Double.MAX_VALUE;
 
         for (Slot slot : emptySlots) {
-            //Calculate the shortest arc between the slot's (intake/shoot) position and the current spindexer position
+            //Calculate the shortest arc between the slot's intake position and the current spindexer position
             double distance = Math.abs(((slot.getIntakePosition() - getAngleDegrees() + 540) % 360) - 180);
             if (distance < minDistance) {
                 nearestSlot = slot;

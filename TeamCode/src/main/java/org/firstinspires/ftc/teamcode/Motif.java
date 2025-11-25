@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Motif {
-    private static MotifType motif = MotifType.NULL;
+    private static MotifType motif = MotifType.PGP; //Default value (in case camera fails)
 
     public static MotifType getMotif() {
         return motif;
@@ -39,7 +39,6 @@ public class Motif {
     public enum MotifType {
         PPG,
         PGP,
-        GPP,
-        NULL
+        GPP
     }
 }
