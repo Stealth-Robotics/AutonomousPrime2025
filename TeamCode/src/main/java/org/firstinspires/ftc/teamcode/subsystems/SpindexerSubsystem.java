@@ -280,24 +280,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return size;
     }
 
-    //Returns any unnecessary artifact colors for a motif
-    public ArrayList<Artifact> getExtraArtifacts() {
-        ArrayList<Artifact> extra = new ArrayList<>();
-        int g = 0, p = 0;
-
-        if (slot1.getArtifact() == Artifact.GREEN) g++;
-        else if (slot1.getArtifact() == Artifact.PURPLE) p++;
-        if (slot2.getArtifact() == Artifact.GREEN) g++;
-        else if (slot2.getArtifact() == Artifact.PURPLE) p++;
-        if (slot3.getArtifact() == Artifact.GREEN) g++;
-        else if (slot3.getArtifact() == Artifact.PURPLE) p++;
-
-        while (g --> 1) extra.add(Artifact.GREEN);
-        if (p > 2) extra.add(Artifact.PURPLE);
-
-        return extra;
-    }
-
     //Has all the needed artifact colors to make a motif
     public boolean hasMotifColors() {
         if (slot1.getArtifact() == Artifact.GREEN && slot2.getArtifact() == Artifact.PURPLE && slot3.getArtifact() == Artifact.PURPLE)
