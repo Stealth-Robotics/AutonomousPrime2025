@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -29,7 +30,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private TurretState state = TurretState.IDLE;
 
     //The amount to aim to the right/left of the goal depending on where you are on the field
-    private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(1.0);
+    private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.0);
 
     public static double kP = 0.01;
     public static double kI = 0.01;
@@ -54,10 +55,20 @@ public class TurretSubsystem extends StealthSubsystem {
     //Turret offsets based on distance from goal
     private void setupLUT() {
         if (Alliance.isBlue()) {
-            offsetTable.addPoint(0, 0, 0);
+            offsetTable.addPoint(82, 9, 0);
+            offsetTable.addPoint(72, 72, -4);
+            offsetTable.addPoint(51, 97, -2);
+            offsetTable.addPoint(70, 134, 0);
+            offsetTable.addPoint(54, 10, -6);
+            offsetTable.addPoint(89, 82, -8);
         }
         else {
-            offsetTable.addPoint(0, 0, 0);
+            offsetTable.addPoint(82, 15, 28);
+            offsetTable.addPoint(144, 0, 10);
+            offsetTable.addPoint(204, 1, 38);
+            offsetTable.addPoint(179, -15, -4);
+            offsetTable.addPoint(155, 33, 0);
+            offsetTable.addPoint(81, -22, 50);
         }
     }
 
@@ -103,7 +114,10 @@ public class TurretSubsystem extends StealthSubsystem {
             double distanceFromGoal = poseEstimator.getDistanceFromGoal();
             double turretTarget = poseEstimator.getTurretTargetAngle();
 
-//            turretTarget += offsetTable.get(poseEstimator.getRobotPose().getX(), poseEstimator.getRobotPose().getY());
+            Pose robotPose = poseEstimator.getRobotPose();
+            double offset = offsetTable.get(robotPose.getX(), robotPose.getY());
+
+            turretTarget += offset;
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
             double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);

@@ -5,6 +5,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RepeatCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -21,6 +22,7 @@ import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class RobotSystem extends StealthSubsystem {
@@ -54,14 +56,11 @@ public class RobotSystem extends StealthSubsystem {
     //Operator dictates where we are in the motif (0 = first, 1 = middle, 2 = last)
     private int patternIndexOffset = 0;
 
-    //Boolean to keep track of when to process shooting state transitions or not
-    private boolean isShooting = false;
-
     //Keep track of whether we have intaked a new artifact (for rumble)
     public boolean justIntaked = false;
 
     //Time in between shots (essentially the time for the loader to reach its position plus some extra tolerance)
-    private final int LOADER_TRAVEL_TIME_MS = 500;
+    private final int LOADER_TRAVEL_TIME_MS = 800;
 
     //It is in fact, not an infinite state machine
     public enum RobotState {
@@ -199,38 +198,38 @@ public class RobotSystem extends StealthSubsystem {
 
         // SHOOT STATE LOGIC
         {
-            //Exit conditions for shoot state
-            isSHOOT
-                    .and(new Trigger(() -> spindexer.isEmpty() && !isShooting))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
-                    .whenActive(setRobotState(RobotState.IDLE));
-
             isSHOOT
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
                     .whenActive(shooter.setState(ShooterState.SHOOT));
 
             isSHOOT
-                    .and(new Trigger(() -> !isShooting))
                     .whenActive(
-                            new InstantCommand(() -> isShooting = true)
-                                    .andThen(new WaitUntilCommand(shooter::atVelocity).withTimeout(4000)) //Wait for shooter to fully spin up to speed
-                                    .andThen(new WaitUntilCommand(spindexer::atSetpoint).withTimeout(500)) //Wait for spindexer to be rotated
-                                    .andThen(intake.setState(IntakeState.TRANSFER))
-                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
-                                    .andThen(new WaitUntilCommand(() -> !intake.isStalled()))
-                                    .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
-                                    .andThen(new WaitCommand(200))
-                                    .andThen(spindexer.shootArtifact())
-                                    .andThen(new ConditionalCommand(
-                                            spindexer.rotateArtifactToShoot(shootingQueue),
-                                            new SequentialCommandGroup(
-                                                    shooter.setState(ShooterState.IDLE),
-                                                    setRobotState(RobotState.IDLE)
-                                            ),
-                                            () -> !spindexer.isEmpty() && !shootingQueue.isEmpty())
-                                    )
-                                    .andThen(new InstantCommand(() -> isShooting = false))
+                            new SequentialCommandGroup(
+                                    new WaitCommand(100),
+                                    new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
+                                    new RepeatCommand(
+                                            new WaitUntilCommand(shooter::atVelocity).withTimeout(200)
+                                                    .andThen(new WaitUntilCommand(spindexer::atSetpoint).withTimeout(500)) //Wait for spindexer to be rotated
+                                                    .andThen(intake.setState(IntakeState.TRANSFER))
+                                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
+                                                    .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
+                                                    .andThen(new WaitCommand(200))
+                                                    .andThen(new InstantCommand(() -> spindexer.shootArtifact()))
+                                                    .andThen(new ConditionalCommand(
+                                                            spindexer.rotateArtifactToShoot(shootingQueue),
+                                                            new SequentialCommandGroup(
+                                                                    shooter.setState(ShooterState.IDLE),
+                                                                    setRobotState(RobotState.IDLE)
+                                                            ),
+                                                            () -> !spindexer.isEmpty() && !shootingQueue.isEmpty())
+                                    )).interruptOn(() -> spindexer.isEmpty())
+                            )
                     );
+
+            isSHOOT
+                    .and(new Trigger(() -> spindexer.isEmpty()))
+                    .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(setRobotState(RobotState.IDLE));
         }
     }
 
@@ -293,38 +292,31 @@ public class RobotSystem extends StealthSubsystem {
 
         // SHOOT STATE LOGIC
         {
-            //Exit conditions for shoot state
-            isSHOOT
-                    .and(new Trigger(() -> spindexer.isEmpty() && !isShooting))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
-                    .whenActive(setRobotState(RobotState.IDLE));
-
             isSHOOT
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
                     .whenActive(shooter.setState(ShooterState.SHOOT));
 
-            isSHOOT
-                    .and(new Trigger(() -> !isShooting))
-                    .whenActive(
-                            new InstantCommand(() -> isShooting = true)
-                                    .andThen(new WaitUntilCommand(shooter::atVelocity).withTimeout(4000)) //Wait for shooter to fully spin up to speed
-                                    .andThen(new WaitUntilCommand(spindexer::atSetpoint).withTimeout(500)) //Wait for spindexer to be rotated
-                                    .andThen(intake.setState(IntakeState.TRANSFER))
-                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
-                                    .andThen(new WaitUntilCommand(() -> !intake.isStalled()))
-                                    .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
-                                    .andThen(new WaitCommand(200))
-                                    .andThen(spindexer.shootArtifact())
-                                    .andThen(new ConditionalCommand(
-                                            spindexer.rotateArtifactToShoot(shootingQueue),
-                                            new SequentialCommandGroup(
-                                                    shooter.setState(ShooterState.IDLE),
-                                                    setRobotState(RobotState.IDLE)
-                                            ),
-                                            () -> !spindexer.isEmpty() && !shootingQueue.isEmpty())
-                                    )
-                                    .andThen(new InstantCommand(() -> isShooting = false))
-                    );
+//            isSHOOT
+//                    .and(new Trigger(() -> shoot))
+//                    .whenActive(
+//                            new InstantCommand(() -> shoot = false)
+//                                    .andThen(new WaitUntilCommand(shooter::atVelocity).withTimeout(4000)) //Wait for shooter to fully spin up to speed
+//                                    .andThen(new WaitUntilCommand(spindexer::atSetpoint).withTimeout(500)) //Wait for spindexer to be rotated
+//                                    .andThen(intake.setState(IntakeState.TRANSFER))
+//                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
+//                                    .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
+//                                    .andThen(new WaitCommand(200))
+//                                    .andThen(new InstantCommand(() -> spindexer.shootArtifact()))
+//                                    .andThen(new ConditionalCommand(
+//                                            spindexer.rotateArtifactToShoot(shootingQueue).andThen(new InstantCommand(() -> shoot = true)),
+//                                            new SequentialCommandGroup(
+//                                                    shooter.setState(ShooterState.IDLE),
+//                                                    setRobotState(RobotState.IDLE),
+//                                                    new InstantCommand(() -> shoot = false)
+//                                            ),
+//                                            () -> !spindexer.isEmpty() && !shootingQueue.isEmpty())
+//                                    )
+//                    );
         }
     }
 
@@ -332,19 +324,19 @@ public class RobotSystem extends StealthSubsystem {
     public Command forceIdle() {
         return new SequentialCommandGroup(
                 setRobotState(RobotState.IDLE),
-                new InstantCommand(() -> isShooting = false),
                 new InstantCommand(shootingQueue::clear),
                 new InstantCommand(() -> shooter.setState(ShooterState.IDLE))
         );
     }
 
     private void printTelemetry() {
-        telemetry.addLine("<h4>----robot system----</h4>");
-        telemetry.addData("<h4>State", robotState + "</h4>");
-        telemetry.addData("<h4>isShooting", isShooting + "</h4>");
-
         String patternStart = (patternIndexOffset == 0) ? "First" : (patternIndexOffset == 1) ? "Middle" : "Last";
-        telemetry.addData("<h4>Pattern Start Artifact", patternStart + "</h4>");
+
+        telemetry.addLine("----Robot System----");
+        telemetry.addData("State", robotState);
+        telemetry.addData("Shooting Queue", shootingQueue);
+        telemetry.addData("Spindexer Empty", spindexer.isEmpty());
+        telemetry.addData("Pattern Start Artifact", patternStart);
     }
 
     @Override

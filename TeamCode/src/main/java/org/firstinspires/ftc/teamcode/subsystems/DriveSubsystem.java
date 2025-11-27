@@ -114,8 +114,8 @@ public class DriveSubsystem extends StealthSubsystem {
 
         boolean updatePinpointPose =
                 poseEstimator.update(new Pose(
-                pp.getPosY(DistanceUnit.INCH),
                 pp.getPosX(DistanceUnit.INCH),
+                pp.getPosY(DistanceUnit.INCH),
                 getHeading()
         ));
 
@@ -123,8 +123,8 @@ public class DriveSubsystem extends StealthSubsystem {
             setPose(poseEstimator.getRobotPose());
 
         telemetry.addLine("----drive----");
-        telemetry.addData("y", pp.getPosY(DistanceUnit.INCH));
-        telemetry.addData("x", pp.getPosX(DistanceUnit.INCH));
+        telemetry.addData("x", poseEstimator.getRobotPose().getX());
+        telemetry.addData("y", poseEstimator.getRobotPose().getY());
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
     }
 }

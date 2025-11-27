@@ -256,8 +256,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
        intakeSlot.setArtifact(artifact);
     }
 
-    public Command shootArtifact() {
-        return new InstantCommand(() -> shooterSlot.setArtifact(Artifact.EMPTY));
+    public void shootArtifact() {
+        shooterSlot.setArtifact(Artifact.EMPTY);
     }
 
     public boolean isFull() {
@@ -279,7 +279,12 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     //Has all the needed artifact colors to make a motif
     public ArrayList<Artifact> getAvailableArtifacts() {
-        return new ArrayList<>(List.of(slot1.getArtifact(), slot2.getArtifact(), slot3.getArtifact()));
+        ArrayList<Artifact> availableArtifacts = new ArrayList<>();
+        availableArtifacts.add(slot1.getArtifact());
+        availableArtifacts.add(slot2.getArtifact());
+        availableArtifacts.add(slot3.getArtifact());
+
+        return availableArtifacts;
     }
 
     public boolean atSetpoint() {
