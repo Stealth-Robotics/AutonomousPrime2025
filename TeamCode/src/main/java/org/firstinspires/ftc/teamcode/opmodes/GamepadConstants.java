@@ -39,6 +39,9 @@ public class GamepadConstants {
         public static final Button BUDGE_SPINDEXER_LEFT = Button.X;
         public static final Button BUDGE_SPINDEXER_RIGHT = Button.B;
 
+        // TURRET
+        public static final Button FREEZE_TURRET_TOGGLE = Button.A;
+
         // SHOOTING
         public static final Button SHOOT_PATTERN = Button.LEFT_BUMPER;
         public static final Button SHOOT_RAPID = Button.RIGHT_BUMPER;

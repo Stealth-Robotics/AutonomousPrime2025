@@ -122,6 +122,7 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
+                    .whenActive(shooter.setState(ShooterState.IDLE))
                     .whenActive(turret.setState(TurretState.TARGET));
 
             isIDLE
@@ -205,7 +206,7 @@ public class RobotSystem extends StealthSubsystem {
             isSHOOT
                     .whenActive(
                             new SequentialCommandGroup(
-                                    new WaitCommand(100),
+                                    new WaitUntilCommand(() -> !shooter.atVelocity()), //Wait for state change to take effect
                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
                                     new RepeatCommand(
                                             new WaitUntilCommand(shooter::atVelocity).withTimeout(200)
@@ -323,9 +324,7 @@ public class RobotSystem extends StealthSubsystem {
     // ! Might need to cancel active commands from this subsystem
     public Command forceIdle() {
         return new SequentialCommandGroup(
-                setRobotState(RobotState.IDLE),
-                new InstantCommand(shootingQueue::clear),
-                new InstantCommand(() -> shooter.setState(ShooterState.IDLE))
+                setRobotState(RobotState.IDLE)
         );
     }
 

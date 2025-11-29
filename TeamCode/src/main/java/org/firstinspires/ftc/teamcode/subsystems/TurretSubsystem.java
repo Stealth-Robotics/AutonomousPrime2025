@@ -63,12 +63,12 @@ public class TurretSubsystem extends StealthSubsystem {
             offsetTable.addPoint(89, 82, -8);
         }
         else {
-            offsetTable.addPoint(82, 15, 28);
-            offsetTable.addPoint(144, 0, 10);
-            offsetTable.addPoint(204, 1, 38);
-            offsetTable.addPoint(179, -15, -4);
-            offsetTable.addPoint(155, 33, 0);
-            offsetTable.addPoint(81, -22, 50);
+            offsetTable.addPoint(62, 9, 0);
+            offsetTable.addPoint(72, 72, 4);
+            offsetTable.addPoint(93, 97, 2);
+            offsetTable.addPoint(74, 134, 0);
+            offsetTable.addPoint(90, 10, 6);
+            offsetTable.addPoint(55, 82, 8);
         }
     }
 

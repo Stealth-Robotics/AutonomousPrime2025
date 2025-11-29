@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
+import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
@@ -37,6 +38,7 @@ public class Teleop extends StealthOpMode {
                 hardwareMap,
                 new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.INTAKE) > 0.01),
                 new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.OUTTAKE) > 0.01),
+                // ! Set to operator once done testing
                 driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_PATTERN),
                 driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_RAPID)
         );
@@ -61,6 +63,11 @@ public class Teleop extends StealthOpMode {
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(72,72, 90));
+
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.FREEZE_TURRET_TOGGLE).toggleWhenActive(
+                robot.turret.setState(TurretState.IDLE),
+                robot.turret.setState(TurretState.TARGET)
+        );
 
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(6));
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-6));
