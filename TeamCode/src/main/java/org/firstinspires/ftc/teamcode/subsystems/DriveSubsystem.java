@@ -64,6 +64,7 @@ public class DriveSubsystem extends StealthSubsystem {
             latestPoseSetCall = newPose;
         }
         else {
+            resetHeading(); //Make sure field-centric is still correctly oriented
             pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getY(), newPose.getX(), AngleUnit.RADIANS, newPose.getHeading()));
             latestPoseSetCall = null;
         }
