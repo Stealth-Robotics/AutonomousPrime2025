@@ -47,12 +47,13 @@ public class PoseEstimator {
 
     //Update via pinpoint based off of robot velocity
     public boolean update(Pose updatedRobotPose) {
-        robotPose = updatedRobotPose;
         if (robotPoseNew != null) {
             robotPose = robotPoseNew;
             robotPoseNew = null;
             return true;
         }
+
+        robotPose = updatedRobotPose;
         return false;
     }
 

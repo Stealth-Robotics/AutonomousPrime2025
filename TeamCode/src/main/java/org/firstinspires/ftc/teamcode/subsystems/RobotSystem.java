@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RepeatCommand;
@@ -122,7 +123,12 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(
+                            new ConditionalCommand(
+                                    shooter.setState(ShooterState.SHOOT),
+                                    shooter.setState(ShooterState.IDLE),
+                                    () -> spindexer.isFull())
+                    )
                     .whenActive(turret.setState(TurretState.TARGET));
 
             isIDLE
@@ -163,7 +169,6 @@ public class RobotSystem extends StealthSubsystem {
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> justIntaked = true))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
-                    .whenActive(new ConditionalCommand(shooter.setState(ShooterState.SHOOT), new InstantCommand(), () -> spindexer.size() > 2))
                     .whenActive(new ConditionalCommand(spindexer.rotateEmptyToIntake(), new InstantCommand(), () -> !spindexer.isFull()));
         }
 
@@ -209,8 +214,7 @@ public class RobotSystem extends StealthSubsystem {
                                     new WaitUntilCommand(() -> !shooter.atVelocity()), //Wait for state change to take effect
                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
                                     new RepeatCommand(
-                                            new WaitUntilCommand(shooter::atVelocity).withTimeout(200)
-                                                    .andThen(new WaitUntilCommand(spindexer::atSetpoint).withTimeout(500)) //Wait for spindexer to be rotated
+                                                    new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250) //Wait for spindexer to be rotated
                                                     .andThen(intake.setState(IntakeState.TRANSFER))
                                                     .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                                     .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
@@ -324,7 +328,8 @@ public class RobotSystem extends StealthSubsystem {
     // ! Might need to cancel active commands from this subsystem
     public Command forceIdle() {
         return new SequentialCommandGroup(
-                setRobotState(RobotState.IDLE)
+                setRobotState(RobotState.IDLE),
+                new InstantCommand(() -> CommandScheduler.getInstance().cancelAll())
         );
     }
 

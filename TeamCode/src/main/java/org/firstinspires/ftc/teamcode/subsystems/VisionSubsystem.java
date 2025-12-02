@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -22,6 +23,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.ArrayList;
@@ -31,6 +33,12 @@ import java.util.ArrayList;
 public class VisionSubsystem extends StealthSubsystem {
     private final VisionPortal visionPortal;
     private final AprilTagProcessor aprilTagProcessor;
+
+    private final Alliance alliance;
+
+    private final ElapsedTime restTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
+    private final double REST_SECONDS = 1.5;
 
     //Position and rotation of the camera relative to the robot's origin (in inches)
     private final Position cameraPosition = new Position(DistanceUnit.INCH, 3.75, 8.25, 9.2, 0);
@@ -58,8 +66,9 @@ public class VisionSubsystem extends StealthSubsystem {
 
         poseEstimator = PoseEstimator.getInstance();
 
-        // For seeing the live camera stream on the dashboard
-//        FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
+        alliance = Alliance.get();
+
+        restTimer.reset();
     }
 
     // Takes a pose in FTC Coordinates (origin (0, 0)) to Pedro Coordinates (origin (72, 72))
@@ -73,25 +82,32 @@ public class VisionSubsystem extends StealthSubsystem {
 
         if (!detections.isEmpty()) {
             for (AprilTagDetection detection : detections) {
-                if (detection.id == GOAL_BLUE_ID || detection.id == GOAL_RED_ID) {
-//                    poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
-//                            detection.robotPose.getPosition().x,
-//                            detection.robotPose.getPosition().y,
-//                            detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
-//                    )));
+                if (restTimer.seconds() >= REST_SECONDS) {
+                    if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED && detection.id == GOAL_RED_ID) {
+                        poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
+                                detection.robotPose.getPosition().x,
+                                detection.robotPose.getPosition().y,
+                                detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
+                        )));
+                    }
+                    restTimer.reset();
                 }
 
-                if (detection.id == MOTIF_GPP_ID)
+                if (detection.id == MOTIF_GPP_ID) {
                     Motif.setMotif(MotifType.GPP);
-                else if (detection.id == MOTIF_PGP_ID)
+                }
+                else if (detection.id == MOTIF_PGP_ID) {
                     Motif.setMotif(MotifType.PGP);
-                else if (detection.id == MOTIF_PPG_ID)
+                }
+                else if (detection.id == MOTIF_PPG_ID) {
                     Motif.setMotif(MotifType.PPG);
+                }
             }
         }
 
         telemetry.addLine("----vision----");
         telemetry.addData("distanceToGoal", poseEstimator.getDistanceFromGoal());
+        telemetry.addData("seesGoal", restTimer.seconds() < REST_SECONDS);
         telemetry.addData("motif", Motif.getMotif());
     }
 }

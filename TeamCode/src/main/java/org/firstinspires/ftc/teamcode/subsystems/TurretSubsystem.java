@@ -33,7 +33,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.0);
 
     public static double kP = 0.01;
-    public static double kI = 0.01;
+    public static double kI = 0.02;
     public static double kD = 0.0;
     public static double kS = 0.18;
 
@@ -63,12 +63,7 @@ public class TurretSubsystem extends StealthSubsystem {
             offsetTable.addPoint(89, 82, -8);
         }
         else {
-            offsetTable.addPoint(62, 9, 0);
-            offsetTable.addPoint(72, 72, 4);
-            offsetTable.addPoint(93, 97, 2);
-            offsetTable.addPoint(74, 134, 0);
-            offsetTable.addPoint(90, 10, 6);
-            offsetTable.addPoint(55, 82, 8);
+            //TODO: Figure out red offsets (pose flip)
         }
     }
 
