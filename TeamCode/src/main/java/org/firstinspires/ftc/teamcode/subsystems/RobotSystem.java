@@ -80,7 +80,7 @@ public class RobotSystem extends StealthSubsystem {
         shooter = new ShooterSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
         vision = new VisionSubsystem(hardwareMap);
-        led = new LEDSubsystem(hardwareMap);
+        led = new LEDSubsystem(hardwareMap, () -> shooter.atVelocity());
 
         this.intakeTrigger = intakeTrigger;
         this.outtakeTrigger = outtakeTrigger;
@@ -209,12 +209,13 @@ public class RobotSystem extends StealthSubsystem {
                     .whenActive(shooter.setState(ShooterState.SHOOT));
 
             isSHOOT
+                    .and(new Trigger(() -> shooter.getState() == ShooterState.SHOOT))
                     .whenActive(
                             new SequentialCommandGroup(
-                                    new WaitUntilCommand(() -> !shooter.atVelocity()), //Wait for state change to take effect
                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
                                     new RepeatCommand(
                                                     new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250) //Wait for spindexer to be rotated
+                                                    .andThen(new WaitUntilCommand(shooter::atVelocity).withTimeout(500))
                                                     .andThen(intake.setState(IntakeState.TRANSFER))
                                                     .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
                                                     .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
@@ -325,11 +326,13 @@ public class RobotSystem extends StealthSubsystem {
         }
     }
 
-    // ! Might need to cancel active commands from this subsystem
     public Command forceIdle() {
         return new SequentialCommandGroup(
                 setRobotState(RobotState.IDLE),
-                new InstantCommand(() -> CommandScheduler.getInstance().cancelAll())
+                new InstantCommand(() -> {
+                    try { CommandScheduler.getInstance().cancelAll(); }
+                    catch (Exception ignored) {}
+                })
         );
     }
 
@@ -345,12 +348,6 @@ public class RobotSystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        //Led color logic
-        if (shooter.atVelocity())
-            led.setState(LEDState.GREEN);
-        else
-            led.setState(LEDState.RED);
-
         printTelemetry();
     }
 }

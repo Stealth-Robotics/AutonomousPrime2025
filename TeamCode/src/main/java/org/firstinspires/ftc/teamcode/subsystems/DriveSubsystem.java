@@ -65,7 +65,7 @@ public class DriveSubsystem extends StealthSubsystem {
         }
         else {
             pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
-            resetHeading();
+            headingOffset = newPose.getHeading() - pp.getHeading(AngleUnit.RADIANS); // ! Keep field centric the same
             latestPoseSetCall = null;
         }
     }
@@ -79,7 +79,7 @@ public class DriveSubsystem extends StealthSubsystem {
     }
 
     public void resetHeading() {
-        headingOffset = -pp.getHeading(AngleUnit.RADIANS);
+        headingOffset = -getHeading();
     }
 
     public void drive(double x, double y, double rot) {

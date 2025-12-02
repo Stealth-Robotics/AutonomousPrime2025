@@ -106,6 +106,7 @@ public class VisionSubsystem extends StealthSubsystem {
         }
 
         telemetry.addLine("----vision----");
+        telemetry.addData("cameraState", visionPortal.getCameraState());
         telemetry.addData("distanceToGoal", poseEstimator.getDistanceFromGoal());
         telemetry.addData("seesGoal", restTimer.seconds() < REST_SECONDS);
         telemetry.addData("motif", Motif.getMotif());

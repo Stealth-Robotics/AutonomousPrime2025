@@ -56,24 +56,19 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
         speedTable.add(0, 900);
-        speedTable.add(15, 900);
-        speedTable.add(25, 1000);
-        speedTable.add(30, 1100);
-        speedTable.add(40, 1100);
-        speedTable.add(68, 1200);
-        speedTable.add(90, 1200);
-        speedTable.add(120, 1600);
-        speedTable.add(210, 1600);
+        speedTable.add(15.36, 900);
+        speedTable.add(55.06, 1100);
+        speedTable.add(82.44, 1250);
+        speedTable.add(131, 1520);
+        speedTable.add(144.34, 1800);
         speedTable.createLUT();
 
         hoodTable.add(0, 0.25);
-        hoodTable.add(15, 0.3);
-        hoodTable.add(25, 0.55);
-        hoodTable.add(30, 0.65);
-        hoodTable.add(40, 0.75);
-        hoodTable.add(68, 0.85);
-        hoodTable.add(120, 1.0);
-        hoodTable.add(210, 1.0);
+        hoodTable.add(15.36, 0.3);
+        hoodTable.add(55.06, 0.6);
+        hoodTable.add(82.44, 0.7);
+        hoodTable.add(131, 1);
+        hoodTable.add(144.34, 1);
         hoodTable.createLUT();
     }
 
@@ -108,11 +103,11 @@ public class ShooterSubsystem extends StealthSubsystem {
         double distanceFromGoal = poseEstimator.getDistanceFromGoal();
 
         //Update hood angle based off of distance from the goal
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200)));
+        setHoodPercentage(hoodTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 144)));
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
+            double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 144));
             velocityPID.setSetPoint(velocitySetpoint);
             setPower(velocityPID.calculate(getVelocity()));
         }

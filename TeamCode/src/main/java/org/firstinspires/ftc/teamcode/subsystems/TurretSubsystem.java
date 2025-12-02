@@ -30,10 +30,10 @@ public class TurretSubsystem extends StealthSubsystem {
     private TurretState state = TurretState.IDLE;
 
     //The amount to aim to the right/left of the goal depending on where you are on the field
-    private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.0);
+    private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.5);
 
     public static double kP = 0.01;
-    public static double kI = 0.02;
+    public static double kI = 0.025;
     public static double kD = 0.0;
     public static double kS = 0.18;
 
@@ -55,15 +55,16 @@ public class TurretSubsystem extends StealthSubsystem {
     //Turret offsets based on distance from goal
     private void setupLUT() {
         if (Alliance.isBlue()) {
-            offsetTable.addPoint(82, 9, 0);
-            offsetTable.addPoint(72, 72, -4);
-            offsetTable.addPoint(51, 97, -2);
-            offsetTable.addPoint(70, 134, 0);
-            offsetTable.addPoint(54, 10, -6);
-            offsetTable.addPoint(89, 82, -8);
+            offsetTable.addPoint(29, 129, 30);
+            offsetTable.addPoint(52, 106, 0);
+            offsetTable.addPoint(72, 72, 0);
+            offsetTable.addPoint(63, 5, -10);
+            offsetTable.addPoint(105, 3, -15);
+            offsetTable.addPoint(110, 83, -15);
+            offsetTable.addPoint(83, 127, -10);
+            offsetTable.addPoint(45, 82, 0);
         }
         else {
-            //TODO: Figure out red offsets (pose flip)
         }
     }
 
@@ -111,6 +112,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
             Pose robotPose = poseEstimator.getRobotPose();
             double offset = offsetTable.get(robotPose.getX(), robotPose.getY());
+
+            telemetry.addData("currentOffset", offset);
 
             turretTarget += offset;
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
