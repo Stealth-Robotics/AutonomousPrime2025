@@ -209,26 +209,30 @@ public class RobotSystem extends StealthSubsystem {
                     .whenActive(shooter.setState(ShooterState.SHOOT));
 
             isSHOOT
-                    .and(new Trigger(() -> shooter.getState() == ShooterState.SHOOT))
+                    .and(new Trigger(() -> shooter.isReadyToShoot()))
                     .whenActive(
                             new SequentialCommandGroup(
                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
                                     new RepeatCommand(
-                                                    new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250) //Wait for spindexer to be rotated
-                                                    .andThen(new WaitUntilCommand(shooter::atVelocity).withTimeout(500))
-                                                    .andThen(intake.setState(IntakeState.TRANSFER))
-                                                    .andThen(new WaitCommand(LOADER_TRAVEL_TIME_MS))
-                                                    .andThen(intake.setState(IntakeState.TRANSFER_DOWN))
-                                                    .andThen(new WaitCommand(200))
-                                                    .andThen(new InstantCommand(() -> spindexer.shootArtifact()))
-                                                    .andThen(new ConditionalCommand(
+                                            new SequentialCommandGroup(
+                                                    new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250),
+                                                    new WaitUntilCommand(shooter::atVelocity).withTimeout(500),
+                                                    new WaitCommand(200), //Recovery extra time
+                                                    intake.setState(IntakeState.TRANSFER),
+                                                    new WaitCommand(LOADER_TRAVEL_TIME_MS),
+                                                    intake.setState(IntakeState.TRANSFER_DOWN),
+                                                    new WaitCommand(200),
+                                                    new InstantCommand(() -> spindexer.shootArtifact()),
+                                                    new ConditionalCommand(
                                                             spindexer.rotateArtifactToShoot(shootingQueue),
                                                             new SequentialCommandGroup(
                                                                     shooter.setState(ShooterState.IDLE),
                                                                     setRobotState(RobotState.IDLE)
                                                             ),
-                                                            () -> !spindexer.isEmpty() && !shootingQueue.isEmpty())
-                                    )).interruptOn(() -> spindexer.isEmpty())
+                                                            () -> !spindexer.isEmpty() && !shootingQueue.isEmpty()
+                                                    )
+                                            )
+                                    ).interruptOn(() -> spindexer.isEmpty())
                             )
                     );
 

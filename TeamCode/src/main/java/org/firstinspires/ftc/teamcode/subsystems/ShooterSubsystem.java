@@ -35,7 +35,7 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
 
-    public static double VELOCITY_TOLERANCE = 50.0;
+    public static double VELOCITY_TOLERANCE = 30.0;
 
     //Interpolation tables for hood and shooter speed
     private final InterpLUT speedTable = new InterpLUT();
@@ -56,15 +56,15 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
         speedTable.add(0, 900);
-        speedTable.add(15.36, 900);
+        speedTable.add(15.36, 950);
         speedTable.add(55.06, 1100);
-        speedTable.add(82.44, 1250);
-        speedTable.add(131, 1520);
-        speedTable.add(144.34, 1800);
+        speedTable.add(82.44, 1300);
+        speedTable.add(131, 1400);
+        speedTable.add(144.34, 1600);
         speedTable.createLUT();
 
-        hoodTable.add(0, 0.25);
-        hoodTable.add(15.36, 0.3);
+        hoodTable.add(0, 0.1);
+        hoodTable.add(15.36, 0.25);
         hoodTable.add(55.06, 0.6);
         hoodTable.add(82.44, 0.7);
         hoodTable.add(131, 1);
@@ -96,6 +96,10 @@ public class ShooterSubsystem extends StealthSubsystem {
     //Returns the shooter velocity in ticks per second
     private double getVelocity() {
         return -shooterMotor.getVelocity();
+    }
+
+    public boolean isReadyToShoot() {
+        return state == ShooterState.SHOOT && velocityPID.getSetPoint() > 0;
     }
 
     @Override

@@ -65,7 +65,6 @@ public class DriveSubsystem extends StealthSubsystem {
         }
         else {
             pp.setPosition(new Pose2D(DistanceUnit.INCH, newPose.getX(), newPose.getY(), AngleUnit.RADIANS, newPose.getHeading()));
-            headingOffset = newPose.getHeading() - pp.getHeading(AngleUnit.RADIANS); // ! Keep field centric the same
             latestPoseSetCall = null;
         }
     }
@@ -126,6 +125,7 @@ public class DriveSubsystem extends StealthSubsystem {
         telemetry.addLine("----drive----");
         telemetry.addData("x", poseEstimator.getRobotPose().getX());
         telemetry.addData("y", poseEstimator.getRobotPose().getY());
-        telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(getHeading()));
+        telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(poseEstimator.getRobotPose().getHeading()));
+        telemetry.addData("headingOffset", headingOffset);
     }
 }

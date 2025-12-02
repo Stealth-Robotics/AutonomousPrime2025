@@ -57,14 +57,16 @@ public class TurretSubsystem extends StealthSubsystem {
         if (Alliance.isBlue()) {
             offsetTable.addPoint(29, 129, 30);
             offsetTable.addPoint(52, 106, 0);
-            offsetTable.addPoint(72, 72, 0);
-            offsetTable.addPoint(63, 5, -10);
+            offsetTable.addPoint(72, 72, -2);
+            offsetTable.addPoint(63, 5, -8);
             offsetTable.addPoint(105, 3, -15);
             offsetTable.addPoint(110, 83, -15);
             offsetTable.addPoint(83, 127, -10);
             offsetTable.addPoint(45, 82, 0);
+            offsetTable.addPoint(95, 88, 18.9);
         }
         else {
+            //
         }
     }
 

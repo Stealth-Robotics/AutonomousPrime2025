@@ -38,8 +38,9 @@ public class Teleop extends StealthOpMode {
                 hardwareMap,
                 new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.INTAKE) > 0.01),
                 new Trigger(() -> driveGamepad.getTrigger(GamepadConstants.DriverBindings.OUTTAKE) > 0.01),
-                operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_PATTERN),
-                operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_RAPID)
+                // ! Change once done testing
+                driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_PATTERN),
+                driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.SHOOT_RAPID)
         );
 
         //Setup driving suppliers
