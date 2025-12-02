@@ -38,7 +38,9 @@ public class VisionSubsystem extends StealthSubsystem {
 
     private final ElapsedTime restTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
-    private final double REST_SECONDS = 1.5;
+    private final double REST_SECONDS = 8;
+
+    private boolean shutOffCamera = true;
 
     //Position and rotation of the camera relative to the robot's origin (in inches)
     private final Position cameraPosition = new Position(DistanceUnit.INCH, 3.75, 8.25, 9.2, 0);
@@ -65,8 +67,9 @@ public class VisionSubsystem extends StealthSubsystem {
                 .build();
 
         poseEstimator = PoseEstimator.getInstance();
-
         alliance = Alliance.get();
+
+        visionPortal.stopLiveView();
 
         restTimer.reset();
     }
@@ -78,18 +81,26 @@ public class VisionSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+        if (restTimer.seconds() >= REST_SECONDS && !shutOffCamera) {
+            visionPortal.resumeStreaming();
+            shutOffCamera = true;
+        }
+        else if (restTimer.seconds() < REST_SECONDS && shutOffCamera) {
+            visionPortal.stopStreaming();
+            shutOffCamera = false;
+        }
 
-        if (!detections.isEmpty()) {
+        ArrayList<AprilTagDetection> detections = aprilTagProcessor.getFreshDetections();
+
+        if (detections != null && !detections.isEmpty()) {
             for (AprilTagDetection detection : detections) {
-                if (restTimer.seconds() >= REST_SECONDS) {
-                    if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED && detection.id == GOAL_RED_ID) {
-                        poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
-                                detection.robotPose.getPosition().x,
-                                detection.robotPose.getPosition().y,
-                                detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
-                        )));
-                    }
+                if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED && detection.id == GOAL_RED_ID) {
+                    poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
+                            detection.robotPose.getPosition().x,
+                            detection.robotPose.getPosition().y,
+                            detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
+                    )));
+
                     restTimer.reset();
                 }
 
@@ -108,9 +119,8 @@ public class VisionSubsystem extends StealthSubsystem {
         telemetry.addLine("----vision----");
         telemetry.addData("cameraState", visionPortal.getCameraState());
         telemetry.addData("fps", visionPortal.getFps());
-        telemetry.addData("seesGoal", restTimer.seconds() < REST_SECONDS);
+        telemetry.addData("restTimer", String.format("%.3f", restTimer.seconds()));
         telemetry.addData("distanceToGoal", poseEstimator.getDistanceFromGoal());
         telemetry.addData("motif", Motif.getMotif());
-
     }
 }
