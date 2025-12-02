@@ -28,6 +28,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private double encoderOffset = 0.0;
 
     private TurretState state = TurretState.IDLE;
+    public static double offset = 0.0;
 
     //The amount to aim to the right/left of the goal depending on where you are on the field
     private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.0);
@@ -48,7 +49,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
         poseEstimator = PoseEstimator.getInstance();
 
-        setupLUT();
+//        setupLUT();
         resetEncoder();
     }
 
@@ -110,7 +111,8 @@ public class TurretSubsystem extends StealthSubsystem {
             double turretTarget = poseEstimator.getTurretTargetAngle();
 
             Pose robotPose = poseEstimator.getRobotPose();
-            double offset = offsetTable.get(robotPose.getX(), robotPose.getY());
+
+//            double offset = offsetTable.get(robotPose.getX(), robotPose.getY());
 
             turretTarget += offset;
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);

@@ -41,6 +41,9 @@ public class ShooterSubsystem extends StealthSubsystem {
     private final InterpLUT speedTable = new InterpLUT();
     private final InterpLUT hoodTable = new InterpLUT();
 
+    public static double shooterTPS = 0;
+    public static double hoodAngle = 0;
+
     public ShooterSubsystem(HardwareMap hardwareMap) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
@@ -108,12 +111,12 @@ public class ShooterSubsystem extends StealthSubsystem {
         double distanceFromGoal = poseEstimator.getDistanceFromGoal();
 
         //Update hood angle based off of distance from the goal
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200)));
+        setHoodPercentage(hoodAngle);
 
         //State-machine
         if (state == ShooterState.SHOOT) {
             double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 200));
-            velocityPID.setSetPoint(velocitySetpoint);
+            velocityPID.setSetPoint(shooterTPS);
             setPower(velocityPID.calculate(getVelocity()));
         }
         else {
@@ -127,5 +130,6 @@ public class ShooterSubsystem extends StealthSubsystem {
         telemetry.addData("target", velocityPID.getSetPoint());
         telemetry.addData("at velocity", atVelocity());
         telemetry.addData("hood position", hoodServo.getPosition());
+        telemetry.addData("distance from goal", distanceFromGoal);
     }
 }
