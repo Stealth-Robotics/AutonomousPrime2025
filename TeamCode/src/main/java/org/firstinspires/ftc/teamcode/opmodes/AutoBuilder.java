@@ -1,12 +1,19 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 
 import org.firstinspires.ftc.teamcode.AlliancePoseFlipper;
+import org.firstinspires.ftc.teamcode.enums.IntakeState;
+import org.firstinspires.ftc.teamcode.enums.ShooterState;
+import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
 import org.stealthrobotics.library.Alliance;
 
-public class AutoPathLibrary {
+public class AutoBuilder {
+    private final RobotSystem robot;
+
     //Our robot's starting positions
     public Pose CLOSE_START_POSE = new Pose();
     public Pose FAR_START_POSE = new Pose();
@@ -32,7 +39,7 @@ public class AutoPathLibrary {
     private Pose PRELOAD_2_END = new Pose();
     private Pose PRELOAD_3_END = new Pose();
 
-    //All paths for compiling partner compatible autonomous sequences
+    //All paths needed for compiling autonomous sequences
     public Path FAR_SHOOT_TO_PRELOAD_1;
     public Path FAR_SHOOT_TO_PRELOAD_2;
     public Path FAR_SHOOT_TO_PRELOAD_3;
@@ -59,7 +66,9 @@ public class AutoPathLibrary {
     public Path FAR_SHOOT_TO_LOADING_ZONE;
     public Path LOADING_ZONE_TO_FAR_SHOOT;
 
-    public AutoPathLibrary() {
+    public AutoBuilder(RobotSystem robot) {
+        this.robot = robot;
+
         if (Alliance.get() == Alliance.RED) {
             flipPoses();
         }
@@ -71,6 +80,24 @@ public class AutoPathLibrary {
 
     }
 
+    // Subsystem command macros
+    private Command spinup() {
+        return new InstantCommand(() -> robot.shooter.setState(ShooterState.SHOOT));
+    }
+
+    private Command intake() {
+        return new InstantCommand(() -> robot.intake.setState(IntakeState.INTAKE));
+    }
+
+    private Command outtake() {
+        return new InstantCommand(() -> robot.intake.setState(IntakeState.OUTTAKE));
+    }
+
+    private Command stopIntake() {
+        return new InstantCommand(() -> robot.intake.setState(IntakeState.IDLE));
+    }
+
+    // Pose flipper if on red alliance
     private void flipPoses() {
         CLOSE_START_POSE = AlliancePoseFlipper.flip(CLOSE_START_POSE);
         FAR_START_POSE = AlliancePoseFlipper.flip(FAR_START_POSE);

@@ -255,6 +255,7 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
+                    .whenActive(shooter.setState(ShooterState.IDLE))
                     .whenActive(turret.setState(TurretState.TARGET));
         }
 
@@ -360,9 +361,7 @@ public class RobotSystem extends StealthSubsystem {
         telemetry.addLine("----Robot System----");
         telemetry.addData("State", robotState);
         telemetry.addData("Shooting Queue", shootingQueue);
-        telemetry.addData("PatternSequence", Arrays.toString(PatternMode.getPatternSequence(patternIndexOffset, spindexer.greenCount(), spindexer.purpleCount()).toArray()));
-        telemetry.addData("Spindexer Empty", spindexer.isEmpty());
-        telemetry.addData("Pattern Start Artifact", patternStart);
+        telemetry.addData("Pattern Start Location", patternStart);
     }
 
     @Override
