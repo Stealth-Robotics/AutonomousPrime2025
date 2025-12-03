@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.stealthrobotics.library.Alliance;
@@ -27,15 +29,16 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double encoderOffset = 0.0;
 
+    public static double userSetpoint = 0.0;
+
     private TurretState state = TurretState.IDLE;
 
     //The amount to aim to the right/left of the goal depending on where you are on the field
     private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.5);
 
-    public static double kP = 0.01;
-    public static double kI = 0.025;
+    public static double kP = 0.06;
+    public static double kI = 0.2;
     public static double kD = 0.0;
-    public static double kS = 0.18;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
@@ -115,27 +118,32 @@ public class TurretSubsystem extends StealthSubsystem {
             Pose robotPose = poseEstimator.getRobotPose();
             double offset = offsetTable.get(robotPose.getX(), robotPose.getY());
 
-            telemetry.addData("currentOffset", offset);
-
             turretTarget += offset;
             turretTarget = MathFunctions.clamp(turretTarget, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
 
             double pidOutput = trackingPID.calculate(getCurrentDegrees(), turretTarget);
-            double staticFrictionCompensation = 0;
-
-            if (Math.abs(trackingPID.getPositionError()) > 3)
-                staticFrictionCompensation =  kS * Math.signum(trackingPID.getPositionError());
-
-            setPower(pidOutput + staticFrictionCompensation);
+            setPower(pidOutput);
         }
         else {
             //Stop all turret movement
             setPower(0.0);
+            trackingPID.reset();
         }
+
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+        dashboardTelemetry.addData("pos", getCurrentDegrees());
+        dashboardTelemetry.addData("set", trackingPID.getSetPoint());
+        dashboardTelemetry.update();
+
 
         telemetry.addLine("----turret----");
         telemetry.addData("state", state);
+        telemetry.addData("target", poseEstimator.getOther());
         telemetry.addData("error", trackingPID.getPositionError());
         telemetry.addData("at setpoint", trackingPID.atSetPoint());
+
+        trackingPID.setPID(kP, kI, kD);
     }
 }

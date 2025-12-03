@@ -17,5 +17,5 @@ public class AutoToTeleopData {
     public static Artifact slot2Artifact = Artifact.EMPTY;
     public static Artifact slot3Artifact = Artifact.EMPTY;
 
-    public static Pose endOfAutoPose = new Pose(0, 0, Math.toRadians(0));
+    public static Pose endOfAutoPose = new Pose(72, 72, Math.toRadians(90));
 }
