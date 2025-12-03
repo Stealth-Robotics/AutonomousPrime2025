@@ -37,7 +37,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private final CoordinateInterpolationTable offsetTable = new CoordinateInterpolationTable(2.5);
 
     public static double kP = 0.06;
-    public static double kI = 0.1;
+    public static double kI = 0.05;
     public static double kD = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
@@ -69,7 +69,6 @@ public class TurretSubsystem extends StealthSubsystem {
             offsetTable.addPoint(95, 88, 18.9);
         }
         else {
-            //
         }
     }
 
@@ -127,7 +126,6 @@ public class TurretSubsystem extends StealthSubsystem {
         else {
             //Stop all turret movement
             setPower(0.0);
-            trackingPID.reset();
         }
 
         telemetry.addLine("----turret----");
