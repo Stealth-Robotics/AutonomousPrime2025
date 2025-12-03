@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.cos;
 import static java.lang.Math.pow;
+import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 
 import com.pedropathing.geometry.Pose;
@@ -13,6 +15,8 @@ public class PoseEstimator {
 
     private Pose robotPoseNew = null;
     private Pose robotPose = new Pose();
+
+    private final double INCHES_FROM_ORIGIN_TO_TURRET = 2.56077; //Distance from the robot's origin to the rotation point of the turret
 
     private static final Pose BLUE_GOAL_POSE = new Pose(16.3575, 130.3727);
     private static final Pose RED_GOAL_POSE = new Pose(127.6425, 130.3727);
@@ -58,7 +62,11 @@ public class PoseEstimator {
     }
 
     public double getTurretTargetAngle() {
-        double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - robotPose.getY(), goalPose.getX() - robotPose.getX()));
+        double robotHeading = robotPose.getHeading();
+        double turretX = robotPose.getX() + INCHES_FROM_ORIGIN_TO_TURRET * cos(robotHeading);
+        double turretY = robotPose.getY() + INCHES_FROM_ORIGIN_TO_TURRET * sin(robotHeading);
+
+        double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - turretY, goalPose.getX() - turretX));
         return AngleUnit.normalizeDegrees(AngleUnit.RADIANS.toDegrees(robotPose.getHeading()) - targetAngleDegrees);
     }
 

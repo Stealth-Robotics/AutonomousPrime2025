@@ -56,6 +56,7 @@ public class VisionSubsystem extends StealthSubsystem {
                 .setCameraPose(cameraPosition, cameraOrientation)
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
                 .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) //From FTC discord (veer)
+                .setNumThreads(AprilTagProcessor.THREADS_DEFAULT)
                 .build();
 
         visionPortal = new VisionPortal.Builder()

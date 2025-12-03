@@ -162,8 +162,8 @@ public class SpindexerSubsystem extends StealthSubsystem {
     // Rotate the nearest artifact of the specified color to the shooter position
     public Command rotateArtifactToShoot(Queue<Artifact> shootingQueue) {
         return runOnce(() -> {
-            if (!shootingQueue.isEmpty() && shootingQueue != null) {
-                Slot slot = getNearestFilledSlotToShooter(shootingQueue.remove());
+            if (!shootingQueue.isEmpty()) {
+                Slot slot = getNearestFilledSlotToShooter(shootingQueue.peek());
 
                 if (slot != null) {
                     pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
