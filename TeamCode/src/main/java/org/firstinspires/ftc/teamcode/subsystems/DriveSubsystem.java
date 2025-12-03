@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.function.DoubleSupplier;
@@ -81,6 +82,15 @@ public class DriveSubsystem extends StealthSubsystem {
         headingOffset = -getHeading();
     }
 
+    //For field centric at start of teleop
+    public void setAllianceSpecificHeading(Alliance allianceColor) {
+        double desiredHeading = (allianceColor == Alliance.BLUE)
+                ? Math.PI / 2
+                : (3 * Math.PI) / 2;
+
+        headingOffset = desiredHeading - getHeading();
+    }
+
     public void drive(double x, double y, double rot) {
         double heading = getHeading() + headingOffset;
         double dx = x * Math.cos(-heading) - y * Math.sin(-heading);
@@ -126,6 +136,6 @@ public class DriveSubsystem extends StealthSubsystem {
         telemetry.addData("x", poseEstimator.getRobotPose().getX());
         telemetry.addData("y", poseEstimator.getRobotPose().getY());
         telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(poseEstimator.getRobotPose().getHeading()));
-        telemetry.addData("headingOffset", headingOffset);
+        telemetry.addData("headingOffset", AngleUnit.RADIANS.toDegrees(headingOffset));
     }
 }
