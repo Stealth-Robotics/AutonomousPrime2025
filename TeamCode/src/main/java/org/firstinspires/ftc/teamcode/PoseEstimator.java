@@ -70,15 +70,6 @@ public class PoseEstimator {
         return AngleUnit.normalizeDegrees(AngleUnit.RADIANS.toDegrees(robotPose.getHeading()) - targetAngleDegrees);
     }
 
-    public double getOther() {
-        double robotHeading = robotPose.getHeading();
-        double turretX = robotPose.getX() + (INCHES_FROM_ORIGIN_TO_TURRET * cos(robotHeading));
-        double turretY = robotPose.getY() + (INCHES_FROM_ORIGIN_TO_TURRET * sin(robotHeading));
-
-        double targetAngleDegrees = AngleUnit.RADIANS.toDegrees(Math.atan2(goalPose.getY() - turretY, goalPose.getX() - turretX));
-        return targetAngleDegrees;
-    }
-
     public double getDistanceFromGoal() {
         return sqrt(pow((robotPose.getX() - goalPose.getX()), 2) + pow((robotPose.getY() - goalPose.getY()), 2));
     }

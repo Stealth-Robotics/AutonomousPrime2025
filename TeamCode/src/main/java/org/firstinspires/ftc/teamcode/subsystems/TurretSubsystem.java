@@ -130,20 +130,9 @@ public class TurretSubsystem extends StealthSubsystem {
             trackingPID.reset();
         }
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-        dashboardTelemetry.addData("pos", getCurrentDegrees());
-        dashboardTelemetry.addData("set", trackingPID.getSetPoint());
-        dashboardTelemetry.update();
-
-
         telemetry.addLine("----turret----");
         telemetry.addData("state", state);
-        telemetry.addData("target", poseEstimator.getOther());
         telemetry.addData("error", trackingPID.getPositionError());
         telemetry.addData("at setpoint", trackingPID.atSetPoint());
-
-        trackingPID.setPID(kP, kI, kD);
     }
 }

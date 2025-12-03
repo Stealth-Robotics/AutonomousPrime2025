@@ -33,7 +33,7 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final Debouncer purpleColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
     private final Debouncer greenColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
 
-    private final double DISTANCE_THRESHOLD_MM = 100.0;
+    private final double DISTANCE_THRESHOLD_MM = 120.0;
 
     private final double GREEN_HUE = 120, PURPLE_HUE = 250;
     private final double GREEN_HUE_THRESHOLD = 50, PURPLE_HUE_THRESHOLD = 50;

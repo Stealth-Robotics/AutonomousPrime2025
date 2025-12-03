@@ -349,6 +349,10 @@ public class RobotSystem extends StealthSubsystem {
     public Command forceIdle() {
         return new SequentialCommandGroup(
                 setRobotState(RobotState.IDLE),
+                new InstantCommand(() -> shootingQueue.clear()),
+                intake.setState(IntakeState.IDLE),
+                shooter.setState(ShooterState.IDLE),
+                turret.setState(TurretState.TARGET),
                 new InstantCommand(() -> {
                     try { CommandScheduler.getInstance().cancelAll(); }
                     catch (Exception ignored) {}
