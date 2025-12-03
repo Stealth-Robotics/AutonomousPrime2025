@@ -7,20 +7,32 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class PatternMode {
-    public static Queue<Artifact> getPatternSequence(int patternStartOffset, ArrayList<Artifact> availableBalls) {
+    /**
+     * @param patternStartOffset where in the pattern should be start
+     * @param gCount number of green artifacts available
+     * @param pCount number of purple artifacts available
+     * @return A queue of the exact sequence that should be shot
+     */
+    public static Queue<Artifact> getPatternSequence(int patternStartOffset, int gCount, int pCount) {
         ArrayList<Artifact> patternList = Motif.getPatternList();
         Queue<Artifact> patternSequence = new LinkedList<>();
 
         //Works with the number balls available to shoot
-        for (int i = 0; i < availableBalls.size(); i++) {
+        int totalArtifacts = (gCount + pCount);
+        for (int i = 0; i < totalArtifacts; i++) {
             //Essentially wraps around the pattern based on the desired starting index (to complete partially completed patterns)
             Artifact nextInSequence = patternList.get((i - patternStartOffset + 3) % 3);
-            if (availableBalls.contains(nextInSequence)) {
+            if (nextInSequence == Artifact.GREEN && gCount > 0) {
                 patternSequence.add(nextInSequence);
-                availableBalls.remove(nextInSequence);
+                gCount--;
             }
-            else break;
+            else if (nextInSequence == Artifact.PURPLE && pCount > 0) {
+                patternSequence.add(nextInSequence);
+                pCount--;
+            }
+            else break; //Stop and continue with the pattern so far (don't want to ruin the motif)
         }
+
         return patternSequence;
     }
 }

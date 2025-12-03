@@ -197,13 +197,18 @@ public class RobotSystem extends StealthSubsystem {
             isPRE_PATTERN.whenActive(
                     new InstantCommand(() -> {
                         shootingQueue.clear(); //Clear just in case
-                        shootingQueue.addAll(PatternMode.getPatternSequence(patternIndexOffset, spindexer.getAvailableArtifacts()));
+                        shootingQueue.addAll(PatternMode.getPatternSequence(patternIndexOffset, spindexer.greenCount(), spindexer.purpleCount()));
                     }).andThen(setRobotState(RobotState.SHOOT))
             );
         }
 
         // SHOOT STATE LOGIC
         {
+            isSHOOT
+                    .and(new Trigger(() -> spindexer.isEmpty()))
+                    .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(setRobotState(RobotState.IDLE));
+
             isSHOOT
                     .whenActive(spindexer.rotateArtifactToShoot(shootingQueue))
                     .whenActive(shooter.setState(ShooterState.SHOOT));
@@ -220,7 +225,7 @@ public class RobotSystem extends StealthSubsystem {
                                                     new WaitCommand(200), //Recovery extra time
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
-                                                    intake.setState(IntakeState.TRANSFER_DOWN),
+                                                    intake.setState(IntakeState.IDLE),
                                                     new WaitCommand(200),
                                                     new InstantCommand(() -> spindexer.shootArtifact()),
                                                     new ConditionalCommand(
@@ -235,11 +240,6 @@ public class RobotSystem extends StealthSubsystem {
                                     ).interruptOn(() -> spindexer.isEmpty())
                             )
                     );
-
-            isSHOOT
-                    .and(new Trigger(() -> spindexer.isEmpty()))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
-                    .whenActive(setRobotState(RobotState.IDLE));
         }
     }
 
@@ -295,7 +295,7 @@ public class RobotSystem extends StealthSubsystem {
             isPRE_PATTERN.whenActive(
                     new InstantCommand(() -> {
                         shootingQueue.clear(); //Clear just in case
-                        shootingQueue.addAll(PatternMode.getPatternSequence(patternIndexOffset, spindexer.getAvailableArtifacts()));
+                        shootingQueue.addAll(PatternMode.getPatternSequence(patternIndexOffset, spindexer.greenCount(), spindexer.purpleCount()));
                     }).andThen(setRobotState(RobotState.SHOOT))
             );
         }

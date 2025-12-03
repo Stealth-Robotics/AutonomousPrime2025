@@ -162,11 +162,13 @@ public class SpindexerSubsystem extends StealthSubsystem {
     // Rotate the nearest artifact of the specified color to the shooter position
     public Command rotateArtifactToShoot(Queue<Artifact> shootingQueue) {
         return runOnce(() -> {
-            Slot slot = getNearestFilledSlotToShooter(shootingQueue.remove());
+            if (!shootingQueue.isEmpty() && shootingQueue != null) {
+                Slot slot = getNearestFilledSlotToShooter(shootingQueue.remove());
 
-            if (slot != null) {
-                pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
-                shooterSlot = slot;
+                if (slot != null) {
+                    pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
+                    shooterSlot = slot;
+                }
             }
         });
     }
@@ -277,14 +279,16 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return size;
     }
 
-    //Has all the needed artifact colors to make a motif
-    public ArrayList<Artifact> getAvailableArtifacts() {
-        ArrayList<Artifact> availableArtifacts = new ArrayList<>();
-        availableArtifacts.add(slot1.getArtifact());
-        availableArtifacts.add(slot2.getArtifact());
-        availableArtifacts.add(slot3.getArtifact());
+    public int purpleCount() {
+        return ((slot1.getArtifact() == Artifact.PURPLE) ? 1 : 0) +
+                ((slot2.getArtifact() == Artifact.PURPLE) ? 1 : 0) +
+                ((slot3.getArtifact() == Artifact.PURPLE) ? 1 : 0);
+    }
 
-        return availableArtifacts;
+    public int greenCount() {
+        return ((slot1.getArtifact() == Artifact.GREEN) ? 1 : 0) +
+                ((slot2.getArtifact() == Artifact.GREEN) ? 1 : 0) +
+                ((slot3.getArtifact() == Artifact.GREEN) ? 1 : 0);
     }
 
     public boolean atSetpoint() {
@@ -305,7 +309,6 @@ public class SpindexerSubsystem extends StealthSubsystem {
         telemetry.addLine("----spindexer----");
         telemetry.addData("error", pid.getPositionError());
         telemetry.addData("setpoint reached", atSetpoint());
-        telemetry.addData("current draw (amps)", spindexerMotor.getCurrent(CurrentUnit.AMPS));
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());
         telemetry.addData("3", slot3.getArtifact());

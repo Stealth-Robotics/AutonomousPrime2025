@@ -104,11 +104,6 @@ public class IntakeSubsystem extends StealthSubsystem {
             setPower(OPERATING_SPEED);
             loaderServo.setPosition(LOADER_DEPLOYED_POSITION);
         }
-        else if (state == IntakeState.TRANSFER_DOWN) {
-            //Transfer but loader arm retracted
-            setPower(OPERATING_SPEED);
-            loaderServo.setPosition(LOADER_RETRACTED_POSITION);
-        }
         else {
             setPower(0);
             loaderServo.setPosition(LOADER_RETRACTED_POSITION);
