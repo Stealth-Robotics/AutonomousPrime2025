@@ -13,7 +13,7 @@ import org.stealthrobotics.library.commands.EndOpModeCommand;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 public class TestAuto extends StealthOpMode {
-    private AutoBuilder pathLibrary;
+    private AutoBuilder builder;
     private FollowerSubsystem follower;
     private RobotSystem robot;
 
@@ -24,8 +24,8 @@ public class TestAuto extends StealthOpMode {
         follower = new FollowerSubsystem(hardwareMap);
         robot = new RobotSystem(hardwareMap);
 
-        pathLibrary = new AutoBuilder();
-        startPose = pathLibrary.FAR_START_POSE;
+        builder = new AutoBuilder(robot);
+        startPose = builder.FAR_START_POSE;
 
         //Reset pinpoint
         robot.drive.resetPosAndIMU();

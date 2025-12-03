@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -9,11 +10,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.enums.Artifact;
+import org.stealthrobotics.library.SquIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
+import android.icu.lang.UCharacter;
 
 import androidx.annotation.NonNull;
 
@@ -25,19 +30,17 @@ import java.util.Queue;
 @SuppressWarnings("FieldCanBeLocal")
 public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
-    private final PIDController pid;
+    private final SquIDController squid;
 
-    public static double kP = 0.00025;
-    public static double kI = 0.05;
-    public static double kD = 0.000005;
-    public static double kS = 0.01;
+    public static double kP = 0.01;
+    public static double kS = 0.02;
 
     private double encoderOffset = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 8192; //REV Thru Bore
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
 
-    private final double POSITION_TOLERANCE_TICKS = 60; //Around 2.3 degrees
+    private final double POSITION_TOLERANCE_TICKS = 15;
 
     /* Slot numbers increase going counter-clockwise
                     3 ————— 2
@@ -93,8 +96,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
         spindexerMotor = hardwareMap.get(DcMotorEx.class, "spindexerMotor");
         spindexerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        pid = new PIDController(kP, kI, kD);
-        pid.setTolerance(POSITION_TOLERANCE_TICKS);
+        squid = new SquIDController(kP);
 
         resetEncoder();
     }
@@ -142,7 +144,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
             if (slotNumber == 1) slot = slot1;
             if (slotNumber == 2) slot = slot2;
 
-            pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
+            squid.setSetpoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
             intakeSlot = slot;
         });
     }
@@ -153,7 +155,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
             Slot slot = getNearestEmptySlot();
 
             if (slot != null) {
-                pid.setSetPoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
+                squid.setSetpoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
                 intakeSlot = slot;
             }
         });
@@ -166,7 +168,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 Slot slot = getNearestFilledSlotToShooter(shootingQueue.peek());
 
                 if (slot != null) {
-                    pid.setSetPoint(slot.getShootPosition() * TICKS_PER_DEGREE);
+                    squid.setSetpoint(slot.getShootPosition() * TICKS_PER_DEGREE);
                     shooterSlot = slot;
                 }
             }
@@ -292,7 +294,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     }
 
     public boolean atSetpoint() {
-        return pid.atSetPoint();
+        return Math.abs(squid.getSetpoint() - getCurrentTicks()) < POSITION_TOLERANCE_TICKS;
     }
 
     private void setPower(double power) {
@@ -301,13 +303,17 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        double pidOutput = pid.calculate(getCurrentTicks());
-        double kSFeedforward = kS * Math.signum(pid.getPositionError());
+        if (atSetpoint()) {
+            setPower(0.0);
+        }
+        else {
+            double error = squid.getSetpoint() - getCurrentTicks();
+            double kSFeedforward = kS * Math.signum(error);
 
-        setPower(pidOutput + kSFeedforward);
+            setPower(squid.calculate(getCurrentTicks()) + kSFeedforward);
+        }
 
         telemetry.addLine("----spindexer----");
-        telemetry.addData("error", pid.getPositionError());
         telemetry.addData("setpoint reached", atSetpoint());
         telemetry.addData("1", slot1.getArtifact());
         telemetry.addData("2", slot2.getArtifact());

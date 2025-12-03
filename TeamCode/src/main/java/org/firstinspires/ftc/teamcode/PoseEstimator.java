@@ -14,7 +14,7 @@ public class PoseEstimator {
     private static PoseEstimator INSTANCE = null;
 
     private Pose robotPoseNew = null;
-    private Pose robotPose = new Pose();
+    private Pose robotPose = new Pose(0, 0, 0);
 
     private final double INCHES_FROM_ORIGIN_TO_TURRET = 2.56077; //Distance from the robot's origin to the rotation point of the turret
 

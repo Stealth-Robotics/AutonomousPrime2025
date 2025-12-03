@@ -88,7 +88,8 @@ public class RobotSystem extends StealthSubsystem {
         this.shootPatternTrigger = shootPatternTrigger;
         this.shootRapidTrigger = shootRapidTrigger;
 
-        turret.setState(TurretState.TARGET).schedule();
+        //Pause for pose estimator to be updated with the auto pose
+        new WaitCommand(200).andThen(turret.setState(TurretState.TARGET)).schedule();
 
         configureStateMachine(intakeTrigger == null);
     }
