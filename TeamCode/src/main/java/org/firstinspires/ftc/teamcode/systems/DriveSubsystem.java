@@ -1,12 +1,10 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.systems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -122,20 +120,15 @@ public class DriveSubsystem extends StealthSubsystem {
         if (pp.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY && latestPoseSetCall != null)
             setPose(latestPoseSetCall);
 
-        boolean updatePinpointPose =
-                poseEstimator.update(new Pose(
-                pp.getPosX(DistanceUnit.INCH),
-                pp.getPosY(DistanceUnit.INCH),
-                getHeading()
-        ));
+        double poseX = pp.getPosX(DistanceUnit.INCH);
+        double poseY = pp.getPosY(DistanceUnit.INCH);
+        double heading = getHeading();
 
-        if (updatePinpointPose)
-            setPose(poseEstimator.getRobotPose());
+        poseEstimator.update(new Pose(poseX, poseY, heading));
 
         telemetry.addLine("----drive----");
-        telemetry.addData("x", poseEstimator.getRobotPose().getX());
-        telemetry.addData("y", poseEstimator.getRobotPose().getY());
-        telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(poseEstimator.getRobotPose().getHeading()));
-        telemetry.addData("headingOffset", AngleUnit.RADIANS.toDegrees(headingOffset));
+        telemetry.addData("x", poseX);
+        telemetry.addData("y", poseY);
+        telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(heading));
     }
 }

@@ -1,27 +1,21 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import android.os.Environment;
-
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
-import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
+import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -72,31 +66,13 @@ public class Teleop extends StealthOpMode {
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(72,72, 90));
 
-//        operatorGamepad.getGamepadButton(GamepadKeys.Button.Y).whenActive(
-//                new InstantCommand(() -> {
-//                    offsets.add("offsetTable.add(" + PoseEstimator.getInstance().getRobotPose().getX() + ", " +
-//                            PoseEstimator.getInstance().getRobotPose().getY() + ", " +
-//                            robot.turret.getTurretOffset() + ");");
-//                })
-//        );
-//        operatorGamepad.getGamepadButton(GamepadKeys.Button.X).whenActive(
-//                new InstantCommand(() -> {
-//                    try (FileWriter myWriter = new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath()+"/FIRST/data/turret.txt", true)) {
-//                        for (String s : offsets) {
-//                            myWriter.write(s + "\n");
-//                        }
-//                    } catch (IOException e) {
-//                    }
-//                })
-//        );
-
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.FREEZE_TURRET_TOGGLE).toggleWhenActive(
                 robot.turret.setState(TurretState.IDLE),
-                robot.turret.setState(TurretState.TARGET)
+                new InstantCommand(() -> robot.turret.switchToOdometryControl())
         );
 
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(6));
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-6));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(5));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-5));
 
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(
@@ -136,8 +112,11 @@ public class Teleop extends StealthOpMode {
     @Override
     public void printTelemetry() {
         matchTime = (int) Math.max(0, 120 - matchTimer.time());
+    }
+
+    private String matchTimerString() {
         String timeStr = String.format(Locale.US, "%02d", (matchTime / 60)) + ":" + String.format(Locale.US, "%02d", (matchTime - ((matchTime / 60) * 60)));
-        telemetry.addLine("<h4>MATCH TIME: " + timeStr + "</h4>");
+        return "<h4>MATCH TIME: " + timeStr + "</h4>";
     }
 
     @SuppressWarnings("unused")

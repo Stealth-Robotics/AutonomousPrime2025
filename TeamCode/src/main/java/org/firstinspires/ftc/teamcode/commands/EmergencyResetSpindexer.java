@@ -5,8 +5,8 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.enums.Artifact;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.SpindexerSubsystem;
+import org.firstinspires.ftc.teamcode.systems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.systems.SpindexerSubsystem;
 
 public class EmergencyResetSpindexer extends SequentialCommandGroup {
 

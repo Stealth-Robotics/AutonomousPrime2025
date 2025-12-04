@@ -8,7 +8,7 @@ import com.pedropathing.paths.Path;
 import org.firstinspires.ftc.teamcode.AlliancePoseFlipper;
 import org.firstinspires.ftc.teamcode.enums.IntakeState;
 import org.firstinspires.ftc.teamcode.enums.ShooterState;
-import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
+import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import org.stealthrobotics.library.Alliance;
 
 public class AutoBuilder {

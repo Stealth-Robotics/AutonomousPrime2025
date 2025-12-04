@@ -13,7 +13,6 @@ import org.stealthrobotics.library.Alliance;
 public class PoseEstimator {
     private static PoseEstimator INSTANCE = null;
 
-    private Pose robotPoseNew = null;
     private Pose robotPose = new Pose(0, 0, 0);
 
     private final double INCHES_FROM_ORIGIN_TO_TURRET = 3; //Distance from the robot's origin to the rotation point of the turret
@@ -24,12 +23,10 @@ public class PoseEstimator {
     private static Pose goalPose = null;
 
     public PoseEstimator() {
-        if (Alliance.get() == Alliance.BLUE) {
+        if (Alliance.get() == Alliance.BLUE)
             goalPose = BLUE_GOAL_POSE;
-        }
-        else {
+        else
             goalPose = RED_GOAL_POSE;
-        }
     }
 
     public Pose getRobotPose() {
@@ -44,21 +41,8 @@ public class PoseEstimator {
         return INSTANCE;
     }
 
-    //Update via camera with new apriltag data
-    public void updateWithNewPose(Pose newEstimation) {
-        robotPoseNew = newEstimation;
-    }
-
-    //Update via pinpoint based off of robot velocity
-    public boolean update(Pose updatedRobotPose) {
-        if (robotPoseNew != null) {
-            robotPose = robotPoseNew;
-            robotPoseNew = null;
-            return true;
-        }
-
+    public void update(Pose updatedRobotPose) {
         robotPose = updatedRobotPose;
-        return false;
     }
 
     public double getTurretTargetAngle() {
@@ -72,9 +56,5 @@ public class PoseEstimator {
 
     public double getDistanceFromGoal() {
         return sqrt(pow((robotPose.getX() - goalPose.getX()), 2) + pow((robotPose.getY() - goalPose.getY()), 2));
-    }
-
-    public Pose getGoalPose() {
-        return goalPose;
     }
 }

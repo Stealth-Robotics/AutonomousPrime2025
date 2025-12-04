@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.systems;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
@@ -12,21 +12,20 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.PoseEstimator;
+import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.enums.Artifact;
 import org.firstinspires.ftc.teamcode.enums.IntakeState;
-import org.firstinspires.ftc.teamcode.enums.LEDState;
 import org.firstinspires.ftc.teamcode.PatternMode;
 import org.firstinspires.ftc.teamcode.enums.ShooterState;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
+import org.stealthrobotics.library.math.filter.Debouncer;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class RobotSystem extends StealthSubsystem {
@@ -90,9 +89,6 @@ public class RobotSystem extends StealthSubsystem {
         this.shootPatternTrigger = shootPatternTrigger;
         this.shootRapidTrigger = shootRapidTrigger;
 
-        //Pause for pose estimator to be updated with the auto pose
-        new WaitCommand(200).andThen(turret.setState(TurretState.TARGET)).schedule();
-
         configureStateMachine(intakeTrigger == null);
     }
 
@@ -132,8 +128,7 @@ public class RobotSystem extends StealthSubsystem {
                                     shooter.setState(ShooterState.SHOOT),
                                     shooter.setState(ShooterState.IDLE),
                                     () -> spindexer.isFull())
-                    )
-                    .whenActive(turret.setState(TurretState.TARGET));
+                    );
 
             isIDLE
                     .and(intakeTrigger)
@@ -258,8 +253,7 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE))
-                    .whenActive(turret.setState(TurretState.TARGET));
+                    .whenActive(shooter.setState(ShooterState.IDLE));
         }
 
         // INTAKE STATE LOGIC
@@ -354,7 +348,6 @@ public class RobotSystem extends StealthSubsystem {
                 new InstantCommand(() -> shootingQueue.clear()),
                 intake.setState(IntakeState.IDLE),
                 shooter.setState(ShooterState.IDLE),
-                turret.setState(TurretState.TARGET),
                 new InstantCommand(() -> {
                     try { CommandScheduler.getInstance().cancelAll(); }
                     catch (Exception ignored) {}
@@ -369,11 +362,23 @@ public class RobotSystem extends StealthSubsystem {
         telemetry.addData("Alliance", Alliance.get());
         telemetry.addData("State", robotState);
         telemetry.addData("Shooting Queue", shootingQueue);
+        telemetry.addData("Motif", Motif.getMotif());
         telemetry.addData("Pattern Start Location", patternStart);
     }
 
     @Override
     public void periodic() {
+        //Turret switching logic
+        if (vision.seesGoal() && turret.getState() == TurretState.ODOMETRY) {
+            turret.switchToApriltagControl();
+        }
+        else if (!vision.seesGoal() && turret.getState() == TurretState.APRILTAG) {
+            turret.switchToOdometryControl();
+        }
+        else if (vision.seesGoal() && turret.getState() == TurretState.APRILTAG) {
+            turret.updateOffsetFromTag(vision.getTagOffset());
+        }
+
         printTelemetry();
     }
 }

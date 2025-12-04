@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
-import org.firstinspires.ftc.teamcode.subsystems.FollowerSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
+import org.firstinspires.ftc.teamcode.systems.FollowerSubsystem;
+import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import org.stealthrobotics.library.commands.EndOpModeCommand;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 

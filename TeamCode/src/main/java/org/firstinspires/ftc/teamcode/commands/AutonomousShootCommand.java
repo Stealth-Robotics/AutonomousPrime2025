@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
-import org.firstinspires.ftc.teamcode.subsystems.RobotSystem;
+import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class AutonomousShootCommand extends SequentialCommandGroup {
     public AutonomousShootCommand(RobotSystem robot) {

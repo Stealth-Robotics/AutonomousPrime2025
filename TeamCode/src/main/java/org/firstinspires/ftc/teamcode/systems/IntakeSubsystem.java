@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.systems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
@@ -114,11 +114,6 @@ public class IntakeSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----intake----");
         telemetry.addData("state", state);
-        telemetry.addData("distance", colorSensor.getDistance(DistanceUnit.MM));
         telemetry.addData("detected artifact", getSensedArtifact());
-
-        float[] hsv = new float[3];
-        Color.RGBToHSV((int) MathFunctions.clamp(colorSensor.red(), 0, 255), (int) MathFunctions.clamp(colorSensor.green(), 0, 255), (int) MathFunctions.clamp(colorSensor.blue(), 0, 255), hsv);
-        telemetry.addData("hue", hsv[0]);
     }
 }
