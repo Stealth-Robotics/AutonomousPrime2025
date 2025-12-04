@@ -57,18 +57,16 @@ public class ShooterSubsystem extends StealthSubsystem {
     private void generateInterpolationTables() {
         speedTable.add(0, 900);
         speedTable.add(15.36, 950);
-        speedTable.add(55.06, 1100);
-        speedTable.add(82.44, 1300);
-        speedTable.add(131, 1400);
-        speedTable.add(144.34, 1600);
+        speedTable.add(55.06, 1200);
+        speedTable.add(77, 1300);
+        speedTable.add(124, 1600);
         speedTable.createLUT();
 
-        hoodTable.add(0, 0.1);
-        hoodTable.add(15.36, 0.25);
+        hoodTable.add(0, 0);
+        hoodTable.add(15.36, 0.2);
         hoodTable.add(55.06, 0.6);
         hoodTable.add(82.44, 0.7);
-        hoodTable.add(131, 1);
-        hoodTable.add(144.34, 1);
+        hoodTable.add(124, 1);
         hoodTable.createLUT();
     }
 
@@ -107,11 +105,11 @@ public class ShooterSubsystem extends StealthSubsystem {
         double distanceFromGoal = poseEstimator.getDistanceFromGoal();
 
         //Update hood angle based off of distance from the goal
-        setHoodPercentage(hoodTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 144)));
+        setHoodPercentage(hoodTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 123.99)));
 
         //State-machine
         if (state == ShooterState.SHOOT) {
-            double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 144));
+            double velocitySetpoint = speedTable.get(MathFunctions.clamp(distanceFromGoal, 0.25, 123.99));
             velocityPID.setSetPoint(velocitySetpoint);
             setPower(velocityPID.calculate(getVelocity()));
         }

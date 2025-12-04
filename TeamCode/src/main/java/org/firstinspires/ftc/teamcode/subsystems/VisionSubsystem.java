@@ -86,11 +86,12 @@ public class VisionSubsystem extends StealthSubsystem {
             for (AprilTagDetection detection : detections) {
                 if (restTimer.seconds() >= REST_SECONDS) {
                     if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED && detection.id == GOAL_RED_ID) {
-                        poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
-                                detection.robotPose.getPosition().x,
-                                detection.robotPose.getPosition().y,
-                                detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
-                        )));
+                        //! Reloc disabled
+//                        poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
+//                                detection.robotPose.getPosition().x,
+//                                detection.robotPose.getPosition().y,
+//                                detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
+//                        )));
 
                         restTimer.reset();
                     }
