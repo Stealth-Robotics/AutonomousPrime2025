@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.enums.LEDState;
 import org.firstinspires.ftc.teamcode.PatternMode;
 import org.firstinspires.ftc.teamcode.enums.ShooterState;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
 
 import java.util.Arrays;
@@ -365,6 +366,7 @@ public class RobotSystem extends StealthSubsystem {
         String patternStart = (patternIndexOffset == 0) ? "First" : (patternIndexOffset == 1) ? "Middle" : "Last";
 
         telemetry.addLine("----Robot System----");
+        telemetry.addData("Alliance", Alliance.get());
         telemetry.addData("State", robotState);
         telemetry.addData("Shooting Queue", shootingQueue);
         telemetry.addData("Pattern Start Location", patternStart);
