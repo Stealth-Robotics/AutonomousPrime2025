@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,6 +20,8 @@ import org.stealthrobotics.library.math.filter.Debouncer;
 
 import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 
+import android.graphics.Color;
+
 @SuppressWarnings("FieldCanBeLocal")
 @Config
 public class IntakeSubsystem extends StealthSubsystem {
@@ -33,10 +36,10 @@ public class IntakeSubsystem extends StealthSubsystem {
     private final Debouncer purpleColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
     private final Debouncer greenColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
 
-    private final double DISTANCE_THRESHOLD_MM = 120.0;
+    private final double DISTANCE_THRESHOLD_MM = 100.0;
 
-    private final double GREEN_HUE = 120, PURPLE_HUE = 250;
-    private final double GREEN_HUE_THRESHOLD = 50, PURPLE_HUE_THRESHOLD = 50;
+    private final double GREEN_HUE = 150, PURPLE_HUE = 190;
+    private final double GREEN_HUE_THRESHOLD = 20, PURPLE_HUE_THRESHOLD = 20;
 
     private final double STALL_THRESHOLD = 3.8;
 
@@ -111,7 +114,11 @@ public class IntakeSubsystem extends StealthSubsystem {
 
         telemetry.addLine("----intake----");
         telemetry.addData("state", state);
-        telemetry.addData("current (amps)", intakeMotor.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("distance", colorSensor.getDistance(DistanceUnit.MM));
         telemetry.addData("detected artifact", getSensedArtifact());
+
+        float[] hsv = new float[3];
+        Color.RGBToHSV((int) MathFunctions.clamp(colorSensor.red(), 0, 255), (int) MathFunctions.clamp(colorSensor.green(), 0, 255), (int) MathFunctions.clamp(colorSensor.blue(), 0, 255), hsv);
+        telemetry.addData("hue", hsv[0]);
     }
 }

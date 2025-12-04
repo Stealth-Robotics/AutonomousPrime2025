@@ -40,8 +40,6 @@ public class VisionSubsystem extends StealthSubsystem {
 
     private final double REST_SECONDS = 8;
 
-    private boolean shutOffCamera = true;
-
     //Position and rotation of the camera relative to the robot's origin (in inches)
     private final Position cameraPosition = new Position(DistanceUnit.INCH, 3.75, 8.25, 9.2, 0);
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0,-90, 180, 0);
@@ -82,27 +80,20 @@ public class VisionSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        if (restTimer.seconds() >= REST_SECONDS && !shutOffCamera) {
-            visionPortal.resumeStreaming();
-            shutOffCamera = true;
-        }
-        else if (restTimer.seconds() < REST_SECONDS && shutOffCamera) {
-            visionPortal.stopStreaming();
-            shutOffCamera = false;
-        }
-
         ArrayList<AprilTagDetection> detections = aprilTagProcessor.getFreshDetections();
 
         if (detections != null && !detections.isEmpty()) {
             for (AprilTagDetection detection : detections) {
-                if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED && detection.id == GOAL_RED_ID) {
-                    poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
-                            detection.robotPose.getPosition().x,
-                            detection.robotPose.getPosition().y,
-                            detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
-                    )));
+                if (restTimer.seconds() >= REST_SECONDS) {
+                    if (alliance == Alliance.BLUE && detection.id == GOAL_BLUE_ID || alliance == Alliance.RED && detection.id == GOAL_RED_ID) {
+                        poseEstimator.updateWithNewPose(ftcToPedroCoordinates(new Pose(
+                                detection.robotPose.getPosition().x,
+                                detection.robotPose.getPosition().y,
+                                detection.robotPose.getOrientation().getYaw(AngleUnit.RADIANS)
+                        )));
 
-                    restTimer.reset();
+                        restTimer.reset();
+                    }
                 }
 
                 if (detection.id == MOTIF_GPP_ID) {
