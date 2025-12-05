@@ -4,5 +4,6 @@ public enum TurretState {
     IDLE,
     APRILTAG,
     ODOMETRY,
+    OBELISK,
     HOME
 }

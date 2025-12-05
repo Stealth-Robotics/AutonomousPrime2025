@@ -108,6 +108,11 @@ public class TurretSubsystem extends StealthSubsystem {
         odoPID.reset();
     }
 
+    public void switchToObelisk() {
+        state = TurretState.OBELISK;
+        odoPID.reset();
+    }
+
     public void switchToOdometryControl() {
         state = TurretState.ODOMETRY;
         odoPID.reset();
@@ -133,6 +138,11 @@ public class TurretSubsystem extends StealthSubsystem {
         switch (state) {
             case HOME:
                 double odoOutput = odoPID.calculate(getCurrentDegrees(), 0);
+                setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                break;
+
+            case OBELISK:
+                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getObeliskTurretTargetAngle(), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
                 setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
                 break;
 

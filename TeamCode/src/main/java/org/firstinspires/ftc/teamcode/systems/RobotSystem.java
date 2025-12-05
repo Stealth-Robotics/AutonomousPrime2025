@@ -352,6 +352,9 @@ public class RobotSystem extends StealthSubsystem {
         }
     }
 
+    /**
+     * Forces the robot into its IDLE state, hopefully fixing whatever garbage is happening
+     */
     public Command forceIdle() {
         return new SequentialCommandGroup(
                 setRobotState(RobotState.IDLE),
@@ -360,7 +363,10 @@ public class RobotSystem extends StealthSubsystem {
                 shooter.setState(ShooterState.IDLE),
                 new InstantCommand(() -> {
                     try { CommandScheduler.getInstance().cancelAll(); }
-                    catch (Exception ignored) {}
+                    catch (Exception ignored) {
+                        // ! Only for testing today, then remove if it works (which it won't)
+                        telemetry.speak("I failed bozo, Try again!");
+                    }
                 })
         );
     }
