@@ -114,21 +114,20 @@ public class DriveSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        //Update the pinpoint with new position deltas
         pp.update();
 
-        // Update pose if there is a pose queued from a previous setPose method call
-        if (pp.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY && latestPoseSetCall != null)
+        //Update pose if there is a pose queued from a previous setPose method call
+        if (pp.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY && latestPoseSetCall != null) {
             setPose(latestPoseSetCall);
+            latestPoseSetCall = null;
+        }
 
-        double poseX = pp.getPosX(DistanceUnit.INCH);
-        double poseY = pp.getPosY(DistanceUnit.INCH);
-        double heading = getHeading();
-
-        poseEstimator.update(new Pose(poseX, poseY, heading));
-
-        telemetry.addLine("----drive----");
-        telemetry.addData("x", poseX);
-        telemetry.addData("y", poseY);
-        telemetry.addData("θ", AngleUnit.RADIANS.toDegrees(heading));
+        //Update the pose estimator for the turret tracking
+        poseEstimator.update(new Pose(
+                pp.getPosX(DistanceUnit.INCH),
+                pp.getPosY(DistanceUnit.INCH),
+                getHeading()
+        ));
     }
 }

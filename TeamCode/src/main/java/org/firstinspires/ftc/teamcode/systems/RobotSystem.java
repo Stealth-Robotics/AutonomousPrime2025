@@ -11,10 +11,13 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Motif;
+import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.enums.Artifact;
 import org.firstinspires.ftc.teamcode.enums.IntakeState;
 import org.firstinspires.ftc.teamcode.PatternMode;
@@ -382,8 +385,12 @@ public class RobotSystem extends StealthSubsystem {
         String patternStart = (patternIndexOffset == 0) ? "First" : (patternIndexOffset == 1) ? "Middle" : "Last";
 
         telemetry.addLine("----Robot System----");
-        telemetry.addData("Alliance", Alliance.get());
         telemetry.addData("State", robotState);
+        telemetry.addData("Alliance", Alliance.get());
+
+        Pose robotPose = PoseEstimator.getInstance().getRobotPose();
+        telemetry.addLine("Pose " + String.format("(%.2f, %.2f, %.2f°)", robotPose.getX(), robotPose.getY(), AngleUnit.RADIANS.toDegrees(robotPose.getHeading())));
+
         telemetry.addData("Shooting Queue", shootingQueue);
         telemetry.addData("Motif", Motif.getMotif());
         telemetry.addData("Pattern Start Location", patternStart);
