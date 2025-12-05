@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.enums.Artifact;
 import org.firstinspires.ftc.teamcode.enums.IntakeState;
 import org.firstinspires.ftc.teamcode.PatternMode;
+import org.firstinspires.ftc.teamcode.enums.LEDState;
 import org.firstinspires.ftc.teamcode.enums.ShooterState;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.stealthrobotics.library.Alliance;
@@ -82,7 +83,7 @@ public class RobotSystem extends StealthSubsystem {
         shooter = new ShooterSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
         vision = new VisionSubsystem(hardwareMap);
-        led = new LEDSubsystem(hardwareMap, () -> shooter.atVelocity());
+        led = new LEDSubsystem(hardwareMap);
 
         this.intakeTrigger = intakeTrigger;
         this.outtakeTrigger = outtakeTrigger;
@@ -366,8 +367,20 @@ public class RobotSystem extends StealthSubsystem {
         telemetry.addData("Pattern Start Location", patternStart);
     }
 
-    @Override
-    public void periodic() {
+    private void updateLEDState() {
+        if (shooter.atVelocity() && shooter.isReadyToShoot()) {
+            led.setState(LEDState.GREEN);
+        }
+        else if (shooter.atVelocity() && !shooter.isReadyToShoot()) {
+            led.setState(LEDState.RED);
+        }
+        else if (!shooter.atVelocity() && shooter.isReadyToShoot()) {
+            led.setState(LEDState.YELLOW);
+        }
+        else led.setState(LEDState.OFF);
+    }
+
+    private void updateTurretState() {
         if (turret.getState() != TurretState.IDLE) {
             if (!vision.seesGoal()) {
                 turret.switchToOdometryControl();
@@ -381,6 +394,12 @@ public class RobotSystem extends StealthSubsystem {
         else {
             turret.updateOffsetFromTag(0);
         }
+    }
+
+    @Override
+    public void periodic() {
+        updateLEDState();
+        updateTurretState();
 
         printTelemetry();
     }

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.systems;
 
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -11,20 +13,27 @@ import java.util.function.BooleanSupplier;
 
 public class LEDSubsystem extends StealthSubsystem {
     private final Servo led;
-    private final BooleanSupplier velocityDebouncer;
+    private LEDState currentState = LEDState.OFF;
+    private LEDState newState = LEDState.OFF;
 
-    private final Debouncer stateDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
+    private final Debouncer timingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
 
-    public LEDSubsystem(HardwareMap hardwareMap, BooleanSupplier velocityDebouncer) {
+    public LEDSubsystem(HardwareMap hardwareMap) {
         led = hardwareMap.get(Servo.class, "led");
-        this.velocityDebouncer = velocityDebouncer;
+    }
+
+    public void setState(LEDState newState) {
+        this.newState = newState;
     }
 
     @Override
     public void periodic() {
-        if (stateDebouncer.calculate(velocityDebouncer.getAsBoolean()))
-            led.setPosition(LEDState.GREEN.getColorValue());
-        else
-            led.setPosition(LEDState.RED.getColorValue());
+        if (timingDebouncer.calculate(currentState != newState)) {
+            led.setPosition(newState.getColorValue());
+            currentState = newState;
+        }
+
+        telemetry.addLine("----led----");
+        telemetry.addData("state", currentState);
     }
 }
