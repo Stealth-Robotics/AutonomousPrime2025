@@ -15,8 +15,8 @@ public class AutoBuilder {
     private final RobotSystem robot;
 
     //Our robot's starting positions
-    public Pose CLOSE_START_POSE = new Pose();
-    public Pose FAR_START_POSE = new Pose();
+    public Pose CLOSE_START_POSE = new Pose(22.3, 120, Math.toRadians(0));
+    public Pose FAR_START_POSE = new Pose(56.99, 8.44, Math.toRadians(0));
 
     //Poses that we shoot from depending on location
     private Pose CLOSE_SHOOT_POSE = new Pose();

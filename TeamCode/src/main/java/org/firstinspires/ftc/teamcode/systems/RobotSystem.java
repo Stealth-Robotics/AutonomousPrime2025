@@ -47,9 +47,6 @@ public class RobotSystem extends StealthSubsystem {
     //List for storing persistent telemetry to write to the Driver Station in periodic
     private final ArrayList<String> persistentTelemetry = new ArrayList<>();
 
-    private double loopTime = 0.0;
-    private double previousLoopTime = 0.0;
-
     //All of the robot's subsystems
     public final DriveSubsystem drive;
     public final TurretSubsystem turret;
@@ -110,8 +107,6 @@ public class RobotSystem extends StealthSubsystem {
         this.shootRapidTrigger = shootRapidTrigger;
 
         configureStateMachine(intakeTrigger == null);
-
-        loopTime = System.nanoTime();
     }
 
     public RobotSystem(HardwareMap hardwareMap) {
@@ -402,7 +397,7 @@ public class RobotSystem extends StealthSubsystem {
         telemetry.addData("Pattern Start", patternStart);
 
         telemetry.addData("Limelight FPS", vision.getFPS());
-        telemetry.addLine(String.format("Goal (Visible = %b | Distance From Robot = %.fs in)", vision.seesGoal(), PoseEstimator.getInstance().getDistanceFromGoal()));
+        telemetry.addLine(String.format("Goal (Visible = %b | Distance From Robot = %.1f in)", vision.seesGoal(), PoseEstimator.getInstance().getDistanceFromGoal()));
 
         telemetry.addData("Intake Sensor", intake.getSensedArtifact());
 
@@ -412,20 +407,15 @@ public class RobotSystem extends StealthSubsystem {
 
         telemetry.addData("Shooting Queue", shootingQueue);
 
-        loopTime = 1E6 / (loopTime - previousLoopTime);
-        previousLoopTime = loopTime;
-        telemetry.addLine(String.format("Loop Time: %f ms", loopTime));
-
-        telemetry.addLine("----Subsystem States----");
         telemetry.addLine();
+        telemetry.addLine("----Subsystem States----");
         telemetry.addData("Intake State", intake.getState());
         telemetry.addData("Turret State", turret.getState());
         telemetry.addData("Shooter State", shooter.getState());
         telemetry.addData("LED State", led.getState());
 
-
-        telemetry.addLine("----Persistent Telemetry----");
         telemetry.addLine();
+        telemetry.addLine("----Persistent Telemetry----");
         for (String data : persistentTelemetry) {
             telemetry.addLine(data);
         }
@@ -435,13 +425,10 @@ public class RobotSystem extends StealthSubsystem {
         if (shooter.atVelocity() && shooter.isReadyToShoot()) {
             led.setState(LEDState.GREEN);
         }
-        else if (shooter.atVelocity() && !shooter.isReadyToShoot()) {
-            led.setState(LEDState.RED);
-        }
         else if (!shooter.atVelocity() && shooter.isReadyToShoot()) {
             led.setState(LEDState.YELLOW);
         }
-        else led.setState(LEDState.OFF);
+        else led.setState(LEDState.RED);
     }
 
     private void updateTurretState() {

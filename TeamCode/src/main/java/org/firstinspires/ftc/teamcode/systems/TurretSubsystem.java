@@ -41,10 +41,10 @@ public class TurretSubsystem extends StealthSubsystem {
     public static double odo_kD = 0.0;
     public static double odo_kS = 0.08;
 
-    public static double apriltag_kP = 0.02;
+    public static double apriltag_kP = 0.03;
     public static double apriltag_kI = 0.0;
     public static double apriltag_kD = 0.0;
-    public static double apriltag_kS = 0.08;
+    public static double apriltag_kS = 0.075;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
