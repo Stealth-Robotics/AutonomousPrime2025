@@ -39,6 +39,13 @@ public class VisionSubsystem extends StealthSubsystem {
         GOAL_ID = (Alliance.get() == Alliance.BLUE) ? GOAL_BLUE_ID : GOAL_RED_ID;
     }
 
+    /**
+     * @return The limelight's frames per second
+     */
+    public double getFPS() {
+        return limelight.getStatus().getFps();
+    }
+
     public boolean seesGoal() {
         return seesGoal;
     }
@@ -77,9 +84,5 @@ public class VisionSubsystem extends StealthSubsystem {
         }
 
         seesGoal = (seenGoal) ? true : false;
-
-        telemetry.addData("Limelight FPS", limelight.getStatus().getFps());
-        telemetry.addData("Can See Goal", seesGoal);
-        telemetry.addData("Distance To Goal", PoseEstimator.getInstance().getDistanceFromGoal());
     }
 }

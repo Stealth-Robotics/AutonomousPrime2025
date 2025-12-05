@@ -401,6 +401,9 @@ public class RobotSystem extends StealthSubsystem {
         String patternStart = (patternIndexOffset == 0) ? "First" : (patternIndexOffset == 1) ? "Middle" : "Last";
         telemetry.addData("Pattern Start", patternStart);
 
+        telemetry.addData("Limelight FPS", vision.getFPS());
+        telemetry.addLine(String.format("Goal (Visible = %b | Distance From Robot = %.fs in)", vision.seesGoal(), PoseEstimator.getInstance().getDistanceFromGoal()));
+
         telemetry.addData("Intake Sensor", intake.getSensedArtifact());
 
         telemetry.addLine(String.format("Shooter Velocity = %.1f rpm | Shooter Target = %.1f rpm", shooter.getVelocityRPM(), shooter.getTargetRPM()));
