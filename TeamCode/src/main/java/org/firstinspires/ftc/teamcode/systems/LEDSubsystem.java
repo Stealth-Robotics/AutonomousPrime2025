@@ -26,14 +26,15 @@ public class LEDSubsystem extends StealthSubsystem {
         this.newState = newState;
     }
 
+    public LEDState getState() {
+        return currentState;
+    }
+
     @Override
     public void periodic() {
         if (timingDebouncer.calculate(currentState != newState)) {
             led.setPosition(newState.getColorValue());
             currentState = newState;
         }
-
-        telemetry.addLine("----led----");
-        telemetry.addData("state", currentState);
     }
 }

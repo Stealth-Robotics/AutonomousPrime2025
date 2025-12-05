@@ -67,6 +67,10 @@ public class TurretSubsystem extends StealthSubsystem {
         resetEncoder();
     }
 
+    public double getOffsetFromTag() {
+        return offsetFromTag;
+    }
+
     public Command setState(TurretState newState) {
         return this.runOnce(() -> state = newState);
     }
@@ -169,9 +173,5 @@ public class TurretSubsystem extends StealthSubsystem {
             default:
                 setPower(0.0);
         }
-
-        telemetry.addLine("----turret----");
-        telemetry.addData("state", state);
-        telemetry.addData("tagOffset [tx]", offsetFromTag);
     }
 }

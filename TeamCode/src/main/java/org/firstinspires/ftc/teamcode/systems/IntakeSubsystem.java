@@ -111,9 +111,5 @@ public class IntakeSubsystem extends StealthSubsystem {
             setPower(0);
             loaderServo.setPosition(LOADER_RETRACTED_POSITION);
         }
-
-        telemetry.addLine("----intake----");
-        telemetry.addData("state", state);
-        telemetry.addData("detected artifact", getSensedArtifact());
     }
 }

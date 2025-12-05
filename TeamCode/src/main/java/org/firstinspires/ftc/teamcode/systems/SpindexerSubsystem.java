@@ -312,11 +312,5 @@ public class SpindexerSubsystem extends StealthSubsystem {
 
             setPower(squid.calculate(getCurrentTicks()) + kSFeedforward);
         }
-
-        telemetry.addLine("----spindexer----");
-        telemetry.addData("setpoint reached", atSetpoint());
-        telemetry.addData("1", slot1.getArtifact());
-        telemetry.addData("2", slot2.getArtifact());
-        telemetry.addData("3", slot3.getArtifact());
     }
 }

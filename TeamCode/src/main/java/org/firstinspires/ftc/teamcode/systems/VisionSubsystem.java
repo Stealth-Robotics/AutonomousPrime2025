@@ -78,9 +78,8 @@ public class VisionSubsystem extends StealthSubsystem {
 
         seesGoal = (seenGoal) ? true : false;
 
-        telemetry.addLine("----vision----");
-        telemetry.addData("FPS", limelight.getStatus().getFps());
-        telemetry.addData("seesGoal", seesGoal);
-        telemetry.addData("distanceFromGoal", PoseEstimator.getInstance().getDistanceFromGoal());
+        telemetry.addData("Limelight FPS", limelight.getStatus().getFps());
+        telemetry.addData("Can See Goal", seesGoal);
+        telemetry.addData("Distance To Goal", PoseEstimator.getInstance().getDistanceFromGoal());
     }
 }

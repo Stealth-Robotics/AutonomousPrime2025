@@ -32,6 +32,8 @@ public class ShooterSubsystem extends StealthSubsystem {
     public static double kD = 0.0;
     public static double kV = 0.0008;
 
+    private final int TICKS_PER_ROTATION = 28;
+
     private final double MAX_HOOD_ANGLE = 1;
     private final double MIN_HOOD_ANGLE = 0.15;
 
@@ -100,6 +102,21 @@ public class ShooterSubsystem extends StealthSubsystem {
         return state == ShooterState.SHOOT && velocityPID.getSetPoint() > 0;
     }
 
+    public double getVelocityRPM() {
+        return tpsToRPM(getVelocity());
+    }
+
+    public double getTargetRPM() {
+        return tpsToRPM(velocityPID.getSetPoint());
+    }
+
+    /**
+     * Converts from Ticks Per Second (TPS) to Rotations Per Minute (RPM)
+     */
+    private double tpsToRPM(double tps) {
+        return (tps * 60) / TICKS_PER_ROTATION;
+    }
+
     @Override
     public void periodic() {
         double distanceFromGoal = poseEstimator.getDistanceFromGoal();
@@ -117,12 +134,5 @@ public class ShooterSubsystem extends StealthSubsystem {
             velocityPID.setSetPoint(0);
             setPower(0.0);
         }
-
-        telemetry.addLine("----shooter----");
-        telemetry.addData("state", state);
-        telemetry.addData("velocity", getVelocity());
-        telemetry.addData("target", velocityPID.getSetPoint());
-        telemetry.addData("at velocity", atVelocity());
-        telemetry.addData("hood position", hoodServo.getPosition());
     }
 }

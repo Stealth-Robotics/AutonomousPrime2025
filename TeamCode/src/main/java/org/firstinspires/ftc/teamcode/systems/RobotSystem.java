@@ -44,7 +44,11 @@ import java.util.function.DoubleSupplier;
 public class RobotSystem extends StealthSubsystem {
     private RobotState robotState = RobotState.IDLE;
 
+    //List for storing persistent telemetry to write to the Driver Station in periodic
     private final ArrayList<String> persistentTelemetry = new ArrayList<>();
+
+    private double loopTime = 0.0;
+    private double previousLoopTime = 0.0;
 
     //All of the robot's subsystems
     public final DriveSubsystem drive;
@@ -106,6 +110,8 @@ public class RobotSystem extends StealthSubsystem {
         this.shootRapidTrigger = shootRapidTrigger;
 
         configureStateMachine(intakeTrigger == null);
+
+        loopTime = System.nanoTime();
     }
 
     public RobotSystem(HardwareMap hardwareMap) {
@@ -382,19 +388,41 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     private void printTelemetry() {
-        String patternStart = (patternIndexOffset == 0) ? "First" : (patternIndexOffset == 1) ? "Middle" : "Last";
-
-        telemetry.addLine("----Robot System----");
         telemetry.addData("State", robotState);
-        telemetry.addData("Alliance", Alliance.get());
 
         Pose robotPose = PoseEstimator.getInstance().getRobotPose();
         telemetry.addLine("Pose " + String.format("(%.2f, %.2f, %.2f°)", robotPose.getX(), robotPose.getY(), AngleUnit.RADIANS.toDegrees(robotPose.getHeading())));
 
-        telemetry.addData("Shooting Queue", shootingQueue);
         telemetry.addData("Motif", Motif.getMotif());
-        telemetry.addData("Pattern Start Location", patternStart);
 
+        Artifact[] artifactsInRobot = spindexer.getCurrentArtifacts();
+        telemetry.addLine(String.format("Artifacts In Robot [%s, %s, %s]", artifactsInRobot[0], artifactsInRobot[1], artifactsInRobot[2]));
+
+        String patternStart = (patternIndexOffset == 0) ? "First" : (patternIndexOffset == 1) ? "Middle" : "Last";
+        telemetry.addData("Pattern Start", patternStart);
+
+        telemetry.addData("Intake Sensor", intake.getSensedArtifact());
+
+        telemetry.addLine(String.format("Shooter Velocity = %.1f rpm | Shooter Target = %.1f rpm", shooter.getVelocityRPM(), shooter.getTargetRPM()));
+
+        telemetry.addData("Offset From Apriltag", turret.getOffsetFromTag() + "°");
+
+        telemetry.addData("Shooting Queue", shootingQueue);
+
+        loopTime = 1E6 / (loopTime - previousLoopTime);
+        previousLoopTime = loopTime;
+        telemetry.addLine(String.format("Loop Time: %f ms", loopTime));
+
+        telemetry.addLine("----Subsystem States----");
+        telemetry.addLine();
+        telemetry.addData("Intake State", intake.getState());
+        telemetry.addData("Turret State", turret.getState());
+        telemetry.addData("Shooter State", shooter.getState());
+        telemetry.addData("LED State", led.getState());
+
+
+        telemetry.addLine("----Persistent Telemetry----");
+        telemetry.addLine();
         for (String data : persistentTelemetry) {
             telemetry.addLine(data);
         }
