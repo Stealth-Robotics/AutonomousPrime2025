@@ -33,6 +33,7 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
 
     private final double POSITION_TOLERANCE_TICKS = 15;
+    private final double INTAKE_POSITION_TOLERANCE_TICKS = 30;
 
     /* Slot numbers increase going counter-clockwise
                     3 ————— 2
@@ -283,6 +284,13 @@ public class SpindexerSubsystem extends StealthSubsystem {
         return ((slot1.getArtifact() == Artifact.GREEN) ? 1 : 0) +
                 ((slot2.getArtifact() == Artifact.GREEN) ? 1 : 0) +
                 ((slot3.getArtifact() == Artifact.GREEN) ? 1 : 0);
+    }
+
+    /**
+     * @return true if the spindexer is roughly around its setpoint (used for intaking only)
+     */
+    public boolean atIntakeSetpoint() {
+        return Math.abs(squid.getSetpoint() - getCurrentTicks()) < INTAKE_POSITION_TOLERANCE_TICKS;
     }
 
     public boolean atSetpoint() {

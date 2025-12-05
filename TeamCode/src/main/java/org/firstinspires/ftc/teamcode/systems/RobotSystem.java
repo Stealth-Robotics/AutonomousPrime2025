@@ -29,9 +29,18 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+/**
+ * A class that neatly initializes all of the robot's subsystems in one place and allows different subsystem's
+ * behavior to be combined in it's periodic. This system can be used in autonomous or tele-op, but for tele-op the state machine
+ * transition must not include gamepad triggers.
+ *
+ * @author Marco Videla
+ * @author Ian Nachreiner
+ */
 public class RobotSystem extends StealthSubsystem {
     private RobotState robotState = RobotState.IDLE;
 
+    //All of the robot's subsystems
     public final DriveSubsystem drive;
     public final TurretSubsystem turret;
     public final IntakeSubsystem intake;
@@ -165,7 +174,7 @@ public class RobotSystem extends StealthSubsystem {
 
             //If we have an empty slot ready, continually check for artifacts
             isINTAKE
-                    .and(new Trigger(spindexer::atSetpoint))
+                    .and(new Trigger(spindexer::atIntakeSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> justIntaked = true))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
@@ -266,7 +275,7 @@ public class RobotSystem extends StealthSubsystem {
 
             //If we have an empty slot ready, continually check for artifacts
             isINTAKE
-                    .and(new Trigger(spindexer::atSetpoint))
+                    .and(new Trigger(spindexer::atIntakeSetpoint))
                     .and(new Trigger(() -> intake.getSensedArtifact() != Artifact.EMPTY))
                     .whenActive(new InstantCommand(() -> justIntaked = true))
                     .whenActive(new InstantCommand(() -> spindexer.intakeArtifact(intake.getSensedArtifact())))
