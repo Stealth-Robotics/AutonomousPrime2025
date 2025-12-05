@@ -15,6 +15,7 @@ import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.SquIDController;
 import org.stealthrobotics.library.StealthSubsystem;
 
@@ -27,6 +28,8 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private final PoseEstimator poseEstimator;
 
+    private final double farTurretOffset;
+
     private double encoderOffset = 0.0;
 
     private TurretState state = TurretState.IDLE;
@@ -34,7 +37,7 @@ public class TurretSubsystem extends StealthSubsystem {
     private double offsetFromTag = 0.0;
 
     public static double odo_kP = 0.03;
-    public static double odo_kI = 0.1;
+    public static double odo_kI = 0.06;
     public static double odo_kD = 0.0;
     public static double odo_kS = 0.08;
 
@@ -55,7 +58,12 @@ public class TurretSubsystem extends StealthSubsystem {
         odoPID = new PIDController(odo_kP, odo_kI, odo_kD);
         apriltagPID = new PIDController(apriltag_kP, apriltag_kI, apriltag_kD);
 
-        switchToHome();
+        if (Alliance.isRed())
+            farTurretOffset = -1;
+        else
+            farTurretOffset = 8;
+
+        switchToOdometryControl();
         resetEncoder();
     }
 
@@ -100,6 +108,11 @@ public class TurretSubsystem extends StealthSubsystem {
         odoPID.reset();
     }
 
+    public void switchToOdometryControl() {
+        state = TurretState.ODOMETRY;
+        odoPID.reset();
+    }
+
     public void switchToApriltagControl() {
         state = TurretState.APRILTAG;
         apriltagPID.reset();
@@ -111,20 +124,36 @@ public class TurretSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
+        //Constant offset for far shooting (y less than 48 inches)
+        double constantOffset = 0;
+        if (poseEstimator.getRobotPose().getY() < 48) {
+            constantOffset = farTurretOffset;
+        }
+
         switch (state) {
             case HOME:
                 double odoOutput = odoPID.calculate(getCurrentDegrees(), 0);
                 setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
                 break;
 
-            case APRILTAG:
-                double apriltagOutput = apriltagPID.calculate(-offsetFromTag, 0);
-                double ff = Math.abs(apriltagOutput) > 0.01 ? apriltag_kS * Math.signum(apriltagOutput) : 0;
+            case ODOMETRY:
+                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle() - constantOffset, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
+                setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                break;
 
-                if (getCurrentDegrees() < MAX_DEGREES_RIGHT && getCurrentDegrees() > MAX_DEGREES_LEFT)
-                    setPower(apriltagOutput + ff);
-                else
-                    state = TurretState.HOME;
+            case APRILTAG:
+                double offset = -offsetFromTag + constantOffset;
+
+                if (getCurrentDegrees() - offset < MAX_DEGREES_LEFT)
+                    offset = MAX_DEGREES_LEFT - getCurrentDegrees();
+                else if (getCurrentDegrees() + offset > MAX_DEGREES_RIGHT)
+                    offset = MAX_DEGREES_RIGHT - getCurrentDegrees();
+
+
+                double apriltagOutput = apriltagPID.calculate(offset, 0);
+                double ff = Math.abs(apriltagPID.getPositionError()) > 1 ? apriltag_kS * Math.signum(apriltagOutput) : 0;
+
+                setPower(apriltagOutput + ff);
                 break;
 
             default:
@@ -132,7 +161,7 @@ public class TurretSubsystem extends StealthSubsystem {
         }
 
         telemetry.addLine("----turret----");
-        telemetry.addData("tagOffset [tx]", offsetFromTag);
         telemetry.addData("state", state);
+        telemetry.addData("tagOffset [tx]", offsetFromTag);
     }
 }

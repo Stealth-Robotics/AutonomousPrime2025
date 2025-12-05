@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.enums;
 
 public enum LEDState {
     OFF(0.0),
-    RED(0.277),
+    RED(0.3),
     ORANGE(0.333),
     YELLOW(0.388),
     SAGE(0.444),

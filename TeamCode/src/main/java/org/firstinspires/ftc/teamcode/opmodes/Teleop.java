@@ -68,7 +68,7 @@ public class Teleop extends StealthOpMode {
 
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.FREEZE_TURRET_TOGGLE).toggleWhenActive(
                 robot.turret.setState(TurretState.IDLE),
-                new InstantCommand(() -> robot.turret.switchToHome())
+                new InstantCommand(() -> robot.turret.switchToOdometryControl())
         );
 
         operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(5));

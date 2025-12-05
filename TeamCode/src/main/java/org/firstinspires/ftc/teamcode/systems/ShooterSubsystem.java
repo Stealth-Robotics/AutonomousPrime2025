@@ -59,7 +59,7 @@ public class ShooterSubsystem extends StealthSubsystem {
         speedTable.add(15.36, 950);
         speedTable.add(55.06, 1200);
         speedTable.add(77, 1300);
-        speedTable.add(124, 1600);
+        speedTable.add(124, 1580);
         speedTable.createLUT();
 
         hoodTable.add(0, 0);

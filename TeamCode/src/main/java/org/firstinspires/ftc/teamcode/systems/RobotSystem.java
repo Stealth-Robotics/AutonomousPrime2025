@@ -31,8 +31,6 @@ import java.util.function.DoubleSupplier;
 public class RobotSystem extends StealthSubsystem {
     private RobotState robotState = RobotState.IDLE;
 
-//    private final Debouncer visionDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kRising);
-
     public final DriveSubsystem drive;
     public final TurretSubsystem turret;
     public final IntakeSubsystem intake;
@@ -370,12 +368,17 @@ public class RobotSystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        if (vision.seesGoal()) {
-            turret.switchToApriltagControl();
-            turret.updateOffsetFromTag(vision.getTagOffset());
+        if (turret.getState() != TurretState.IDLE) {
+            if (!vision.seesGoal()) {
+                turret.switchToOdometryControl();
+                turret.updateOffsetFromTag(0);
+            }
+            else {
+                turret.switchToApriltagControl();
+                turret.updateOffsetFromTag(vision.getTagOffset());
+            }
         }
         else {
-            turret.switchToHome();
             turret.updateOffsetFromTag(0);
         }
 
