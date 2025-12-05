@@ -93,7 +93,7 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     //Returns the shooter velocity in ticks per second
     private double getVelocity() {
-        return -shooterMotor.getVelocity();
+        return shooterMotor.getVelocity();
     }
 
     public boolean isReadyToShoot() {

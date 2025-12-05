@@ -22,7 +22,8 @@ import org.stealthrobotics.library.StealthSubsystem;
 @SuppressWarnings("FieldCanBeLocal")
 public class TurretSubsystem extends StealthSubsystem {
     private final DcMotorEx turretMotor;
-    private final PIDController pid;
+    private final PIDController odoPID;
+    private final PIDController apriltagPID;
 
     private final PoseEstimator poseEstimator;
 
@@ -32,10 +33,15 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private double offsetFromTag = 0.0;
 
-    public static double kP = 0.04;
-    public static double kI = 0.05;
-    public static double kD = 0.0;
-    public static double kS = 0.1;
+    public static double odo_kP = 0.03;
+    public static double odo_kI = 0.1;
+    public static double odo_kD = 0.0;
+    public static double odo_kS = 0.08;
+
+    public static double apriltag_kP = 0.02;
+    public static double apriltag_kI = 0.0;
+    public static double apriltag_kD = 0.0;
+    public static double apriltag_kS = 0.08;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
@@ -46,9 +52,10 @@ public class TurretSubsystem extends StealthSubsystem {
         turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
         poseEstimator = PoseEstimator.getInstance();
 
-        pid = new PIDController(kP, kI, kD);
+        odoPID = new PIDController(odo_kP, odo_kI, odo_kD);
+        apriltagPID = new PIDController(apriltag_kP, apriltag_kI, apriltag_kD);
 
-        switchToOdometryControl();
+        switchToHome();
         resetEncoder();
     }
 
@@ -88,38 +95,41 @@ public class TurretSubsystem extends StealthSubsystem {
         return (getCurrentTicks() / TICKS_PER_REVOLUTION) * 360;
     }
 
-    public void switchToOdometryControl() {
-        state = TurretState.ODOMETRY;
-        pid.reset();
+    public void switchToHome() {
+        state = TurretState.HOME;
+        odoPID.reset();
     }
 
     public void switchToApriltagControl() {
         state = TurretState.APRILTAG;
-        pid.reset();
+        apriltagPID.reset();
     }
 
     public void updateOffsetFromTag(double newOffset) {
-        offsetFromTag = -newOffset;
+        offsetFromTag = newOffset;
     }
 
     @Override
     public void periodic() {
         switch (state) {
-            case ODOMETRY:
-                double odoOutput = pid.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle(), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
-                setPower(odoOutput + (kS * Math.signum(pid.getPositionError())));
+            case HOME:
+                double odoOutput = odoPID.calculate(getCurrentDegrees(), 0);
+                setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
                 break;
 
             case APRILTAG:
-                double apriltagOutput = pid.calculate(getCurrentDegrees(), MathFunctions.clamp(getCurrentDegrees() - offsetFromTag, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
-                setPower(apriltagOutput + (kS * Math.signum(pid.getPositionError())));
+                double apriltagOutput = apriltagPID.calculate(-offsetFromTag, 0);
+                double ff = Math.abs(apriltagOutput) > 0.01 ? apriltag_kS * Math.signum(apriltagOutput) : 0;
+
+                if (getCurrentDegrees() < MAX_DEGREES_RIGHT && getCurrentDegrees() > MAX_DEGREES_LEFT)
+                    setPower(apriltagOutput + ff);
+                else
+                    state = TurretState.HOME;
                 break;
 
             default:
                 setPower(0.0);
         }
-
-        pid.setPID(kP, kI, kD);
 
         telemetry.addLine("----turret----");
         telemetry.addData("tagOffset [tx]", offsetFromTag);

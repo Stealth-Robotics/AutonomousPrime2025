@@ -33,10 +33,10 @@ public class IntakeSubsystem extends StealthSubsystem {
 
     private Artifact sensedArtifact = Artifact.EMPTY;
 
-    private final Debouncer purpleColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
-    private final Debouncer greenColorDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
+    private final Debouncer purpleColorDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+    private final Debouncer greenColorDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
-    private final double DISTANCE_THRESHOLD_MM = 100.0;
+    private final double DISTANCE_THRESHOLD_MM = 90.0;
 
     private final double GREEN_HUE = 150, PURPLE_HUE = 190;
     private final double GREEN_HUE_THRESHOLD = 20, PURPLE_HUE_THRESHOLD = 20;
