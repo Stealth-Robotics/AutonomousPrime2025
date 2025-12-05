@@ -25,6 +25,7 @@ import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.StealthSubsystem;
 import org.stealthrobotics.library.math.filter.Debouncer;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
@@ -39,6 +40,8 @@ import java.util.function.DoubleSupplier;
  */
 public class RobotSystem extends StealthSubsystem {
     private RobotState robotState = RobotState.IDLE;
+
+    private final ArrayList<String> persistentTelemetry = new ArrayList<>();
 
     //All of the robot's subsystems
     public final DriveSubsystem drive;
@@ -365,10 +368,14 @@ public class RobotSystem extends StealthSubsystem {
                     try { CommandScheduler.getInstance().cancelAll(); }
                     catch (Exception ignored) {
                         // ! Only for testing today, then remove if it works (which it won't)
-                        telemetry.speak("I failed bozo, Try again!");
+                        addPersistentTelemetry("forceIdle threw an error (caught)");
                     }
                 })
         );
+    }
+
+    private void addPersistentTelemetry(String data) {
+        persistentTelemetry.add(data);
     }
 
     private void printTelemetry() {
@@ -380,6 +387,10 @@ public class RobotSystem extends StealthSubsystem {
         telemetry.addData("Shooting Queue", shootingQueue);
         telemetry.addData("Motif", Motif.getMotif());
         telemetry.addData("Pattern Start Location", patternStart);
+
+        for (String data : persistentTelemetry) {
+            telemetry.addLine(data);
+        }
     }
 
     private void updateLEDState() {
