@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -12,48 +12,41 @@ import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import org.stealthrobotics.library.commands.EndOpModeCommand;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
-import org.firstinspires.ftc.teamcode.autonomous.AutoBuilder;
-
-public class TestAuto extends StealthOpMode {
-    private AutoBuilder builder;
+public class NearPreloadAuto extends StealthOpMode {
     private FollowerSubsystem follower;
+    private AutoBuilder builder;
     private RobotSystem robot;
-
     private Pose startPose;
 
     @Override
-    public void initialize() {
+    public void initialize(){
         follower = new FollowerSubsystem(hardwareMap);
         robot = new RobotSystem(hardwareMap);
-
         builder = new AutoBuilder(robot, follower);
-        startPose = builder.FAR_START_POSE;
 
-        //Reset pinpoint
+        startPose = builder.CLOSE_START_POSE;
         robot.drive.resetPosAndIMU();
 
-        //For localization
         robot.drive.setPose(startPose);
         follower.setStartingPose(startPose);
     }
 
     @Override
-    public Command getAutoCommand() {
+    public Command getAutoCommand(){
         return new SequentialCommandGroup(
-                // PUT AUTONOMOUS SEQUENCE HERE
                 new AutonomousShootCommand(robot),
+                builder.parkNear(),
                 new SaveSubsystemData(robot),
                 new EndOpModeCommand(this)
         );
     }
-
     @SuppressWarnings("unused")
-    @Autonomous(name = "RedTestAuto", group = "Red")
-    public static class RedTestAuto extends TestAuto {
+    @Autonomous(name = "RedNearPreload", group = "Red")
+    public static class RedNearPreloadAuto extends NearPreloadAuto {
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "BlueTestAuto", group = "Blue")
-    public static class BlueTestAuto extends TestAuto {
+    @Autonomous(name = "BlueNearPreload", group = "Blue")
+    public static class BlueNearPreloadAuto extends NearPreloadAuto {
     }
 }
