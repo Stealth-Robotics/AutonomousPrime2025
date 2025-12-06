@@ -14,7 +14,7 @@ public class FarSingleCycle extends FarAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
-                builder.fromStartToShoot(autoType),
+                builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
                 builder.cycle(AutoBuilder.PresetLocation.FAR, autoType),
                 new AutonomousShootCommand(robot, follower),

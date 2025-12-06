@@ -48,6 +48,5 @@ public class FollowerSubsystem extends StealthSubsystem {
     @Override
     public void periodic() {
         follower.update();
-        telemetry.addLine("isBusy: " + String.valueOf(follower.isBusy()));
     }
 }

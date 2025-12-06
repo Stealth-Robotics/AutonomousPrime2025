@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.autonomous.util.AutoBuilder;
@@ -13,7 +14,7 @@ public class FarSingleCyclePlusPickup extends FarAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
-                builder.fromStartToShoot(autoType),
+                builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
                 builder.cycle(AutoBuilder.PresetLocation.FAR, autoType),
                 new AutonomousShootCommand(robot, follower),

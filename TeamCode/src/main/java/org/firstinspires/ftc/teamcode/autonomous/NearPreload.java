@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.autonomous.util.NearAuto;
@@ -12,8 +13,9 @@ public class NearPreload extends NearAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
+                builder.fromStartToShootNear(),
                 new AutonomousShootCommand(robot, follower),
-                builder.parkFar(),
+                builder.parkNear(),
                 new SaveSubsystemData(robot, follower)
         );
     }

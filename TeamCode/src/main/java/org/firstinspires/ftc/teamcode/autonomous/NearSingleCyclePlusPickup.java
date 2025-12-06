@@ -14,7 +14,7 @@ public class NearSingleCyclePlusPickup extends NearAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
-                builder.fromStartToShoot(autoType),
+                builder.fromStartToShootNear(),
                 new AutonomousShootCommand(robot, follower),
                 builder.cycle(AutoBuilder.PresetLocation.NEAR, autoType),
                 new AutonomousShootCommand(robot, follower),

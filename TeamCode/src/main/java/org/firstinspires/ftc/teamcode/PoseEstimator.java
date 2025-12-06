@@ -13,7 +13,7 @@ import org.stealthrobotics.library.Alliance;
 public class PoseEstimator {
     private static PoseEstimator INSTANCE = null;
 
-    private Pose robotPose = new Pose(0, 0, 0);
+    private Pose robotPose = new Pose(0, 0,0);
 
     private final double INCHES_FROM_ORIGIN_TO_TURRET = 3; //Distance from the robot's origin to the rotation point of the turret
 
@@ -60,6 +60,11 @@ public class PoseEstimator {
     }
 
     public double getTurretTargetAngle() {
+        if (Alliance.get() == Alliance.BLUE)
+            goalPose = BLUE_GOAL_POSE;
+        else
+            goalPose = RED_GOAL_POSE;
+
         double robotHeading = robotPose.getHeading();
         double turretX = robotPose.getX() + INCHES_FROM_ORIGIN_TO_TURRET * cos(robotHeading);
         double turretY = robotPose.getY() + INCHES_FROM_ORIGIN_TO_TURRET * sin(robotHeading);

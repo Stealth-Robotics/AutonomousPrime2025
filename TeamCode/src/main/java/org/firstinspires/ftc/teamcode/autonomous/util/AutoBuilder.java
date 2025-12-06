@@ -19,15 +19,15 @@ public class AutoBuilder {
     private final FollowerSubsystem follower;
 
     //Our robot's starting positions
-    public Pose CLOSE_START_POSE = new Pose(22.3, 120, Math.toRadians(0));
+    public Pose CLOSE_START_POSE = new Pose(21.2, 120, Math.toRadians(0));
     public Pose FAR_START_POSE = new Pose(57.38, 8.44, Math.toRadians(0));
 
     //Poses that we shoot from depending on location
-    private Pose CLOSE_SHOOT_POSE = new Pose(27.82,100.783,Math.toRadians(0));
+    private Pose CLOSE_SHOOT_POSE = new Pose(48.54, 84,Math.toRadians(0));
     private Pose FAR_SHOOT_POSE = new Pose(58.16,19.46, Math.toRadians(0));
 
     //Leave pose for end of auto points
-    private Pose CLOSE_LEAVE_POSE = new Pose(27.5,92.5,Math.toRadians(0));
+    private Pose CLOSE_LEAVE_POSE = new Pose(48.54, 72,Math.toRadians(0));
     private Pose FAR_LEAVE_POSE = new Pose(47,23, Math.toRadians(0));
     private Pose RAMP_PARK_POSE = new Pose(20.471,69.988,Math.toRadians(0));
 
@@ -232,9 +232,15 @@ public class AutoBuilder {
         return follower.followPath(selectPath, 0.6, true);
     }
 
-    public Command fromStartToShoot(AutoType autoType) {
+    public Command fromStartToShootNear() {
         return new SequentialCommandGroup(
-                new ConditionalCommand(follower.followPath(NEAR_START_TO_NEAR_SHOOT, 0.75, true), follower.followPath(FAR_START_TO_FAR_SHOOT, true), () -> autoType == AutoType.NEAR)
+                follower.followPath(NEAR_START_TO_NEAR_SHOOT, true)
+        );
+    }
+
+    public Command fromStartToShootFar() {
+        return new SequentialCommandGroup(
+                follower.followPath(FAR_START_TO_FAR_SHOOT, true)
         );
     }
     
@@ -297,17 +303,29 @@ public class AutoBuilder {
     private void flipPoses() {
         CLOSE_START_POSE = AlliancePoseFlipper.flip(CLOSE_START_POSE);
         FAR_START_POSE = AlliancePoseFlipper.flip(FAR_START_POSE);
+
         CLOSE_SHOOT_POSE = AlliancePoseFlipper.flip(CLOSE_SHOOT_POSE);
         FAR_SHOOT_POSE = AlliancePoseFlipper.flip(FAR_SHOOT_POSE);
+
         CLOSE_LEAVE_POSE = AlliancePoseFlipper.flip(CLOSE_LEAVE_POSE);
         FAR_LEAVE_POSE = AlliancePoseFlipper.flip(FAR_LEAVE_POSE);
+        RAMP_PARK_POSE = AlliancePoseFlipper.flip(RAMP_PARK_POSE);
+
         LOADING_ZONE_POSE = AlliancePoseFlipper.flip(LOADING_ZONE_POSE);
+
         PRESET_1_START = AlliancePoseFlipper.flip(PRESET_1_START);
         PRESET_2_START = AlliancePoseFlipper.flip(PRESET_2_START);
         PRESET_3_START = AlliancePoseFlipper.flip(PRESET_3_START);
+
+        PRESET_1_MIDDLE_1 = AlliancePoseFlipper.flip(PRESET_1_MIDDLE_1);
+        PRESET_1_MIDDLE_2 = AlliancePoseFlipper.flip(PRESET_1_MIDDLE_2);
+        PRESET_2_MIDDLE_1 = AlliancePoseFlipper.flip(PRESET_2_MIDDLE_1);
+        PRESET_2_MIDDLE_2 = AlliancePoseFlipper.flip(PRESET_2_MIDDLE_2);
+        PRESET_3_MIDDLE_1 = AlliancePoseFlipper.flip(PRESET_3_MIDDLE_1);
+        PRESET_3_MIDDLE_2 = AlliancePoseFlipper.flip(PRESET_3_MIDDLE_2);
+
         PRESET_1_END = AlliancePoseFlipper.flip(PRESET_1_END);
         PRESET_2_END = AlliancePoseFlipper.flip(PRESET_2_END);
         PRESET_3_END = AlliancePoseFlipper.flip(PRESET_3_END);
-        RAMP_PARK_POSE = AlliancePoseFlipper.flip(RAMP_PARK_POSE);
     }
 }
