@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.systems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.pedropathing.math.MathFunctions;
@@ -28,16 +29,20 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private final PoseEstimator poseEstimator;
 
+    private double constantAutoAngle;
+
     private double encoderOffset = 0.0;
 
     private TurretState state = TurretState.IDLE;
 
     private double offsetFromTag = 0.0;
 
-    public static double odo_kP = 0.008;
+    public static double ODO_KS_THRESHOLD = 3;
+
+    public static double odo_kP = 0.02;
     public static double odo_kI = 0.0;
     public static double odo_kD = 0.0;
-    public static double odo_kS = 0.12;
+    public static double odo_kS = 0.2;
 
     public static double apriltag_kP = 0.01;
     public static double apriltag_kI = 10;
@@ -56,7 +61,9 @@ public class TurretSubsystem extends StealthSubsystem {
         odoPID = new PIDController(odo_kP, odo_kI, odo_kD);
         apriltagPID = new PIDController(apriltag_kP, apriltag_kI, apriltag_kD);
 
-        switchToOdometryControl();
+        if (Alliance.isBlue()) constantAutoAngle = -122;
+        else constantAutoAngle = 122;
+
         resetEncoder();
     }
 
@@ -65,7 +72,7 @@ public class TurretSubsystem extends StealthSubsystem {
     }
 
     public Command setState(TurretState newState) {
-        return this.runOnce(() -> state = newState);
+        return new InstantCommand(() -> state = newState);
     }
 
     public TurretState getState() {
@@ -105,6 +112,11 @@ public class TurretSubsystem extends StealthSubsystem {
         odoPID.reset();
     }
 
+    public void switchToConstant() {
+        state = TurretState.CONSTANT;
+        odoPID.reset();
+    }
+
     public void switchToObelisk() {
         state = TurretState.OBELISK;
         odoPID.reset();
@@ -129,17 +141,34 @@ public class TurretSubsystem extends StealthSubsystem {
         switch (state) {
             case HOME:
                 double odoOutput = odoPID.calculate(getCurrentDegrees(), 0);
-                setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                if (Math.abs(odoPID.getPositionError()) > ODO_KS_THRESHOLD) {
+                    setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                }
+                else setPower(odoOutput);
                 break;
 
             case OBELISK:
                 odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getObeliskTurretTargetAngle(), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
-                setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                if (Math.abs(odoPID.getPositionError()) > ODO_KS_THRESHOLD) {
+                    setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                }
+                else setPower(odoOutput);
+                break;
+
+            case CONSTANT:
+                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(constantAutoAngle, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
+                if (Math.abs(odoPID.getPositionError()) > ODO_KS_THRESHOLD) {
+                    setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                }
+                else setPower(odoOutput);
                 break;
 
             case ODOMETRY:
                 odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle(), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
-                setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                if (Math.abs(odoPID.getPositionError()) > ODO_KS_THRESHOLD) {
+                    setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
+                }
+                else setPower(odoOutput);
                 break;
 
             case APRILTAG:
@@ -162,7 +191,6 @@ public class TurretSubsystem extends StealthSubsystem {
                 setPower(0.0);
         }
 
-        odoPID.setPID(odo_kP, odo_kI, odo_kD);
         apriltagPID.setPID(apriltag_kP, apriltag_kI, apriltag_kD);
     }
 }

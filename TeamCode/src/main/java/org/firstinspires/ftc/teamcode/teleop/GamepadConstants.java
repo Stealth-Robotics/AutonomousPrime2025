@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.teleop;
 
 import com.arcrobotics.ftclib.gamepad.GamepadKeys.*;
 import com.qualcomm.robotcore.hardware.Gamepad;

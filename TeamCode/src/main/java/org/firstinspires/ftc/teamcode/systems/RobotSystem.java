@@ -82,7 +82,7 @@ public class RobotSystem extends StealthSubsystem {
     public boolean justIntaked = false;
 
     //Time in between shots (essentially the time for the loader to reach its position plus some extra tolerance)
-    private final int LOADER_TRAVEL_TIME_MS = 800;
+    private final int LOADER_TRAVEL_TIME_MS = 400;
 
     //It is in fact, not an infinite state machine
     public enum RobotState {
@@ -95,7 +95,13 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     public RobotSystem(HardwareMap hardwareMap, Trigger intakeTrigger, Trigger outtakeTrigger, Trigger shootPatternTrigger, Trigger shootRapidTrigger) {
-        drive = new DriveSubsystem(hardwareMap);
+        boolean isAuto = (intakeTrigger == null);
+
+        if (!isAuto)
+            drive = new DriveSubsystem(hardwareMap);
+        else
+            drive = null;
+
         intake = new IntakeSubsystem(hardwareMap);
         spindexer = new SpindexerSubsystem(hardwareMap);
         shooter = new ShooterSubsystem(hardwareMap);
@@ -108,7 +114,14 @@ public class RobotSystem extends StealthSubsystem {
         this.shootPatternTrigger = shootPatternTrigger;
         this.shootRapidTrigger = shootRapidTrigger;
 
-        configureStateMachine(intakeTrigger == null);
+        configureStateMachine(isAuto);
+
+        if (isAuto) {
+            turret.switchToOdometryControl();
+        }
+        else {
+            turret.switchToOdometryControl();
+        }
     }
 
     public RobotSystem(HardwareMap hardwareMap) {
@@ -133,7 +146,7 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     public Command setRobotState(RobotState newState) {
-        return runOnce(() -> robotState = newState);
+        return new InstantCommand(() -> robotState = newState);
     }
 
     private void configStateBehavior() {
@@ -242,7 +255,6 @@ public class RobotSystem extends StealthSubsystem {
                                             new SequentialCommandGroup(
                                                     new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250),
                                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(500),
-                                                    new WaitCommand(200), //Recovery extra time
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
                                                     intake.setState(IntakeState.OUTTAKE),
@@ -274,7 +286,12 @@ public class RobotSystem extends StealthSubsystem {
             //Set subsystems to their idle states
             isIDLE
                     .whenActive(intake.setState(IntakeState.IDLE))
-                    .whenActive(shooter.setState(ShooterState.IDLE));
+                    .whenActive(
+                            new ConditionalCommand(
+                                    shooter.setState(ShooterState.SHOOT),
+                                    shooter.setState(ShooterState.IDLE),
+                                    () -> spindexer.isFull())
+                    );
         }
 
         // INTAKE STATE LOGIC
@@ -340,7 +357,6 @@ public class RobotSystem extends StealthSubsystem {
                                             new SequentialCommandGroup(
                                                     new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250),
                                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(500),
-                                                    new WaitCommand(200), //Recovery extra time
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
                                                     intake.setState(IntakeState.OUTTAKE),
@@ -438,7 +454,7 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     private void updateTurretState() {
-        if (turret.getState() != TurretState.IDLE) {
+        if (turret.getState() != TurretState.IDLE && turret.getState() != TurretState.CONSTANT) {
             if (vision.seesGoal()) {
                 turret.switchToApriltagControl();
                 turret.updateOffsetFromTag(vision.getTagOffset());

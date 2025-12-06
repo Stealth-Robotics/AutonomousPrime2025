@@ -86,7 +86,7 @@ public class DriveSubsystem extends StealthSubsystem {
                 ? (3 * Math.PI) / 2
                 : Math.PI / 2;
 
-        headingOffset = desiredHeading - getHeading();
+        headingOffset = getHeading() - desiredHeading;
     }
 
     public void drive(double x, double y, double rot) {

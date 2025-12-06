@@ -6,10 +6,11 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import org.firstinspires.ftc.teamcode.enums.Artifact;
 import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
+import org.firstinspires.ftc.teamcode.systems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class SaveSubsystemData extends SequentialCommandGroup {
-    public SaveSubsystemData(RobotSystem robot) {
+    public SaveSubsystemData(RobotSystem robot, FollowerSubsystem follower) {
         addCommands(
                 new InstantCommand(() -> AutoToTeleopData.spindexerTicks = robot.spindexer.getTicks()),
                 new InstantCommand(() -> AutoToTeleopData.turretTicks = robot.turret.getRawTicks()),
@@ -19,7 +20,7 @@ public class SaveSubsystemData extends SequentialCommandGroup {
                     AutoToTeleopData.slot2Artifact = artifacts[1];
                     AutoToTeleopData.slot3Artifact = artifacts[2];
                 }),
-                new InstantCommand(() -> AutoToTeleopData.endOfAutoPose = PoseEstimator.getInstance().getRobotPose())
+                new InstantCommand(() -> AutoToTeleopData.endOfAutoPose = follower.getPose())
         );
     }
 }

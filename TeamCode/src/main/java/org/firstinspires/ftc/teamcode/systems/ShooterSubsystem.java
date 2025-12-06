@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.systems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.pedropathing.math.MathFunctions;
@@ -57,12 +58,14 @@ public class ShooterSubsystem extends StealthSubsystem {
 
     //Make sure interpolation table values have a big enough range to not throw out of bounds errors
     private void generateInterpolationTables() {
-        speedTable.add(0, 900);
-        speedTable.add(15.36, 950);
-        speedTable.add(55.06, 1200);
-        speedTable.add(77, 1300);
-        speedTable.add(124, 1580);
-        speedTable.add(142, 1600);
+//        speedTable.add(0, 900);
+//        speedTable.add(15.36, 950);
+//        speedTable.add(55.06, 1200);
+//        speedTable.add(77, 1300);
+//        speedTable.add(124, 1560);
+//        speedTable.add(142, 1600);
+        speedTable.add(0, 850);
+        speedTable.add(142, 850);
         speedTable.createLUT();
 
         hoodTable.add(0, 0);
@@ -70,12 +73,12 @@ public class ShooterSubsystem extends StealthSubsystem {
         hoodTable.add(55.06, 0.6);
         hoodTable.add(82.44, 0.7);
         hoodTable.add(124, 1);
-        speedTable.add(142, 1);
+        hoodTable.add(142, 1);
         hoodTable.createLUT();
     }
 
     public Command setState(ShooterState newState) {
-        return this.runOnce(() -> state = newState);
+        return new InstantCommand(() -> state = newState);
     }
 
     public ShooterState getState() {

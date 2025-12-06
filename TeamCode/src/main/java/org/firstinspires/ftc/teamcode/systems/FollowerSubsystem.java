@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.systems;
 
+import static org.stealthrobotics.library.opmodes.StealthOpMode.telemetry;
+
+import android.sax.StartElementListener;
+
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -23,10 +27,6 @@ public class FollowerSubsystem extends StealthSubsystem {
         follower.setStartingPose(startPose);
     }
 
-    public void setMaxPower(double power) {
-        follower.setMaxPower(power);
-    }
-
     public Pose getPose() {
         return follower.getPose();
     }
@@ -36,13 +36,18 @@ public class FollowerSubsystem extends StealthSubsystem {
     }
 
     public Command followPath(PathChain path, boolean holdPoint) {
-        return this.runOnce(()-> follower.followPath(path, holdPoint))
-                .andThen(new WaitUntilCommand(() -> !follower.isBusy()))
-                .andThen(new InstantCommand(() -> setMaxPower(1.0)));
+        return this.runOnce(() -> follower.followPath(path, holdPoint))
+                .andThen(new WaitUntilCommand(() -> !follower.isBusy()));
+    }
+
+    public Command followPath(PathChain path, double maxSpeed, boolean holdPoint) {
+        return this.runOnce(() -> follower.followPath(path, maxSpeed, holdPoint))
+                .andThen(new WaitUntilCommand(() -> !follower.isBusy()));
     }
 
     @Override
     public void periodic() {
         follower.update();
+        telemetry.addLine("isBusy: " + String.valueOf(follower.isBusy()));
     }
 }

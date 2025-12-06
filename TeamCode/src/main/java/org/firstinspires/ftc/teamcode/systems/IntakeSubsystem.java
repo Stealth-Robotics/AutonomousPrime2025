@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.systems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.pedropathing.math.MathFunctions;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -62,7 +63,7 @@ public class IntakeSubsystem extends StealthSubsystem {
     }
 
     public Command setState(IntakeState newState) {
-        return this.runOnce(() -> state = newState);
+        return new InstantCommand(() -> state = newState);
     }
 
     public IntakeState getState() {
