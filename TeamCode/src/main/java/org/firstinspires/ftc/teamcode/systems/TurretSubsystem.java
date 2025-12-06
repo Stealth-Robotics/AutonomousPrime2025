@@ -28,23 +28,21 @@ public class TurretSubsystem extends StealthSubsystem {
 
     private final PoseEstimator poseEstimator;
 
-    private final double farTurretOffset;
-
     private double encoderOffset = 0.0;
 
     private TurretState state = TurretState.IDLE;
 
     private double offsetFromTag = 0.0;
 
-    public static double odo_kP = 0.03;
-    public static double odo_kI = 0.06;
+    public static double odo_kP = 0.008;
+    public static double odo_kI = 0.0;
     public static double odo_kD = 0.0;
-    public static double odo_kS = 0.08;
+    public static double odo_kS = 0.12;
 
-    public static double apriltag_kP = 0.03;
-    public static double apriltag_kI = 0.0;
+    public static double apriltag_kP = 0.01;
+    public static double apriltag_kI = 10;
     public static double apriltag_kD = 0.0;
-    public static double apriltag_kS = 0.075;
+    public static double apriltag_kS = 0.08;
 
     private final double TICKS_PER_REVOLUTION = 4 * 537.7; // (output ratio) * PPR = 4 * 537.7
 
@@ -57,11 +55,6 @@ public class TurretSubsystem extends StealthSubsystem {
 
         odoPID = new PIDController(odo_kP, odo_kI, odo_kD);
         apriltagPID = new PIDController(apriltag_kP, apriltag_kI, apriltag_kD);
-
-        if (Alliance.isRed())
-            farTurretOffset = -1;
-        else
-            farTurretOffset = 8;
 
         switchToOdometryControl();
         resetEncoder();
@@ -133,12 +126,6 @@ public class TurretSubsystem extends StealthSubsystem {
 
     @Override
     public void periodic() {
-        //Constant offset for far shooting (y less than 48 inches)
-        double constantOffset = 0;
-        if (poseEstimator.getRobotPose().getY() < 48) {
-            constantOffset = farTurretOffset;
-        }
-
         switch (state) {
             case HOME:
                 double odoOutput = odoPID.calculate(getCurrentDegrees(), 0);
@@ -151,21 +138,22 @@ public class TurretSubsystem extends StealthSubsystem {
                 break;
 
             case ODOMETRY:
-                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle() - constantOffset, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
+                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle(), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
                 setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
                 break;
 
             case APRILTAG:
-                double offset = -offsetFromTag + constantOffset;
+                double offset = -offsetFromTag;
 
-                if (getCurrentDegrees() - offset < MAX_DEGREES_LEFT)
+                MathFunctions.clamp(getCurrentDegrees() + offset, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT);
+                if (getCurrentDegrees() + offset < MAX_DEGREES_LEFT)
                     offset = MAX_DEGREES_LEFT - getCurrentDegrees();
                 else if (getCurrentDegrees() + offset > MAX_DEGREES_RIGHT)
                     offset = MAX_DEGREES_RIGHT - getCurrentDegrees();
 
 
                 double apriltagOutput = apriltagPID.calculate(offset, 0);
-                double ff = Math.abs(apriltagPID.getPositionError()) > 1 ? apriltag_kS * Math.signum(apriltagOutput) : 0;
+                double ff = apriltag_kS * Math.signum(apriltagPID.getPositionError());
 
                 setPower(apriltagOutput + ff);
                 break;
@@ -173,5 +161,8 @@ public class TurretSubsystem extends StealthSubsystem {
             default:
                 setPower(0.0);
         }
+
+        odoPID.setPID(odo_kP, odo_kI, odo_kD);
+        apriltagPID.setPID(apriltag_kP, apriltag_kI, apriltag_kD);
     }
 }

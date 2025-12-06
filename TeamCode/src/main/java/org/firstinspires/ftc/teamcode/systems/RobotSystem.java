@@ -44,6 +44,8 @@ import java.util.function.DoubleSupplier;
 public class RobotSystem extends StealthSubsystem {
     private RobotState robotState = RobotState.IDLE;
 
+    private final Debouncer tagDebouncer = new Debouncer(2, Debouncer.DebounceType.kRising);
+
     //List for storing persistent telemetry to write to the Driver Station in periodic
     private final ArrayList<String> persistentTelemetry = new ArrayList<>();
 
@@ -224,6 +226,7 @@ public class RobotSystem extends StealthSubsystem {
             isSHOOT
                     .and(new Trigger(() -> spindexer.isEmpty() || shootingQueue.isEmpty()))
                     .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(intake.setState(IntakeState.IDLE))
                     .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT
@@ -242,7 +245,7 @@ public class RobotSystem extends StealthSubsystem {
                                                     new WaitCommand(200), //Recovery extra time
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
-                                                    intake.setState(IntakeState.IDLE),
+                                                    intake.setState(IntakeState.OUTTAKE),
                                                     new WaitCommand(200),
                                                     new InstantCommand(() -> {
                                                         spindexer.shootArtifact();
@@ -252,6 +255,7 @@ public class RobotSystem extends StealthSubsystem {
                                                             spindexer.rotateArtifactToShoot(shootingQueue),
                                                             new SequentialCommandGroup(
                                                                     shooter.setState(ShooterState.IDLE),
+                                                                    intake.setState(IntakeState.IDLE),
                                                                     setRobotState(RobotState.IDLE)
                                                             ),
                                                             () -> !spindexer.isEmpty() && !shootingQueue.isEmpty()
@@ -320,6 +324,7 @@ public class RobotSystem extends StealthSubsystem {
             isSHOOT
                     .and(new Trigger(() -> spindexer.isEmpty() || shootingQueue.isEmpty()))
                     .whenActive(shooter.setState(ShooterState.IDLE))
+                    .whenActive(intake.setState(IntakeState.IDLE))
                     .whenActive(setRobotState(RobotState.IDLE));
 
             isSHOOT
@@ -338,7 +343,7 @@ public class RobotSystem extends StealthSubsystem {
                                                     new WaitCommand(200), //Recovery extra time
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
-                                                    intake.setState(IntakeState.IDLE),
+                                                    intake.setState(IntakeState.OUTTAKE),
                                                     new WaitCommand(200),
                                                     new InstantCommand(() -> {
                                                         spindexer.shootArtifact();
@@ -348,6 +353,7 @@ public class RobotSystem extends StealthSubsystem {
                                                             spindexer.rotateArtifactToShoot(shootingQueue),
                                                             new SequentialCommandGroup(
                                                                     shooter.setState(ShooterState.IDLE),
+                                                                    intake.setState(IntakeState.IDLE),
                                                                     setRobotState(RobotState.IDLE)
                                                             ),
                                                             () -> !spindexer.isEmpty() && !shootingQueue.isEmpty()
@@ -403,7 +409,7 @@ public class RobotSystem extends StealthSubsystem {
 
         telemetry.addLine(String.format("Shooter Velocity = %.1f rpm | Shooter Target = %.1f rpm", shooter.getVelocityRPM(), shooter.getTargetRPM()));
 
-        telemetry.addData("Offset From Apriltag", turret.getOffsetFromTag() + "°");
+        telemetry.addLine(String.format("Offset From Apriltag = %.2f°", turret.getOffsetFromTag()));
 
         telemetry.addData("Shooting Queue", shootingQueue);
 
@@ -433,13 +439,13 @@ public class RobotSystem extends StealthSubsystem {
 
     private void updateTurretState() {
         if (turret.getState() != TurretState.IDLE) {
-            if (!vision.seesGoal()) {
-                turret.switchToOdometryControl();
-                turret.updateOffsetFromTag(0);
-            }
-            else {
+            if (vision.seesGoal()) {
                 turret.switchToApriltagControl();
                 turret.updateOffsetFromTag(vision.getTagOffset());
+            }
+            else {
+                turret.switchToOdometryControl();
+                turret.updateOffsetFromTag(0);
             }
         }
         else {
