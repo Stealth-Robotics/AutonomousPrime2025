@@ -82,11 +82,12 @@ public class DriveSubsystem extends StealthSubsystem {
 
     //For field centric at start of teleop
     public void setAllianceSpecificHeading(Alliance allianceColor) {
-        double desiredHeading = (allianceColor == Alliance.BLUE)
-                ? (3 * Math.PI) / 2
-                : Math.PI / 2;
-
-        headingOffset = getHeading() - desiredHeading;
+        if (allianceColor == Alliance.BLUE) {
+            headingOffset = getHeading() - Math.PI;
+        }
+        else {
+            headingOffset = -getHeading();
+        }
     }
 
     public void drive(double x, double y, double rot) {
