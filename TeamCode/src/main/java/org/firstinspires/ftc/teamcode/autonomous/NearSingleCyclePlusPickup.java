@@ -9,12 +9,14 @@ import org.firstinspires.ftc.teamcode.autonomous.util.AutoBuilder;
 import org.firstinspires.ftc.teamcode.autonomous.util.NearAuto;
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
+import org.firstinspires.ftc.teamcode.commands.SeeMotifCommand;
 
 public class NearSingleCyclePlusPickup extends NearAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
                 builder.fromStartToShootNear(),
+                new SeeMotifCommand(robot, follower),
                 new AutonomousShootCommand(robot, follower),
                 builder.cycle(AutoBuilder.PresetLocation.NEAR, autoType),
                 new AutonomousShootCommand(robot, follower),

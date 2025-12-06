@@ -8,12 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.autonomous.util.NearAuto;
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
+import org.firstinspires.ftc.teamcode.commands.SeeMotifCommand;
 
 public class NearPreload extends NearAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
                 builder.fromStartToShootNear(),
+                new SeeMotifCommand(robot, follower),
                 new AutonomousShootCommand(robot, follower),
                 builder.parkNear(),
                 new SaveSubsystemData(robot, follower)

@@ -11,11 +11,13 @@ import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.autonomous.util.FarAuto;
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
+import org.firstinspires.ftc.teamcode.commands.SeeMotifCommand;
 
 public class FarPreload extends FarAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
+                new SeeMotifCommand(robot, follower),
                 builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
                 builder.parkFar(),

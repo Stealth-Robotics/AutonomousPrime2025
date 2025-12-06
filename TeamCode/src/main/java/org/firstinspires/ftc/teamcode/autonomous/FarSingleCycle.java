@@ -9,11 +9,13 @@ import org.firstinspires.ftc.teamcode.autonomous.util.AutoBuilder;
 import org.firstinspires.ftc.teamcode.autonomous.util.FarAuto;
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
+import org.firstinspires.ftc.teamcode.commands.SeeMotifCommand;
 
 public class FarSingleCycle extends FarAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
+                new SeeMotifCommand(robot, follower),
                 builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
                 builder.cycle(AutoBuilder.PresetLocation.FAR, autoType),
