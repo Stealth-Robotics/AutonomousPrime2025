@@ -33,14 +33,14 @@ public class GamepadConstants {
 
     public static class OperatorBindings {
         // SPINDEXER
-        public static final Button EMERGENCY_RESET_SPINDEXER = Button.BACK;
+        public static final Button EMERGENCY_RESET_SPINDEXER = Button.BACK; //!
         public static final Button RESET_STATE_MACHINE = Button.START;
 
         public static final Button BUDGE_SPINDEXER_LEFT = Button.X;
         public static final Button BUDGE_SPINDEXER_RIGHT = Button.B;
 
         // TURRET
-        public static final Button FREEZE_TURRET_TOGGLE = Button.A;
+        public static final Button FREEZE_TURRET_TOGGLE = Button.A; //!
 
         // SHOOTING
         public static final Button SHOOT_PATTERN = Button.LEFT_BUMPER;

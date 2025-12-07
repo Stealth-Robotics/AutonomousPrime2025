@@ -45,6 +45,10 @@ public class FollowerSubsystem extends StealthSubsystem {
                 .andThen(new WaitUntilCommand(() -> !follower.isBusy()));
     }
 
+    public boolean isBusy() {
+        return follower.isBusy();
+    }
+
     @Override
     public void periodic() {
         follower.update();

@@ -12,15 +12,17 @@ import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 public class SaveSubsystemData extends SequentialCommandGroup {
     public SaveSubsystemData(RobotSystem robot, FollowerSubsystem follower) {
         addCommands(
-                new InstantCommand(() -> AutoToTeleopData.spindexerTicks = robot.spindexer.getTicks()),
-                new InstantCommand(() -> AutoToTeleopData.turretTicks = robot.turret.getRawTicks()),
                 new InstantCommand(() -> {
+                    AutoToTeleopData.spindexerTicks = robot.spindexer.getTicks();
+                    AutoToTeleopData.turretTicks = robot.turret.getRawTicks();
+
                     Artifact[] artifacts = robot.spindexer.getCurrentArtifacts();
                     AutoToTeleopData.slot1Artifact = artifacts[0];
                     AutoToTeleopData.slot2Artifact = artifacts[1];
                     AutoToTeleopData.slot3Artifact = artifacts[2];
-                }),
-                new InstantCommand(() -> AutoToTeleopData.endOfAutoPose = follower.getPose())
+
+                    AutoToTeleopData.endOfAutoPose = follower.getPose();
+                })
         );
     }
 }

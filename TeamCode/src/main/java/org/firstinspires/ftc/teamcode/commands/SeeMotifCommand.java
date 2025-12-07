@@ -14,7 +14,7 @@ public class SeeMotifCommand extends SequentialCommandGroup {
                 new WaitCommand(500),
                 new InstantCommand(() -> PoseEstimator.getInstance().update(follower.getPose())),
                 new InstantCommand(() -> robot.turret.switchToObelisk()),
-                new WaitCommand(1000), //Pause to see motif
+                new WaitCommand(3000), //Pause to see motif
                 new InstantCommand(() -> robot.turret.switchToOdometryControl())
         );
     }

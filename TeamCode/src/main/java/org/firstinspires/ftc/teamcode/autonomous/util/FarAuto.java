@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.autonomous.util;
 
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
+import org.firstinspires.ftc.teamcode.enums.Artifact;
 import org.firstinspires.ftc.teamcode.systems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
@@ -25,10 +27,5 @@ public class FarAuto extends StealthOpMode {
         startPose = builder.FAR_START_POSE;
 
         follower.setStartingPose(startPose);
-    }
-
-    @Override
-    public void saveData() {
-        new SaveSubsystemData(robot, follower).schedule();
     }
 }

@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.Motif;
 import org.firstinspires.ftc.teamcode.PoseEstimator;
 import org.firstinspires.ftc.teamcode.enums.Artifact;
@@ -116,11 +117,13 @@ public class RobotSystem extends StealthSubsystem {
 
         configureStateMachine(isAuto);
 
-        if (isAuto) {
-            turret.switchToOdometryControl();
-        }
-        else {
-            turret.switchToOdometryControl();
+        turret.switchToOdometryControl();
+
+        //Transfer necessary subsystem data from auto into teleop
+        if (!isAuto) {
+            spindexer.setArtifactsInSpindexerManually(Artifact.EMPTY, Artifact.EMPTY, Artifact.EMPTY);
+            drive.setPose(AutoToTeleopData.endOfAutoPose);
+            drive.setAllianceSpecificHeading(Alliance.get());
         }
     }
 
@@ -255,13 +258,15 @@ public class RobotSystem extends StealthSubsystem {
                                             new SequentialCommandGroup(
                                                     new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250),
                                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(500),
+                                                    new WaitCommand(300),
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
                                                     intake.setState(IntakeState.OUTTAKE),
                                                     new WaitCommand(200),
                                                     new InstantCommand(() -> {
                                                         spindexer.shootArtifact();
-                                                        shootingQueue.remove();
+                                                        if (!shootingQueue.isEmpty())
+                                                            shootingQueue.remove();
                                                     }),
                                                     new ConditionalCommand(
                                                             spindexer.rotateArtifactToShoot(shootingQueue),
@@ -352,18 +357,20 @@ public class RobotSystem extends StealthSubsystem {
                     .and(new Trigger(() -> shooter.isReadyToShoot()))
                     .whenActive(
                             new SequentialCommandGroup(
-                                    new WaitUntilCommand(shooter::atVelocity).withTimeout(4000),
+                                    new WaitUntilCommand(shooter::atVelocity).withTimeout(7000),
                                     new RepeatCommand(
                                             new SequentialCommandGroup(
                                                     new WaitUntilCommand(spindexer::atSetpoint).withTimeout(250),
                                                     new WaitUntilCommand(shooter::atVelocity).withTimeout(500),
+                                                    new WaitCommand(500),
                                                     intake.setState(IntakeState.TRANSFER),
                                                     new WaitCommand(LOADER_TRAVEL_TIME_MS),
                                                     intake.setState(IntakeState.OUTTAKE),
                                                     new WaitCommand(200),
                                                     new InstantCommand(() -> {
                                                         spindexer.shootArtifact();
-                                                        shootingQueue.remove();
+                                                        if (!shootingQueue.isEmpty())
+                                                            shootingQueue.remove();
                                                     }),
                                                     new ConditionalCommand(
                                                             spindexer.rotateArtifactToShoot(shootingQueue),
@@ -441,6 +448,8 @@ public class RobotSystem extends StealthSubsystem {
         for (String data : persistentTelemetry) {
             telemetry.addLine(data);
         }
+
+        telemetry.addData("auto to teleop turret ticks", AutoToTeleopData.turretTicks);
     }
 
     private void updateLEDState() {
@@ -454,18 +463,22 @@ public class RobotSystem extends StealthSubsystem {
     }
 
     private void updateTurretState() {
-        if (turret.getState() != TurretState.IDLE && turret.getState() != TurretState.CONSTANT) {
-            if (vision.seesGoal()) {
-                turret.switchToApriltagControl();
-                turret.updateOffsetFromTag(vision.getTagOffset());
-            }
-            else {
+        if (intakeTrigger != null) {
+//            if (turret.getState() != TurretState.IDLE && turret.getState() != TurretState.CONSTANT) {
+//                if (vision.seesGoal()) {
+//                    turret.switchToApriltagControl();
+//                    turret.updateOffsetFromTag(vision.getTagOffset());
+//                }
+//                else {
+//                    turret.switchToOdometryControl();
+//                    turret.updateOffsetFromTag(0);
+//                }
+//            }
+
+            if (turret.getState() != TurretState.IDLE && turret.getState() != TurretState.CONSTANT) {
                 turret.switchToOdometryControl();
                 turret.updateOffsetFromTag(0);
             }
-        }
-        else {
-            turret.updateOffsetFromTag(0);
         }
     }
 
@@ -473,6 +486,19 @@ public class RobotSystem extends StealthSubsystem {
     public void periodic() {
         updateLEDState();
         updateTurretState();
+
+        boolean isAuto = (intakeTrigger == null);
+        if (isAuto) {
+            AutoToTeleopData.spindexerTicks = spindexer.getTicks();
+            AutoToTeleopData.turretTicks = turret.getRawTicks();
+
+            Artifact[] artifacts = spindexer.getCurrentArtifacts();
+            AutoToTeleopData.slot1Artifact = artifacts[0];
+            AutoToTeleopData.slot2Artifact = artifacts[1];
+            AutoToTeleopData.slot3Artifact = artifacts[2];
+
+            AutoToTeleopData.endOfAutoPose = PoseEstimator.getInstance().getRobotPose();
+        }
 
         printTelemetry();
     }

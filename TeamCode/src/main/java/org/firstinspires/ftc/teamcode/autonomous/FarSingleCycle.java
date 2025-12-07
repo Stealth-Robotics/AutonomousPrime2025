@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -22,7 +23,7 @@ public class FarSingleCycle extends FarAuto {
                 new AutonomousShootCommand(robot, follower),
                 new WaitCommand(200),
                 builder.parkFar(),
-                new SaveSubsystemData(robot, follower)
+                new InstantCommand(() -> robot.turret.switchToHome())
         );
     }
 

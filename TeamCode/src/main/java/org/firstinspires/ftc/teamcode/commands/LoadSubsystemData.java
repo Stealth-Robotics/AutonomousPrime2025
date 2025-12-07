@@ -10,11 +10,13 @@ import org.stealthrobotics.library.Alliance;
 public class LoadSubsystemData extends SequentialCommandGroup {
     public LoadSubsystemData(RobotSystem robot) {
         addCommands(
-                new InstantCommand(() -> robot.spindexer.setEncoderOffset(AutoToTeleopData.spindexerTicks)),
-                new InstantCommand(() -> robot.turret.setEncoderOffset(AutoToTeleopData.turretTicks)),
-                new InstantCommand(() -> robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact)),
-                new InstantCommand(() -> robot.drive.setPose(AutoToTeleopData.endOfAutoPose)),
-                new InstantCommand(() -> robot.drive.setAllianceSpecificHeading(Alliance.get()))
+                new InstantCommand(() -> {
+                    robot.spindexer.setEncoderOffset(AutoToTeleopData.spindexerTicks);
+                    robot.turret.setEncoderOffset(AutoToTeleopData.turretTicks);
+                    robot.spindexer.setArtifactsInSpindexerManually(AutoToTeleopData.slot1Artifact, AutoToTeleopData.slot2Artifact, AutoToTeleopData.slot3Artifact);
+                    robot.drive.setPose(AutoToTeleopData.endOfAutoPose);
+                    robot.drive.setAllianceSpecificHeading(Alliance.get());
+                })
         );
     }
 }

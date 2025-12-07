@@ -29,7 +29,9 @@ public class PatternMode {
                 patternSequence.add(nextInSequence);
                 pCount--;
             }
-            else break; //Stop and continue with the pattern so far (don't want to ruin the motif)
+            else {
+                return patternSequence; //Stop and continue with the pattern so far (don't want to ruin the motif)
+            }
         }
 
         return patternSequence;

@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.autonomous.util;
 
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
+import org.firstinspires.ftc.teamcode.enums.Artifact;
 import org.firstinspires.ftc.teamcode.systems.FollowerSubsystem;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
@@ -27,8 +29,15 @@ public class NearAuto extends StealthOpMode {
         follower.setStartingPose(startPose);
     }
 
-    @Override
     public void saveData() {
-        new SaveSubsystemData(robot, follower).schedule();
+        AutoToTeleopData.spindexerTicks = robot.spindexer.getTicks();
+        AutoToTeleopData.turretTicks = robot.turret.getRawTicks();
+
+        Artifact[] artifacts = robot.spindexer.getCurrentArtifacts();
+        AutoToTeleopData.slot1Artifact = artifacts[0];
+        AutoToTeleopData.slot2Artifact = artifacts[1];
+        AutoToTeleopData.slot3Artifact = artifacts[2];
+
+        AutoToTeleopData.endOfAutoPose = follower.getPose();
     }
 }

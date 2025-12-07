@@ -69,11 +69,11 @@ public abstract class StealthOpMode extends LinearOpMode {
         CommandScheduler.getInstance().registerSubsystem(subsystems);
     }
 
-    public void printTelemetry() {}
-
-    public void saveData() {
+    public void bruh() {
 
     }
+
+    public void printTelemetry() {}
 
     /**
      * This is a common {@link LinearOpMode#runOpMode()} for both auto and tele opmodes. It ensures
@@ -133,7 +133,7 @@ public abstract class StealthOpMode extends LinearOpMode {
             hubs.forEach(LynxModule::clearBulkCache);
         }
 
-        saveData();
+        bruh();
 
         CommandScheduler.getInstance().reset();
 

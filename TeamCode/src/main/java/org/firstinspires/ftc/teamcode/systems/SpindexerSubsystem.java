@@ -24,13 +24,15 @@ public class SpindexerSubsystem extends StealthSubsystem {
     private final DcMotorEx spindexerMotor;
     private final SquIDController squid;
 
-    public static double kP = 0.01;
+    public static double kP = 0.0075;
     public static double kS = 0.02;
 
     private double encoderOffset = 0.0;
 
     private final double TICKS_PER_REVOLUTION = 8192; //REV Thru Bore
     private final double TICKS_PER_DEGREE = TICKS_PER_REVOLUTION / 360.0;
+
+    public static double KS_THRESHOLD = 0.5;
 
     private final double INTAKE_POSITION_TOLERANCE_TICKS = 50;
     private final double POSITION_TOLERANCE_TICKS = 15;
@@ -151,6 +153,13 @@ public class SpindexerSubsystem extends StealthSubsystem {
                 squid.setSetpoint(slot.getIntakePosition() * TICKS_PER_DEGREE);
                 intakeSlot = slot;
             }
+        });
+    }
+
+    public Command zero() {
+        return runOnce(() -> {
+            squid.setSetpoint(0);
+            intakeSlot = slot1;
         });
     }
 
@@ -305,9 +314,11 @@ public class SpindexerSubsystem extends StealthSubsystem {
         }
         else {
             double error = squid.getSetpoint() - getCurrentTicks();
-            double kSFeedforward = kS * Math.signum(error);
+            double kSFeedforward = 0;
+            if (Math.abs(error) > KS_THRESHOLD)
+                kSFeedforward = kS * Math.signum(error);
 
-            setPower(-squid.calculate(getCurrentTicks()) + kSFeedforward);
+            setPower(squid.calculate(getCurrentTicks()) + kSFeedforward);
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -17,8 +18,9 @@ public class NearPreload extends NearAuto {
                 builder.fromStartToShootNear(),
                 new SeeMotifCommand(robot, follower),
                 new AutonomousShootCommand(robot, follower),
+                new WaitCommand(200),
                 builder.parkNear(),
-                new SaveSubsystemData(robot, follower)
+                new InstantCommand(() -> robot.turret.switchToHome())
         );
     }
 

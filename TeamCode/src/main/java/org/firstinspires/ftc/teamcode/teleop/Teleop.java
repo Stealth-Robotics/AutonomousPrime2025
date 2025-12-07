@@ -10,10 +10,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.AutoToTeleopData;
 import org.firstinspires.ftc.teamcode.commands.EmergencyResetSpindexer;
 import org.firstinspires.ftc.teamcode.commands.LoadSubsystemData;
 import org.firstinspires.ftc.teamcode.enums.TurretState;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
+import org.stealthrobotics.library.Alliance;
 import org.stealthrobotics.library.opmodes.StealthOpMode;
 
 import java.util.ArrayList;
@@ -56,25 +58,21 @@ public class Teleop extends StealthOpMode {
 
         //Set DS telemetry to allow rich text formatting
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
-
-        //Transfer necessary subsystem data from auto into teleop
-        LoadSubsystemData loadAutoDataIntoTeleop = new LoadSubsystemData(robot);
-        loadAutoDataIntoTeleop.schedule();
     }
 
     private void configureBindings() {
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_HEADING).whenPressed(() -> robot.drive.resetHeading());
         driveGamepad.getGamepadButton(GamepadConstants.DriverBindings.RESET_ROBOT_POSITION).whenPressed(() -> robot.drive.resetToPosition(72,72, 90));
 
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.FREEZE_TURRET_TOGGLE).toggleWhenActive(
+        driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.FREEZE_TURRET_TOGGLE).toggleWhenActive(
                 robot.turret.setState(TurretState.IDLE),
                 new InstantCommand(() -> robot.turret.switchToOdometryControl())
         );
 
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(50));
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-50));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_LEFT).whenPressed(() -> robot.spindexer.moveSpindexerManually(200));
+        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.BUDGE_SPINDEXER_RIGHT).whenPressed(() -> robot.spindexer.moveSpindexerManually(-200));
 
-        operatorGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
+        driveGamepad.getGamepadButton(GamepadConstants.OperatorBindings.EMERGENCY_RESET_SPINDEXER).whenPressed(
                 new ConditionalCommand(
                         new EmergencyResetSpindexer(robot.spindexer, robot.intake),
                         new InstantCommand(),

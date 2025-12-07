@@ -21,7 +21,7 @@ public class FarPreload extends FarAuto {
                 builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
                 builder.parkFar(),
-                new SaveSubsystemData(robot, follower)
+                new InstantCommand(() -> robot.turret.switchToHome())
         );
     }
 

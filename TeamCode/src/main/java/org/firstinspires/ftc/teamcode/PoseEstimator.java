@@ -24,13 +24,6 @@ public class PoseEstimator {
 
     private static Pose goalPose = null;
 
-    public PoseEstimator() {
-        if (Alliance.get() == Alliance.BLUE)
-            goalPose = BLUE_GOAL_POSE;
-        else
-            goalPose = RED_GOAL_POSE;
-    }
-
     public Pose getRobotPose() {
         return robotPose;
     }
@@ -60,10 +53,8 @@ public class PoseEstimator {
     }
 
     public double getTurretTargetAngle() {
-        if (Alliance.get() == Alliance.BLUE)
-            goalPose = BLUE_GOAL_POSE;
-        else
-            goalPose = RED_GOAL_POSE;
+        if (Alliance.get() == Alliance.BLUE) goalPose = BLUE_GOAL_POSE;
+        else goalPose = RED_GOAL_POSE;
 
         double robotHeading = robotPose.getHeading();
         double turretX = robotPose.getX() + INCHES_FROM_ORIGIN_TO_TURRET * cos(robotHeading);
@@ -74,6 +65,9 @@ public class PoseEstimator {
     }
 
     public double getDistanceFromGoal() {
+        if (Alliance.get() == Alliance.BLUE) goalPose = BLUE_GOAL_POSE;
+        else goalPose = RED_GOAL_POSE;
+
         return sqrt(pow((robotPose.getX() - goalPose.getX()), 2) + pow((robotPose.getY() - goalPose.getY()), 2));
     }
 }

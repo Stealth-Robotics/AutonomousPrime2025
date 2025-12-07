@@ -6,33 +6,30 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.autonomous.util.AutoBuilder;
 import org.firstinspires.ftc.teamcode.autonomous.util.FarAuto;
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
-import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
 import org.firstinspires.ftc.teamcode.commands.SeeMotifCommand;
 
-public class FarSingleCyclePlusPickup extends FarAuto {
+public class FarPreloadFlatLeave extends FarAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
                 new SeeMotifCommand(robot, follower),
                 builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
-                builder.cycle(AutoBuilder.PresetLocation.FAR, autoType),
-                new AutonomousShootCommand(robot, follower),
-                builder.halfCycle(AutoBuilder.PresetLocation.MIDDLE, autoType),
+                new WaitCommand(300),
+                builder.farFlatLeave(),
                 new InstantCommand(() -> robot.turret.switchToHome())
         );
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "RedFarSingleCyclePlusPickup", group = "Red")
-    public static class RedFarSingleCyclePlusPickup extends FarSingleCyclePlusPickup {
+    @Autonomous(name = "RedFarPreloadFlatLeave", group = "Red")
+    public static class RedFarPreloadFlatLeave extends FarPreloadFlatLeave {
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "BlueFarSingleCyclePlusPickup", group = "Blue")
-    public static class BlueFarSingleCyclePlusPickup extends FarSingleCyclePlusPickup {
+    @Autonomous(name = "BlueFarPreloadFlatLeave", group = "Blue")
+    public static class BlueFarPreloadFlatLeave extends FarPreloadFlatLeave {
     }
 }

@@ -3,36 +3,31 @@ package org.firstinspires.ftc.teamcode.autonomous;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.autonomous.util.AutoBuilder;
-import org.firstinspires.ftc.teamcode.autonomous.util.FarAuto;
+import org.firstinspires.ftc.teamcode.autonomous.util.NearAuto;
 import org.firstinspires.ftc.teamcode.commands.AutonomousShootCommand;
 import org.firstinspires.ftc.teamcode.commands.SaveSubsystemData;
 import org.firstinspires.ftc.teamcode.commands.SeeMotifCommand;
 
-public class FarSingleCyclePlusPickup extends FarAuto {
+public class NearPreloadNoLeave extends NearAuto {
     @Override
     public Command getAutoCommand() {
         return new SequentialCommandGroup(
+                builder.fromStartToShootNear(),
                 new SeeMotifCommand(robot, follower),
-                builder.fromStartToShootFar(),
                 new AutonomousShootCommand(robot, follower),
-                builder.cycle(AutoBuilder.PresetLocation.FAR, autoType),
-                new AutonomousShootCommand(robot, follower),
-                builder.halfCycle(AutoBuilder.PresetLocation.MIDDLE, autoType),
                 new InstantCommand(() -> robot.turret.switchToHome())
         );
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "RedFarSingleCyclePlusPickup", group = "Red")
-    public static class RedFarSingleCyclePlusPickup extends FarSingleCyclePlusPickup {
+    @Autonomous(name = "RedNearPreloadNoLeave", group = "Red")
+    public static class RedNearPreloadNoLeave extends NearPreloadNoLeave {
     }
 
     @SuppressWarnings("unused")
-    @Autonomous(name = "BlueFarSingleCyclePlusPickup", group = "Blue")
-    public static class BlueFarSingleCyclePlusPickup extends FarSingleCyclePlusPickup {
+    @Autonomous(name = "BlueNearPreloadNoLeave", group = "Blue")
+    public static class BlueNearPreloadNoLeave extends NearPreloadNoLeave {
     }
 }

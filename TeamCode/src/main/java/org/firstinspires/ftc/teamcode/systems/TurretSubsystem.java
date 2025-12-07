@@ -39,7 +39,7 @@ public class TurretSubsystem extends StealthSubsystem {
 
     public static double ODO_KS_THRESHOLD = 3;
 
-    public static double odo_kP = 0.02;
+    public static double odo_kP = 0.01;
     public static double odo_kI = 0.0;
     public static double odo_kD = 0.0;
     public static double odo_kS = 0.2;
@@ -164,7 +164,11 @@ public class TurretSubsystem extends StealthSubsystem {
                 break;
 
             case ODOMETRY:
-                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle(), MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
+                double constantOffset = 0;
+                if (poseEstimator.getRobotPose().getY() < 48) {
+                    constantOffset = -7.5;
+                }
+                odoOutput = odoPID.calculate(getCurrentDegrees(), MathFunctions.clamp(poseEstimator.getTurretTargetAngle() + constantOffset, MAX_DEGREES_LEFT, MAX_DEGREES_RIGHT));
                 if (Math.abs(odoPID.getPositionError()) > ODO_KS_THRESHOLD) {
                     setPower(odoOutput + (odo_kS * Math.signum(odoPID.getPositionError())));
                 }

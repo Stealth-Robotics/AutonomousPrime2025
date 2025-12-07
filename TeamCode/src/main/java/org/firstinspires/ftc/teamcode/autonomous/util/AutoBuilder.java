@@ -23,7 +23,7 @@ public class AutoBuilder {
     public Pose FAR_START_POSE = new Pose(57.38, 8.44, Math.toRadians(0));
 
     //Poses that we shoot from depending on location
-    private Pose CLOSE_SHOOT_POSE = new Pose(48.54, 84,Math.toRadians(0));
+    private Pose CLOSE_SHOOT_POSE = new Pose(39.166, 104.599,Math.toRadians(0));
     private Pose FAR_SHOOT_POSE = new Pose(58.16,19.46, Math.toRadians(0));
 
     //Leave pose for end of auto points
@@ -31,11 +31,13 @@ public class AutoBuilder {
     private Pose FAR_LEAVE_POSE = new Pose(47,23, Math.toRadians(0));
     private Pose RAMP_PARK_POSE = new Pose(20.471,69.988,Math.toRadians(0));
 
+    private Pose FAR_LEAVE_FLAT_POSE = new Pose(20,18, Math.toRadians(0));
+
     //For intaking from loading zone
     private Pose LOADING_ZONE_POSE = new Pose(14,11);
 
     //Positions to start intaking the desired preload stack
-    private Pose PRESET_1_START = new Pose(46,84, Math.toRadians(0));
+    private Pose PRESET_1_START = new Pose(50,84, Math.toRadians(0));
     private Pose PRESET_2_START = new Pose(46,60, Math.toRadians(0));
     private Pose PRESET_3_START = new Pose(46,34, Math.toRadians(0));
 
@@ -56,6 +58,8 @@ public class AutoBuilder {
     //All paths needed for compiling autonomous sequences
     public PathChain FAR_START_TO_FAR_SHOOT;
     public PathChain NEAR_START_TO_NEAR_SHOOT;
+
+    public PathChain FAR_SHOOT_FLAT_LEAVE;
 
     public PathChain FAR_SHOOT_TO_PRESET_1;
     public PathChain FAR_SHOOT_TO_PRESET_2;
@@ -127,6 +131,8 @@ public class AutoBuilder {
         INTAKE_PRESET_3_BALL_1 = pathLinearHeading(PRESET_3_START, PRESET_3_MIDDLE_1);
         INTAKE_PRESET_3_BALL_2 = pathLinearHeading(PRESET_3_MIDDLE_1, PRESET_3_MIDDLE_2);
         INTAKE_PRESET_3_BALL_3 = pathLinearHeading(PRESET_3_MIDDLE_2, PRESET_3_END);
+
+        FAR_SHOOT_FLAT_LEAVE = pathLinearHeading(FAR_SHOOT_POSE, FAR_LEAVE_FLAT_POSE);
 
         FAR_SHOOT_TO_PRESET_1 = pathLinearHeading(FAR_SHOOT_POSE, PRESET_1_START);
         FAR_SHOOT_TO_PRESET_2 = pathLinearHeading(FAR_SHOOT_POSE, PRESET_2_START);
@@ -232,6 +238,10 @@ public class AutoBuilder {
         return follower.followPath(selectPath, 0.6, true);
     }
 
+    public Command farFlatLeave() {
+        return follower.followPath(FAR_SHOOT_FLAT_LEAVE, 0.75, true);
+    }
+
     public Command fromStartToShootNear() {
         return new SequentialCommandGroup(
                 follower.followPath(NEAR_START_TO_NEAR_SHOOT, true)
@@ -323,6 +333,8 @@ public class AutoBuilder {
         PRESET_2_MIDDLE_2 = AlliancePoseFlipper.flip(PRESET_2_MIDDLE_2);
         PRESET_3_MIDDLE_1 = AlliancePoseFlipper.flip(PRESET_3_MIDDLE_1);
         PRESET_3_MIDDLE_2 = AlliancePoseFlipper.flip(PRESET_3_MIDDLE_2);
+
+        FAR_LEAVE_FLAT_POSE = AlliancePoseFlipper.flip(FAR_LEAVE_FLAT_POSE);
 
         PRESET_1_END = AlliancePoseFlipper.flip(PRESET_1_END);
         PRESET_2_END = AlliancePoseFlipper.flip(PRESET_2_END);
